@@ -1,5 +1,7 @@
 import Phaser from "phaser";
 import Hero from "../sprites/Hero";
+import Stave from "../classes/Stave"
+
 class GameScene extends Phaser.Scene {
   constructor(test) {
     super({
@@ -54,6 +56,7 @@ class GameScene extends Phaser.Scene {
     );
     this.mediumBlock.setImmovable();
 
+
     this.largeBlock = this.physics.add.sprite(
       this.sys.game.config.width / 2,
       this.ground.y - 50 - 15 - 19,
@@ -68,6 +71,16 @@ class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.myHero.heroSprite, this.smallBlock, this.myHero.stop());
     this.physics.add.collider(this.myHero.heroSprite, this.mediumBlock);
     this.physics.add.collider(this.myHero.heroSprite, this.largeBlock);
+
+    this.add.sprite(400, 300, 'walkHero').play('walkAnimation');
+
+    this.stave = new Stave({
+      x:200,
+      y:200,
+      scene: this
+    })
+    this.stave.drawNotes();
+
   }
 
   update(time, delta) {
