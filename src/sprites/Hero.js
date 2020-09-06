@@ -15,6 +15,7 @@ export default class Hero {
     this.motion = "stopped";
     this.heroSprite.body.collideWorldBounds=true
     this.heroSprite.setGravityY(100);
+    this.walkStartTime;
 
   }
 
@@ -69,8 +70,8 @@ export default class Hero {
         end: 12,
         first: 12,
       }),
-      frameRate: 15,
-      repeat: 12,
+      frameRate: 20,
+      repeat: 21,
     };
     this.scene.anims.create(midAirAnimationConfig);
   }
@@ -80,7 +81,7 @@ export default class Hero {
       key: "landingAnimation",
       frames: this.scene.anims.generateFrameNumbers("jumpHero", {
         start: 12,
-        end: 8,
+        end: 6,
         first: 12,
       }),
       frameRate: 100,
@@ -135,6 +136,7 @@ export default class Hero {
       loop: false
   })
   this.motion = "walking";
+  this.walkStartTime = Date.now();
   }
 
 
