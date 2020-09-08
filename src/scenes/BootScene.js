@@ -9,7 +9,7 @@ class BootScene extends Phaser.Scene {
 
     this.load.image("backgroundImage", "assets/images/background.png");
     this.load.image("groundImage", "assets/images/ground.png");
-    this.load.image("smallBlockImage", "assets/images/E Block.png");
+    this.load.image("smallBlockImage", "assets/images/E Block2.png");
     this.load.image("mediumBlockImage", "assets/images/Q Block.png");
     this.load.image("largeBlockImage", "assets/images/H Block.png");
     this.load.spritesheet("walkHero", "assets/images/walkHero.png",  { frameWidth: 140, frameHeight: 200, endFrame: 15 });

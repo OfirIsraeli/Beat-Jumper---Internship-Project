@@ -11,10 +11,10 @@ export default class Hero {
   }
   init() {
     this.createAllAnimations();
-    this.heroSprite = this.scene.physics.add.sprite(50, this.scene.ground.y - 150, "walkHero").play("standingAnimation");
+    this.heroSprite = this.scene.physics.add.sprite(150, this.scene.ground.y - 150, "walkHero").play("standingAnimation");
     this.motion = "stopped";
     this.heroSprite.body.collideWorldBounds=true
-    this.heroSprite.setGravityY(100);
+    this.heroSprite.setGravityY(7000);
     this.walkStartTime;
 
   }
@@ -53,10 +53,10 @@ export default class Hero {
       key: "jumpAnimation",
       frames: this.scene.anims.generateFrameNumbers("jumpHero", {
         start: 0,
-        end: 12,
+        end: 6,
         first: 0,
       }),
-      frameRate: 70,
+      frameRate: 100,
       repeat: 0,
     };
     this.scene.anims.create(jumpAnimationConfig);
@@ -70,8 +70,8 @@ export default class Hero {
         end: 12,
         first: 12,
       }),
-      frameRate: 20,
-      repeat: 21,
+      frameRate: 30,
+      repeat: 1,
     };
     this.scene.anims.create(midAirAnimationConfig);
   }
@@ -98,83 +98,45 @@ export default class Hero {
     this.createStandingAnimation();
   }
 
-  heroInAir(justAired, justLanded){
-    if (justAired)
-    {
-      if (this.heroSprite.anims.isPlaying){
-        this.heroSprite.anims.chain('midAirAnimation');
-      }
-      else{
-        this.heroSprite.play('midAirAnimation');
-      }
-      justAired = false;
-    }
-
-
-    if(justLanded){
-      this.heroSprite.play('landingAnimation');
-      this.heroSprite.anims.chain('walkAnimation');
-      justLanded = false;
-    }
-  }
-
-  stop(){
-    //this.heroSprite.setVelocityX(0);
-    //this.heroSprite.play('standingAnimation');
-    //this.motion = "stopped";
-    console.log("hiii");
-  }
 
   walk(){
-    this.scene.time.addEvent({
-      delay: 2000,
-      callback: ()=>{
-        this.heroSprite.setVelocityX(100);
-        this.heroSprite.play('walkAnimation');
 
-      },
-      loop: false
-  })
+  this.heroSprite.play('walkAnimation');
+
   this.motion = "walking";
   this.walkStartTime = Date.now();
   }
 
 
   smallJump() {
-    
-    if (this.heroSprite.body.touching.down)
-    {
-      this.heroSprite.play('jumpAnimation');
-      this.heroSprite.setVelocityY(-125);
-      this.heroSprite.anims.chain('midAirAnimation');
-      this.heroSprite.anims.chain('landingAnimation');
-      this.heroSprite.anims.chain('walkAnimation');
-    }
+    this.heroSprite.play('jumpAnimation');
+    this.heroSprite.setVelocityY(-1100);
+    this.heroSprite.anims.chain('midAirAnimation');
+    this.heroSprite.anims.chain('landingAnimation');
+    this.heroSprite.anims.chain('walkAnimation');
+    this.motion = "jumping";
+
 
   }
+
+  /*
   mediumJump() {
     
-    if (this.heroSprite.body.touching.down)
-    {
-      this.heroSprite.play('jumpAnimation');
-      this.heroSprite.setVelocityY(-155);
-      this.heroSprite.anims.chain('midAirAnimation');
-      this.heroSprite.anims.chain('landingAnimation');
-      this.heroSprite.anims.chain('walkAnimation');
-    }
+    this.heroSprite.play('jumpAnimation');
+    this.heroSprite.setVelocityY(-155);
+    this.heroSprite.anims.chain('midAirAnimation');
+    this.heroSprite.anims.chain('landingAnimation');
+    this.heroSprite.anims.chain('walkAnimation');
 
   }
   bigJump() {
     
-    if (this.heroSprite.body.touching.down)
-    {
-      this.heroSprite.play('jumpAnimation');
-      this.heroSprite.setVelocityY(-180);
-      this.heroSprite.anims.chain('midAirAnimation');
-      this.heroSprite.anims.chain('landingAnimation');
-      this.heroSprite.anims.chain('walkAnimation');
-    }
+    this.heroSprite.play('jumpAnimation');
+    this.heroSprite.setVelocityY(-155);
+    this.heroSprite.anims.chain('midAirAnimation');
+    this.heroSprite.anims.chain('landingAnimation');
+    this.heroSprite.anims.chain('walkAnimation');
 
-  }
+  }*/
 
 }

@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import Hero from "../sprites/Hero";
 //import Stave from "../classes/Stave"
+import {scoreMap} from "../classes/scoreMapCopy"
 
 class GameScene extends Phaser.Scene {
   constructor(test) {
@@ -13,22 +14,76 @@ class GameScene extends Phaser.Scene {
 
   create() {
     this.setGameButtons();
-    this.add.image(0, 0, "backgroundImage").setOrigin(0, 0);
+    this.background = this.add.tileSprite(0, 380, this.width, this.height, "backgroundImage");
     this.setGameGround();
-    //this.setGameBlocks();
     this.myHero = new Hero({ scene: this.scene });
     this.setGameColliders();
-    this.myHero.walk();
-    var tempo = 60;
-    var numberOfBars = 2;
-    this.EighthNoteLength = ((60 / tempo) * 1000) / 2;
+    this.divisonLength = this.getGameDivisions();
+    this.gameMode = "not started";
+    this.scoreMap = [];
+    this.createOneBarScoreMap();
+
+    // start game after 2 seconds
+    this.time.addEvent({
+      delay: 2000,
+      callback: ()=>{
+        this.gameBegin();
+      }})
+  }
+
+  createOneBarScoreMap(){
+    // fetch number of bars
+    const amountOfBars = 2;
+    //
+
+    for(let i = 1; i <= amountOfBars; i++){
+
+      for (let j = 0; j < scoreMap[i].length; j++){
+        this.scoreMap.push([scoreMap[i][j]["division"], scoreMap[i][j]["rest"]]);
+      }
+    }
   }
 
 
+  gameBegin(){
+    this.myHero.walk();
+    this.gameMode = "started";
+    let index = 0;
+    setInterval(()=>{
+      if (this.scoreMap[index][1] != "noPlace"){
+        let smallBlock = this.physics.add.sprite(
+          this.sys.game.config.width ,
+          this.ground.y - 34,
+          "smallBlockImage"
+        );
+        smallBlock.setImmovable();
+        smallBlock.setVelocityX(-350);
+        //this.physics.add.collider(this.myHero.heroSprite, smallBlock);
+      }
+      index++;
+    }, this.divisonLength);
+  }
 
+  getGameDivisions(){
+    // fetch from sheet source
+    let tempo = 60;
+    let divisions = "eights";
+    //
 
-  setGameButtons()
-  {
+    let noteSize;
+    if (divisions === 'quarters'){
+      noteSize = 1;
+    }
+    else if (divisions === 'eights'){
+      noteSize = 2;
+    }
+    else{ // 16th notes
+      noteSize = 4;
+    }
+    return ((60 / tempo) * 1000) / noteSize;
+  }
+
+  setGameButtons(){
     this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
   }
 
@@ -44,38 +99,12 @@ class GameScene extends Phaser.Scene {
   }
 
 
-  setGameBlocks()
-  {
-    this.smallBlock = this.physics.add.sprite(
-      this.sys.game.config.width / 4,
-      this.ground.y - 49,
-      "smallBlockImage"
-    );
-    this.smallBlock.setImmovable();
-
-    this.mediumBlock = this.physics.add.sprite(
-      this.sys.game.config.width / 3,
-      this.ground.y - 50 - 15,
-      "mediumBlockImage"
-    );
-    this.mediumBlock.setImmovable();
-
-
-    this.largeBlock = this.physics.add.sprite(
-      this.sys.game.config.width / 2,
-      this.ground.y - 50 - 15 - 19,
-      "largeBlockImage"
-    );
-    this.largeBlock.setImmovable();
-  }
-
   setGameColliders()
   {
     this.physics.add.collider(this.myHero.heroSprite, this.ground);
 
     // colliders for blocks:
 
-    //this.physics.add.collider(this.myHero.heroSprite, this.smallBlock, this.myHero.stop());
     //this.physics.add.collider(this.myHero.heroSprite, this.mediumBlock);
     //this.physics.add.collider(this.myHero.heroSprite, this.largeBlock);
   }
@@ -84,10 +113,10 @@ class GameScene extends Phaser.Scene {
   jumpTimingCheck(jumpTime){
     var jumpTime = Date.now();
     var timePassedSinceJump = (jumpTime - this.myHero.walkStartTime)  // / 1000
-    var delay = timePassedSinceJump % this.EighthNoteLength;
-    var premature = this.EighthNoteLength - (timePassedSinceJump % this.EighthNoteLength);
+    var delay = timePassedSinceJump % this.divisonLength;
+    var premature = this.divisonLength - (timePassedSinceJump % this.divisonLength);
     if (delay < 100 || premature < 100){
-      console.log ("jump time is: ", timePassedSinceJump % this.EighthNoteLength);
+      console.log ("jump time is: ", timePassedSinceJump % this.divisonLength);
     }
 
     /*
@@ -99,12 +128,15 @@ class GameScene extends Phaser.Scene {
     this.stave.drawNotes();*/
 
   }
-
+  
 
   update(time, delta) {
+    
+    if (this.gameMode === "started"){
+      this.background.tilePositionX += 6; 
+    }
 
-    if (Phaser.Input.Keyboard.JustDown(this.spaceBar))
-    {
+    if (Phaser.Input.Keyboard.JustDown(this.spaceBar) && this.myHero.heroSprite.body.touching.down){
       this.jumpTimingCheck();
       this.myHero.smallJump();
     }
