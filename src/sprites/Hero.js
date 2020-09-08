@@ -11,12 +11,13 @@ export default class Hero {
   }
   init() {
     this.createAllAnimations();
-    this.heroSprite = this.scene.physics.add.sprite(150, this.scene.ground.y - 150, "walkHero").play("standingAnimation");
+    this.heroSprite = this.scene.physics.add
+      .sprite(150, this.scene.ground.y - 150, "walkHero")
+      .play("standingAnimation");
     this.motion = "stopped";
-    this.heroSprite.body.collideWorldBounds=true
+    this.heroSprite.body.collideWorldBounds = true;
     this.heroSprite.setGravityY(7000);
     this.walkStartTime;
-
   }
 
   createStandingAnimation() {
@@ -98,25 +99,20 @@ export default class Hero {
     this.createStandingAnimation();
   }
 
+  walk() {
+    this.heroSprite.play("walkAnimation");
 
-  walk(){
-
-  this.heroSprite.play('walkAnimation');
-
-  this.motion = "walking";
-  this.walkStartTime = Date.now();
+    this.motion = "walking";
+    this.walkStartTime = Date.now();
   }
 
-
   smallJump() {
-    this.heroSprite.play('jumpAnimation');
+    this.heroSprite.play("jumpAnimation");
     this.heroSprite.setVelocityY(-1100);
-    this.heroSprite.anims.chain('midAirAnimation');
-    this.heroSprite.anims.chain('landingAnimation');
-    this.heroSprite.anims.chain('walkAnimation');
+    this.heroSprite.anims.chain("midAirAnimation");
+    this.heroSprite.anims.chain("landingAnimation");
+    this.heroSprite.anims.chain("walkAnimation");
     this.motion = "jumping";
-
-
   }
 
   /*
@@ -138,5 +134,4 @@ export default class Hero {
     this.heroSprite.anims.chain('walkAnimation');
 
   }*/
-
 }

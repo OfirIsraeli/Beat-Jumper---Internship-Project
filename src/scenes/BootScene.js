@@ -12,10 +12,16 @@ class BootScene extends Phaser.Scene {
     this.load.image("smallBlockImage", "assets/images/E Block2.png");
     this.load.image("mediumBlockImage", "assets/images/Q Block.png");
     this.load.image("largeBlockImage", "assets/images/H Block.png");
-    this.load.spritesheet("walkHero", "assets/images/walkHero.png",  { frameWidth: 140, frameHeight: 200, endFrame: 15 });
-    this.load.spritesheet("jumpHero", "assets/images/jumpHero.png",  { frameWidth: 136, frameHeight: 200, endFrame: 13 });
-
-
+    this.load.spritesheet("walkHero", "assets/images/walkHero.png", {
+      frameWidth: 140,
+      frameHeight: 200,
+      endFrame: 15,
+    });
+    this.load.spritesheet("jumpHero", "assets/images/jumpHero.png", {
+      frameWidth: 136,
+      frameHeight: 200,
+      endFrame: 13,
+    });
 
     // Register a load progress event to show a load bar
     this.load.on("progress", (value) => {
