@@ -13,13 +13,25 @@ class GameScene extends Phaser.Scene {
   preload() {}
 
   create() {
-    this.setGameButtons();
+
+
+    // game buttons
+    this.spaceBar = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SPACE
+    );
+
+    // todo: change those function to be local
     this.setGameSounds();
     this.setGameBackground();
     this.setGameGround();
+
     this.myHero = new Hero({ scene: this.scene });
+
     this.setGameColliders();
+
     this.divisonLength = this.getGameDivisions();
+
+    // todo: should this be boolean? if not .. camel case
     this.gameMode = "not started";
     this.scoreMap = [];
     this.createOneBarScoreMap();
@@ -35,6 +47,10 @@ class GameScene extends Phaser.Scene {
 
   // ------------------ METHODS FOR INTERVALS ---------------- //
   getRelevantBlockName(index) {
+    const blockImage = {
+      '1' : "smallBlockImage",
+      //.. todo - change to remove the ifs
+    };
     if (this.scoreMap[index][0] === 1) {
       return "smallBlockImage";
     } else if (this.scoreMap[index][0] === 2) {
@@ -58,6 +74,7 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  // todo: explain that
   getVelocityForTempo() {
     return -8 * this.tempo - 40;
   }
@@ -76,6 +93,7 @@ class GameScene extends Phaser.Scene {
       }
 
       if (index < this.scoreMap.length - 1) {
+        // todo: bad comparison
         if (this.scoreMap[index][1] != "noPlace") {
           let smallBlock = this.physics.add.sprite(
             this.sys.game.config.width,
@@ -96,9 +114,7 @@ class GameScene extends Phaser.Scene {
   // ------------------ SETTER METHODS ---------------- //
 
   setGameButtons() {
-    this.spaceBar = this.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.SPACE
-    );
+
   }
 
   setGameSounds() {
@@ -125,6 +141,7 @@ class GameScene extends Phaser.Scene {
     this.ground.setImmovable();
   }
 
+  // todo: what is the collider here for
   setGameColliders() {
     this.physics.add.collider(this.myHero.heroSprite, this.ground);
 
@@ -141,6 +158,7 @@ class GameScene extends Phaser.Scene {
     //
 
     //let noteSize;
+    // todo: convert by const object
     if (divisions === "quarters") {
       this.noteSize = 1;
     } else if (divisions === "eights") {
@@ -183,9 +201,11 @@ class GameScene extends Phaser.Scene {
   // ------------------ UPDATE METHODS ---------------- //
 
   jumpTimingCheck(jumpTime) {
+    // todo : chnage to let
     var jumpTime = Date.now();
     var timePassedSinceJump = jumpTime - this.myHero.walkStartTime; // / 1000
     var delay = timePassedSinceJump % this.divisonLength;
+    // todo pteMature
     var premature =
       this.divisonLength - (timePassedSinceJump % this.divisonLength);
     if (delay < 50) {
