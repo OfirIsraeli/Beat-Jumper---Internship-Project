@@ -14,13 +14,8 @@ class GameScene extends Phaser.Scene {
 
   create() {
     this.setGameButtons();
-    this.background = this.add.tileSprite(
-      0,
-      380,
-      this.width,
-      this.height,
-      "backgroundImage"
-    );
+    this.setGameSounds();
+    this.setGameBackground();
     this.setGameGround();
     this.myHero = new Hero({ scene: this.scene });
     this.setGameColliders();
@@ -38,38 +33,7 @@ class GameScene extends Phaser.Scene {
     });
   }
 
-  deconstructNote(bar, note) {
-    if (scoreMap[bar][note]["rest"] === "noPlace") {
-      for (let k = 0; k < scoreMap[bar][note]["division"]; k++) {
-        this.scoreMap.push([1, scoreMap[bar][note]["rest"]]);
-      }
-    } else {
-      this.scoreMap.push([
-        scoreMap[bar][note]["division"],
-        scoreMap[bar][note]["rest"],
-      ]);
-      for (let k = 1; k < scoreMap[bar][note]["division"]; k++) {
-        this.scoreMap.push([1, "noPlace"]);
-      }
-    }
-  }
-
-  createOneBarScoreMap() {
-    // fetch number of bars
-    const amountOfBars = 2;
-    //
-
-    for (let bar = 1; bar <= amountOfBars; bar++) {
-      for (let note = 0; note < scoreMap[bar].length; note++) {
-        this.deconstructNote(bar, note);
-        //this.scoreMap.push([scoreMap[bar][note]["division"], scoreMap[bar][note]["rest"]]);
-      }
-    }
-    for (let n = 0; n < this.scoreMap.length; n++) {
-      //console.log(this.scoreMap[n]);
-    }
-  }
-
+  // ------------------ METHODS FOR INTERVALS ---------------- //
   getRelevantBlockName(index) {
     if (this.scoreMap[index][0] === 1) {
       return "smallBlockImage";
@@ -84,8 +48,18 @@ class GameScene extends Phaser.Scene {
       }*/
   }
 
-  stopBlocks(blockInterval) {
-    clearInterval(blockInterval);
+  stopBlocks(blockInterval, index) {
+    if (index < this.scoreMap.length - 1 + 4) {
+      return;
+    } else {
+      clearInterval(blockInterval);
+      this.gameMode = "ended";
+      this.myHero.heroSprite.play("standingAnimation");
+    }
+  }
+
+  getVelocityForTempo() {
+    return -8 * this.tempo - 40;
   }
 
   gameBegin() {
@@ -94,45 +68,50 @@ class GameScene extends Phaser.Scene {
     let index = 0;
     let imageName;
     let blockInterval = setInterval(() => {
-      if (index >= this.scoreMap.length - 1) {
-        this.stopBlocks(blockInterval);
+      if (index % this.noteSize === 0 && index >= 4) {
+        // play every quarter
+        this.beatSound.play();
+      } else if (index < 4) {
+        this.beatSound.play();
       }
 
-      if (this.scoreMap[index][1] != "noPlace") {
-        let smallBlock = this.physics.add.sprite(
-          this.sys.game.config.width,
-          this.ground.y - 34,
-          this.getRelevantBlockName(index)
-        );
-        smallBlock.setImmovable();
-        smallBlock.setVelocityX(-350);
-        //this.physics.add.collider(this.myHero.heroSprite, smallBlock);
+      if (index < this.scoreMap.length - 1) {
+        if (this.scoreMap[index][1] != "noPlace") {
+          let smallBlock = this.physics.add.sprite(
+            this.sys.game.config.width,
+            this.ground.y - 34,
+            this.getRelevantBlockName(index)
+          );
+          smallBlock.setImmovable();
+          smallBlock.setVelocityX(this.getVelocityForTempo());
+          //this.physics.add.collider(this.myHero.heroSprite, smallBlock);
+        }
+      } else {
+        this.stopBlocks(blockInterval, index);
       }
       index++;
     }, this.divisonLength);
   }
 
-  getGameDivisions() {
-    // fetch from sheet source
-    let tempo = 60;
-    let divisions = "eights";
-    //
-
-    let noteSize;
-    if (divisions === "quarters") {
-      noteSize = 1;
-    } else if (divisions === "eights") {
-      noteSize = 2;
-    } else {
-      // 16th notes
-      noteSize = 4;
-    }
-    return ((60 / tempo) * 1000) / noteSize;
-  }
+  // ------------------ SETTER METHODS ---------------- //
 
   setGameButtons() {
     this.spaceBar = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.SPACE
+    );
+  }
+
+  setGameSounds() {
+    this.beatSound = this.sound.add("tick");
+    this.hitSound = this.sound.add("hit");
+  }
+  setGameBackground() {
+    this.background = this.add.tileSprite(
+      0,
+      380,
+      this.width,
+      this.height,
+      "backgroundImage"
     );
   }
 
@@ -155,14 +134,65 @@ class GameScene extends Phaser.Scene {
     //this.physics.add.collider(this.myHero.heroSprite, this.largeBlock);
   }
 
+  getGameDivisions() {
+    // fetch from sheet source
+    this.tempo = 80;
+    let divisions = "eights";
+    //
+
+    //let noteSize;
+    if (divisions === "quarters") {
+      this.noteSize = 1;
+    } else if (divisions === "eights") {
+      this.noteSize = 2;
+    } else {
+      // 16th notes
+      this.noteSize = 4;
+    }
+    return ((60 / this.tempo) * 1000) / this.noteSize;
+  }
+
+  deconstructNote(bar, note) {
+    if (scoreMap[bar][note]["rest"] === "noPlace") {
+      for (let k = 0; k < scoreMap[bar][note]["division"]; k++) {
+        this.scoreMap.push([1, scoreMap[bar][note]["rest"]]);
+      }
+    } else {
+      this.scoreMap.push([
+        scoreMap[bar][note]["division"],
+        scoreMap[bar][note]["rest"],
+      ]);
+      for (let k = 1; k < scoreMap[bar][note]["division"]; k++) {
+        this.scoreMap.push([1, "noPlace"]);
+      }
+    }
+  }
+
+  createOneBarScoreMap() {
+    // TASK: fetch number of bars from library
+    const amountOfBars = 2;
+    //
+
+    for (let bar = 1; bar <= amountOfBars; bar++) {
+      for (let note = 0; note < scoreMap[bar].length; note++) {
+        this.deconstructNote(bar, note);
+      }
+    }
+  }
+
+  // ------------------ UPDATE METHODS ---------------- //
+
   jumpTimingCheck(jumpTime) {
     var jumpTime = Date.now();
     var timePassedSinceJump = jumpTime - this.myHero.walkStartTime; // / 1000
     var delay = timePassedSinceJump % this.divisonLength;
     var premature =
       this.divisonLength - (timePassedSinceJump % this.divisonLength);
-    if (delay < 100 || premature < 100) {
-      console.log("jump time is: ", timePassedSinceJump % this.divisonLength);
+    if (delay < 50) {
+      console.log("jump time is ", delay, "milliseconds late");
+    }
+    if (premature < 50) {
+      console.log("jump time is ", premature, "milliseconds early");
     }
 
     /*
@@ -183,6 +213,7 @@ class GameScene extends Phaser.Scene {
       Phaser.Input.Keyboard.JustDown(this.spaceBar) &&
       this.myHero.heroSprite.body.touching.down
     ) {
+      this.hitSound.play();
       this.jumpTimingCheck();
       this.myHero.smallJump();
     }
