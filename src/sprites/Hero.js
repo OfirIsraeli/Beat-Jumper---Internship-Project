@@ -101,14 +101,13 @@ export default class Hero {
 
   walk() {
     this.heroSprite.play("walkAnimation");
-
     this.motion = "walking";
     this.walkStartTime = Date.now();
   }
 
   smallJump() {
     this.heroSprite.play("jumpAnimation");
-    this.heroSprite.setVelocityY(-1100);
+    this.heroSprite.setVelocityY(-1200);
     this.heroSprite.anims.chain("midAirAnimation");
     this.heroSprite.anims.chain("landingAnimation");
     this.heroSprite.anims.chain("walkAnimation");

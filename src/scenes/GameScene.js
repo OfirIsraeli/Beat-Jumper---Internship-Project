@@ -3,6 +3,38 @@ import Hero from "../sprites/Hero";
 //import Stave from "../classes/Stave"
 import { scoreMap } from "../classes/scoreMapCopy";
 
+// ------------------ CONSTANTS ---------------- //
+
+const BLOCKS_HEIGHTS = {
+  1: -34,
+  2: -50,
+  3: -75,
+  4: -100,
+};
+const BLOCKS_IMAGES = {
+  1: "smallBlockImage",
+  2: "mediumBlockImage",
+  3: "largeBlockImage",
+  4: "biggestBlockImage",
+};
+
+const NOTES_SIZES = {
+  quarters: 1,
+  eights: 2,
+  sixteens: 4,
+};
+
+const GAME_MODES = {
+  notStarted: 1,
+  started: 2,
+  ended: 3,
+};
+const GROUND_HEIGHT = 0.747;
+const EXTRA_BEATS = 16;
+const EXTRA_BEATS_INDEX = EXTRA_BEATS;
+const ACCEPTABLE_DELAY = 50;
+const DEFAULT_GAME_START_DELAY = 2000;
+
 class GameScene extends Phaser.Scene {
   constructor(test) {
     super({
@@ -13,173 +45,138 @@ class GameScene extends Phaser.Scene {
   preload() {}
 
   create() {
+    // set game buttons
+    this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
+    // set game sounds
+    this.beatSound = this.sound.add("tick");
+    this.hitSound = this.sound.add("hit");
 
-    // game buttons
-    this.spaceBar = this.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.SPACE
+    // set game background
+    this.background = this.add
+      .tileSprite(0, 0, this.width, this.height, "backgroundImage")
+      .setOrigin(0, 0);
+    this.background.setScrollFactor(0);
+
+    // set game ground
+    this.ground = this.physics.add.sprite(
+      this.sys.game.config.width / 2,
+      this.sys.game.config.height * GROUND_HEIGHT,
+      "groundImage"
     );
+    this.ground.setVisible(false);
+    this.ground.setImmovable();
 
-    // todo: change those function to be local
-    this.setGameSounds();
-    this.setGameBackground();
-    this.setGameGround();
-
+    // set hero
     this.myHero = new Hero({ scene: this.scene });
 
-    this.setGameColliders();
+    //set colliders
+    this.physics.add.collider(this.myHero.heroSprite, this.ground);
+    /* colliders for blocks:
+    this.physics.add.collider(this.myHero.heroSprite, this.mediumBlock);
+    this.physics.add.collider(this.myHero.heroSprite, this.largeBlock);
+    */
 
-    this.divisonLength = this.getGameDivisions();
-
-    // todo: should this be boolean? if not .. camel case
-    this.gameMode = "not started";
+    // calculate division in milliseconds
+    // ..todo: fetch from sheet source
+    this.tempo = 80;
+    let divisions = "eights";
+    //
+    this.noteSize = NOTES_SIZES[divisions];
+    // this calculates the smallest division in the game in milliseconds:
+    this.divisionLength = ((60 / this.tempo) * 1000) / this.noteSize;
+    // set game mode
+    this.gameMode = GAME_MODES["notStarted"];
+    // set score map of 1 long bar
     this.scoreMap = [];
     this.createOneBarScoreMap();
 
     // start game after 2 seconds
     this.time.addEvent({
-      delay: 2000,
+      delay: DEFAULT_GAME_START_DELAY,
       callback: () => {
         this.gameBegin();
       },
+      //loop: true,
+    });
+
+    this.time.addEvent({
+      delay: 2 * DEFAULT_GAME_START_DELAY + (60 / this.tempo) * 1000 * 8 * this.amountOfBars,
+      callback: () => {
+        this.gameBegin();
+      },
+      loop: true,
     });
   }
 
   // ------------------ METHODS FOR INTERVALS ---------------- //
   getRelevantBlockName(index) {
-    const blockImage = {
-      '1' : "smallBlockImage",
-      //.. todo - change to remove the ifs
-    };
-    if (this.scoreMap[index][0] === 1) {
-      return "smallBlockImage";
-    } else if (this.scoreMap[index][0] === 2) {
-      return "mediumBlockImage";
-    } else if (this.scoreMap[index][0] === 4) {
-      return "largeBlockImage";
-    }
-    /*
-    else{
-        return "biggestBlockImage"; // not existing yet
-      }*/
+    return BLOCKS_IMAGES[this.scoreMap[index][0]];
+  }
+  getRelevantBlockHeight(index) {
+    return BLOCKS_HEIGHTS[this.scoreMap[index][0]];
   }
 
-  stopBlocks(blockInterval, index) {
-    if (index < this.scoreMap.length - 1 + 4) {
+  stopBlocks(blockInterval, noteIndex) {
+    if (noteIndex < this.scoreMap.length - 1 + 4) {
       return;
     } else {
       clearInterval(blockInterval);
-      this.gameMode = "ended";
+      this.gameMode = GAME_MODES["ended"];
       this.myHero.heroSprite.play("standingAnimation");
     }
   }
 
-  // todo: explain that
+  // function that calculates the needed block velocity to match the given tempo
   getVelocityForTempo() {
     return -8 * this.tempo - 40;
   }
 
   gameBegin() {
     this.myHero.walk();
-    this.gameMode = "started";
+    this.gameMode = GAME_MODES["started"];
     let index = 0;
-    let imageName;
+    let noteIndex = index - (EXTRA_BEATS_INDEX - 4);
+
     let blockInterval = setInterval(() => {
-      if (index % this.noteSize === 0 && index >= 4) {
+      // metronome:
+      if (index % this.noteSize === 0) {
         // play every quarter
-        this.beatSound.play();
-      } else if (index < 4) {
         this.beatSound.play();
       }
 
-      if (index < this.scoreMap.length - 1) {
-        // todo: bad comparison
-        if (this.scoreMap[index][1] != "noPlace") {
+      // set blocks after countdown:
+      if (noteIndex < this.scoreMap.length - 1 && noteIndex >= 0) {
+        if (this.scoreMap[noteIndex][1] !== "noPlace") {
           let smallBlock = this.physics.add.sprite(
             this.sys.game.config.width,
-            this.ground.y - 34,
-            this.getRelevantBlockName(index)
+            this.ground.y + this.getRelevantBlockHeight(noteIndex),
+            this.getRelevantBlockName(noteIndex)
           );
           smallBlock.setImmovable();
           smallBlock.setVelocityX(this.getVelocityForTempo());
           //this.physics.add.collider(this.myHero.heroSprite, smallBlock);
         }
-      } else {
-        this.stopBlocks(blockInterval, index);
+      } else if (noteIndex >= EXTRA_BEATS_INDEX) {
+        this.stopBlocks(blockInterval, noteIndex);
       }
       index++;
-    }, this.divisonLength);
+
+      noteIndex++;
+    }, this.divisionLength);
   }
 
   // ------------------ SETTER METHODS ---------------- //
 
-  setGameButtons() {
-
-  }
-
-  setGameSounds() {
-    this.beatSound = this.sound.add("tick");
-    this.hitSound = this.sound.add("hit");
-  }
-  setGameBackground() {
-    this.background = this.add.tileSprite(
-      0,
-      380,
-      this.width,
-      this.height,
-      "backgroundImage"
-    );
-  }
-
-  setGameGround() {
-    this.ground = this.physics.add.sprite(
-      this.sys.game.config.width / 2,
-      this.sys.game.config.height * 0.747,
-      "groundImage"
-    );
-    this.ground.setVisible(false);
-    this.ground.setImmovable();
-  }
-
-  // todo: what is the collider here for
-  setGameColliders() {
-    this.physics.add.collider(this.myHero.heroSprite, this.ground);
-
-    // colliders for blocks:
-
-    //this.physics.add.collider(this.myHero.heroSprite, this.mediumBlock);
-    //this.physics.add.collider(this.myHero.heroSprite, this.largeBlock);
-  }
-
-  getGameDivisions() {
-    // fetch from sheet source
-    this.tempo = 80;
-    let divisions = "eights";
-    //
-
-    //let noteSize;
-    // todo: convert by const object
-    if (divisions === "quarters") {
-      this.noteSize = 1;
-    } else if (divisions === "eights") {
-      this.noteSize = 2;
-    } else {
-      // 16th notes
-      this.noteSize = 4;
-    }
-    return ((60 / this.tempo) * 1000) / this.noteSize;
-  }
-
+  // taking a given note in a given bar, inserting it into our score map as the number of times the smallest note division occurs in that note.
+  // for example, 1 quarter note equals to 4 16th notes that we will insert to our score map.
   deconstructNote(bar, note) {
     if (scoreMap[bar][note]["rest"] === "noPlace") {
       for (let k = 0; k < scoreMap[bar][note]["division"]; k++) {
         this.scoreMap.push([1, scoreMap[bar][note]["rest"]]);
       }
     } else {
-      this.scoreMap.push([
-        scoreMap[bar][note]["division"],
-        scoreMap[bar][note]["rest"],
-      ]);
+      this.scoreMap.push([scoreMap[bar][note]["division"], scoreMap[bar][note]["rest"]]);
       for (let k = 1; k < scoreMap[bar][note]["division"]; k++) {
         this.scoreMap.push([1, "noPlace"]);
       }
@@ -187,11 +184,11 @@ class GameScene extends Phaser.Scene {
   }
 
   createOneBarScoreMap() {
-    // TASK: fetch number of bars from library
-    const amountOfBars = 2;
+    // ..todo: fetch number of bars from library
+    this.amountOfBars = 2;
     //
 
-    for (let bar = 1; bar <= amountOfBars; bar++) {
+    for (let bar = 1; bar <= this.amountOfBars; bar++) {
       for (let note = 0; note < scoreMap[bar].length; note++) {
         this.deconstructNote(bar, note);
       }
@@ -200,32 +197,21 @@ class GameScene extends Phaser.Scene {
 
   // ------------------ UPDATE METHODS ---------------- //
 
-  jumpTimingCheck(jumpTime) {
-    // todo : chnage to let
-    var jumpTime = Date.now();
-    var timePassedSinceJump = jumpTime - this.myHero.walkStartTime; // / 1000
-    var delay = timePassedSinceJump % this.divisonLength;
-    // todo pteMature
-    var premature =
-      this.divisonLength - (timePassedSinceJump % this.divisonLength);
-    if (delay < 50) {
+  jumpTimingCheck() {
+    let jumpTime = Date.now();
+    let timePassedSinceJump = jumpTime - this.myHero.walkStartTime;
+    let delay = timePassedSinceJump % this.divisionLength;
+    let preDelay = this.divisionLength - (timePassedSinceJump % this.divisionLength);
+    if (delay < ACCEPTABLE_DELAY) {
       console.log("jump time is ", delay, "milliseconds late");
     }
-    if (premature < 50) {
-      console.log("jump time is ", premature, "milliseconds early");
+    if (preDelay < ACCEPTABLE_DELAY) {
+      console.log("jump time is ", preDelay, "milliseconds early");
     }
-
-    /*
-    this.stave = new Stave({
-      x:200,
-      y:200,
-      scene: this
-    })
-    this.stave.drawNotes();*/
   }
 
   update(time, delta) {
-    if (this.gameMode === "started") {
+    if (this.gameMode === GAME_MODES["started"]) {
       this.background.tilePositionX += 6;
     }
 
