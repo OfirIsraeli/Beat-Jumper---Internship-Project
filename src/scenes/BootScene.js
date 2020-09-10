@@ -14,6 +14,7 @@ class BootScene extends Phaser.Scene {
     this.load.image("largeBlockImage", "assets/images/H Block.png");
     this.load.audio("tick", "assets/sounds/click beat.mp3");
     this.load.audio("hit", "assets/sounds/hit.mp3");
+    this.load.audio("failure", "assets/sounds/fail.mp3");
 
     this.load.spritesheet("walkHero", "assets/images/walkHero.png", {
       frameWidth: 140,
@@ -24,6 +25,16 @@ class BootScene extends Phaser.Scene {
       frameWidth: 136,
       frameHeight: 200,
       endFrame: 13,
+    });
+    this.load.spritesheet("hurtHero", "assets/images/hurtHero.png", {
+      frameWidth: 131.4,
+      frameHeight: 200,
+      endFrame: 11,
+    });
+    this.load.spritesheet("winHero", "assets/images/winHero.png", {
+      frameWidth: 145.35,
+      frameHeight: 200,
+      endFrame: 15,
     });
 
     // Register a load progress event to show a load bar

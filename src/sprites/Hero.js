@@ -1,3 +1,8 @@
+const JUMP_STATES = {
+  failedJump: 0,
+  goodJump: 1,
+};
+
 export default class Hero {
   constructor(config) {
     this.scene = config.scene.scene;
@@ -14,7 +19,7 @@ export default class Hero {
     this.heroSprite = this.scene.physics.add
       .sprite(150, this.scene.ground.y - 150, "walkHero")
       .play("standingAnimation");
-    this.motion = "stopped";
+    this.jumpState;
     this.heroSprite.body.collideWorldBounds = true;
     this.heroSprite.setGravityY(7000);
     this.walkStartTime;
@@ -91,27 +96,63 @@ export default class Hero {
     this.scene.anims.create(landingAnimationConfig);
   }
 
+  createHurtAnimation() {
+    var hurtAnimationConfig = {
+      key: "hurtAnimation",
+      frames: this.scene.anims.generateFrameNumbers("hurtHero", {
+        start: 0,
+        end: 10,
+        first: 0,
+      }),
+      frameRate: 26,
+      repeat: 5,
+    };
+    this.scene.anims.create(hurtAnimationConfig);
+  }
+
+  createWinAnimation() {
+    var winAnimationConfig = {
+      key: "winAnimation",
+      frames: this.scene.anims.generateFrameNumbers("winHero", {
+        start: 0,
+        end: 14,
+        first: 0,
+      }),
+      frameRate: 26,
+      repeat: 4,
+    };
+    this.scene.anims.create(winAnimationConfig);
+  }
+
   createAllAnimations() {
     this.createWalkAnimation();
     this.createJumpAnimation();
     this.createMidAirAnimation();
     this.createLandingAnimation();
     this.createStandingAnimation();
+    this.createHurtAnimation();
+    this.createWinAnimation();
   }
 
   walk() {
     this.heroSprite.play("walkAnimation");
-    this.motion = "walking";
     this.walkStartTime = Date.now();
   }
 
   smallJump() {
-    this.heroSprite.play("jumpAnimation");
-    this.heroSprite.setVelocityY(-1200);
-    this.heroSprite.anims.chain("midAirAnimation");
-    this.heroSprite.anims.chain("landingAnimation");
-    this.heroSprite.anims.chain("walkAnimation");
-    this.motion = "jumping";
+    if (this.jumpState === JUMP_STATES["goodJump"]) {
+      this.heroSprite.play("jumpAnimation");
+      this.heroSprite.setVelocityY(-1200);
+      this.heroSprite.anims.chain("midAirAnimation");
+      this.heroSprite.anims.chain("landingAnimation");
+      this.heroSprite.anims.chain("walkAnimation");
+    } else {
+      this.heroSprite.play("jumpAnimation");
+      this.heroSprite.setVelocityY(-1200);
+      this.heroSprite.anims.chain("midAirAnimation");
+      this.heroSprite.anims.chain("hurtAnimation");
+      this.heroSprite.anims.chain("standingAnimation");
+    }
   }
 
   /*

@@ -1,5 +1,5 @@
 const divisions = "eights";
-export const scoreMap = {
+export const scoreJson = {
   1: [
     { division: 1 },
     { division: 1 },
