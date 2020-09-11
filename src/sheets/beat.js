@@ -1,4 +1,4 @@
-module.exports = {
+const test = {
   millimeters: 7,
   tenthToMm: 0.1807975,
   divisions: 2,
@@ -8,21 +8,21 @@ module.exports = {
     leftMargin: 70,
     rightMargin: 70,
     topMargin: 88,
-    bottomMargin: 88
+    bottomMargin: 88,
   },
   parts: {},
   partElements: [
     {
       name: "part",
       attrs: {
-        id: "P1"
+        id: "P1",
       },
       children: [
         {
           name: "measure",
           attrs: {
             number: "1",
-            width: "349"
+            width: "349",
           },
           children: [
             {
@@ -36,79 +36,79 @@ module.exports = {
                       children: [
                         {
                           name: "left-margin",
-                          text: "0"
+                          text: "0",
                         },
                         {
                           name: "right-margin",
-                          text: "413"
-                        }
-                      ]
+                          text: "413",
+                        },
+                      ],
                     },
                     {
                       name: "top-system-distance",
-                      text: "211"
-                    }
-                  ]
+                      text: "211",
+                    },
+                  ],
                 },
                 {
                   name: "measure-numbering",
-                  text: "system"
-                }
-              ]
+                  text: "system",
+                },
+              ],
             },
             {
               name: "attributes",
               children: [
                 {
                   name: "divisions",
-                  text: "2"
+                  text: "2",
                 },
                 {
                   name: "key",
                   children: [
                     {
                       name: "fifths",
-                      text: "0"
+                      text: "0",
                     },
                     {
                       name: "mode",
-                      text: "major"
-                    }
-                  ]
+                      text: "major",
+                    },
+                  ],
                 },
                 {
                   name: "time",
                   children: [
                     {
                       name: "beats",
-                      text: "4"
+                      text: "4",
                     },
                     {
                       name: "beat-type",
-                      text: "4"
-                    }
-                  ]
+                      text: "4",
+                    },
+                  ],
                 },
                 {
                   name: "clef",
                   children: [
                     {
                       name: "sign",
-                      text: "G"
+                      text: "G",
                     },
                     {
                       name: "line",
-                      text: "2"
-                    }
-                  ]
-                }
-              ]
+                      text: "2",
+                    },
+                  ],
+                },
+              ],
             },
             {
               name: "sound",
               attrs: {
-                tempo: "120"
-              }
+                tempo: "120",
+              },
             },
             {
               name: "note",
@@ -118,11 +118,11 @@ module.exports = {
               xmlDuration: "2",
               pitch: {
                 key: "C",
-                octave: "5"
+                octave: "5",
               },
               pitchKey: "C5",
               duration: "4",
-              divisions: 2
+              divisions: 2,
             },
             {
               name: "note",
@@ -132,11 +132,11 @@ module.exports = {
               xmlDuration: "2",
               pitch: {
                 key: "C",
-                octave: "5"
+                octave: "5",
               },
               pitchKey: "C5",
               duration: "4",
-              divisions: 2
+              divisions: 2,
             },
             {
               name: "note",
@@ -146,11 +146,11 @@ module.exports = {
               xmlDuration: "2",
               pitch: {
                 key: "C",
-                octave: "5"
+                octave: "5",
               },
               pitchKey: "C5",
               duration: "4",
-              divisions: 2
+              divisions: 2,
             },
             {
               name: "note",
@@ -160,18 +160,18 @@ module.exports = {
               beam: {
                 name: "beam",
                 attrs: {
-                  number: "1"
+                  number: "1",
                 },
-                text: "begin"
+                text: "begin",
               },
               xmlDuration: "1",
               pitch: {
                 key: "C",
-                octave: "5"
+                octave: "5",
               },
               pitchKey: "C5",
               duration: "8",
-              divisions: 1
+              divisions: 1,
             },
             {
               name: "note",
@@ -181,19 +181,19 @@ module.exports = {
               beam: {
                 name: "beam",
                 attrs: {
-                  number: "1"
+                  number: "1",
                 },
-                text: "end"
+                text: "end",
               },
               xmlDuration: "1",
               pitch: {
                 key: "C",
-                octave: "5"
+                octave: "5",
               },
               pitchKey: "C5",
               duration: "8",
-              divisions: 1
-            }
+              divisions: 1,
+            },
           ],
           leftMargin: 0,
           measureFirstInLine: true,
@@ -201,18 +201,18 @@ module.exports = {
           measureLine: 0,
           timeSignature: {
             beats: 4,
-            beatType: 4
+            beatType: 4,
           },
           tempo: [],
           linesInStaff: 5,
           keySign: "C",
-          xmlWidth: 349
+          xmlWidth: 349,
         },
         {
           name: "measure",
           attrs: {
             number: "2",
-            width: "292"
+            width: "292",
           },
           children: [
             {
@@ -223,18 +223,18 @@ module.exports = {
               beam: {
                 name: "beam",
                 attrs: {
-                  number: "1"
+                  number: "1",
                 },
-                text: "begin"
+                text: "begin",
               },
               xmlDuration: "1",
               pitch: {
                 key: "C",
-                octave: "5"
+                octave: "5",
               },
               pitchKey: "C5",
               duration: "8",
-              divisions: 1
+              divisions: 1,
             },
             {
               name: "note",
@@ -244,18 +244,18 @@ module.exports = {
               beam: {
                 name: "beam",
                 attrs: {
-                  number: "1"
+                  number: "1",
                 },
-                text: "end"
+                text: "end",
               },
               xmlDuration: "1",
               pitch: {
                 key: "C",
-                octave: "5"
+                octave: "5",
               },
               pitchKey: "C5",
               duration: "8",
-              divisions: 1
+              divisions: 1,
             },
             {
               name: "note",
@@ -265,18 +265,18 @@ module.exports = {
               beam: {
                 name: "beam",
                 attrs: {
-                  number: "1"
+                  number: "1",
                 },
-                text: "begin"
+                text: "begin",
               },
               xmlDuration: "1",
               pitch: {
                 key: "C",
-                octave: "5"
+                octave: "5",
               },
               pitchKey: "C5",
               duration: "8",
-              divisions: 1
+              divisions: 1,
             },
             {
               name: "note",
@@ -286,18 +286,18 @@ module.exports = {
               beam: {
                 name: "beam",
                 attrs: {
-                  number: "1"
+                  number: "1",
                 },
-                text: "end"
+                text: "end",
               },
               xmlDuration: "1",
               pitch: {
                 key: "C",
-                octave: "5"
+                octave: "5",
               },
               pitchKey: "C5",
               duration: "8",
-              divisions: 1
+              divisions: 1,
             },
             {
               name: "note",
@@ -307,11 +307,11 @@ module.exports = {
               xmlDuration: "2",
               pitch: {
                 key: "C",
-                octave: "5"
+                octave: "5",
               },
               pitchKey: "C5",
               duration: "4",
-              divisions: 2
+              divisions: 2,
             },
             {
               name: "note",
@@ -321,46 +321,46 @@ module.exports = {
               xmlDuration: "2",
               pitch: {
                 key: "C",
-                octave: "5"
+                octave: "5",
               },
               pitchKey: "C5",
               duration: "4",
-              divisions: 2
+              divisions: 2,
             },
             {
               name: "barline",
               attrs: {
-                location: "right"
+                location: "right",
               },
               children: [
                 {
                   name: "bar-style",
-                  text: "light-heavy"
-                }
-              ]
-            }
+                  text: "light-heavy",
+                },
+              ],
+            },
           ],
           measureNumber: 2,
           measureLine: 0,
           measureLastInLine: true,
           timeSignature: {
             beats: 4,
-            beatType: 4
+            beatType: 4,
           },
           tempo: [],
           linesInStaff: 5,
           keySign: "C",
-          xmlWidth: 292
-        }
+          xmlWidth: 292,
+        },
       ],
       instrument: {
         scorePart: "P1",
         partName: "MusicXML Part",
-        instrumentSound: "notRecognized"
+        instrumentSound: "notRecognized",
       },
       instrumentTranspose: "P1",
-      multiVoicePart: false
-    }
+      multiVoicePart: false,
+    },
   ],
   measureInLine: [2],
   lastMeasureNumber: 2,
@@ -372,8 +372,8 @@ module.exports = {
     "P1-I1": {
       scorePart: "P1",
       partName: "MusicXML Part",
-      instrumentSound: "notRecognized"
-    }
+      instrumentSound: "notRecognized",
+    },
   },
   multiStaffScore: false,
   multiVoices: false,
@@ -384,28 +384,29 @@ module.exports = {
       barLocation: "right",
       noteIndex: 6,
       measureNumber: 2,
-      partIndex: 0
-    }
+      partIndex: 0,
+    },
   ],
   voltas: [],
   voltaJumps: {},
   timeChange: {
-    "1": {
+    1: {
       beats: 4,
-      beatType: 4
-    }
+      beatType: 4,
+    },
   },
   tempoChange: {},
   hasTempoChange: false,
   clefChange: {
-    "0": {
-      "1": "treble"
-    }
+    0: {
+      1: "treble",
+    },
   },
   keySignChange: {
-    "1": "C"
+    1: "C",
   },
   measureStyle: {},
   pickupDivisions: 0,
-  filename: "beat.xml"
+  filename: "beat.xml",
 };
+export default test;

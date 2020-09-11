@@ -49,6 +49,8 @@ const EXTRA_BEATS_INDEX = EXTRA_BEATS;
 const ACCEPTABLE_DELAY = 100;
 const DEFAULT_GAME_START_DELAY = 2000;
 const REST_NOTE = "noPlace";
+const PLAYED_NOTE = "playedNote";
+const COUNT_NOTE = "countDown";
 
 class GameScene extends Phaser.Scene {
   constructor(test) {
@@ -60,7 +62,6 @@ class GameScene extends Phaser.Scene {
   preload() {}
 
   create() {
-    console.log(test);
     // set game buttons
     this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
@@ -93,23 +94,20 @@ class GameScene extends Phaser.Scene {
     // set game mode
     this.gameMode = GAME_MODES["notStarted"];
 
-    // set score map of 1 long bar
-
-    //this.
+    this.sheetJson = [test];
 
     // start game after 2 seconds
     this.time.addEvent({
       delay: DEFAULT_GAME_START_DELAY,
       callback: () => {
         this.gameMode = GAME_MODES["started"];
-        this.playLevel();
+        this.playLevel(this.sheetJson[0]);
       },
       //loop: true,
     });
-
     /*
     this.time.addEvent({
-      delay: 2 * DEFAULT_GAME_START_DELAY + (60 / this.tempo) * 1000 * 8 * this.amountOfBars,
+      delay: 2 * DEFAULT_GAME_START_DELAY,
       callback: () => {
         this.gameBegin();
       },
@@ -119,19 +117,17 @@ class GameScene extends Phaser.Scene {
 
   // ------------------ METHODS FOR INTERVALS ---------------- //
 
-  playLevel() {
+  playLevel(levelJson) {
     // calculate division in milliseconds
     // ..todo: fetch from sheet source
     this.tempo = 80;
-    let divisions = "eights";
     //
-    this.noteSize = NOTES_SIZES[divisions];
+    this.noteSize = test.divisions;
     // this calculates the smallest division in the game in milliseconds:
     this.divisionLength = ((60 / this.tempo) * 1000) / this.noteSize;
     this.scoreMap = [];
-    this.createOneBarScoreMap();
+    this.createOneBarScoreMap(levelJson);
     this.createTimingList();
-
     this.levelMode = LEVEL_MODES["levelOnMotion"];
     this.myHero.walk();
     this.blocksArray = [];
@@ -184,13 +180,14 @@ class GameScene extends Phaser.Scene {
       this.removeBlocks();
       clearInterval(this.blockInterval);
       this.levelMode = LEVEL_MODES["levelLost"];
-    }
-    if (noteIndex >= this.scoreMap.length - 1 + 4) {
+    } else if (noteIndex >= this.scoreMap.length - 1 + 4) {
       clearInterval(this.blockInterval);
       console.log("won level!");
       this.levelMode = LEVEL_MODES["levelWon"];
       this.myHero.heroSprite.play("winAnimation");
       this.myHero.heroSprite.anims.chain("standingAnimation");
+    } else {
+      return;
     }
   }
 
@@ -203,27 +200,38 @@ class GameScene extends Phaser.Scene {
 
   // taking a given note in a given bar, inserting it into our score map as the number of times the smallest note division occurs in that note.
   // for example, 1 quarter note equals to 4 16th notes that we will insert to our score map.
-  deconstructNote(bar, note) {
-    if (scoreJson[bar][note]["rest"] === REST_NOTE) {
-      for (let k = 0; k < scoreJson[bar][note]["division"]; k++) {
-        this.scoreMap.push([1, scoreJson[bar][note]["rest"]]);
+  deconstructNote(barIndex, noteIndex) {
+    if (this.filteredprevScore[barIndex][noteIndex]["rest"]) {
+      for (let k = 0; k < this.filteredprevScore[barIndex][noteIndex].divisions; k++) {
+        this.scoreMap.push([1, REST_NOTE]);
       }
     } else {
-      this.scoreMap.push([scoreJson[bar][note]["division"], scoreJson[bar][note]["rest"]]);
-      for (let k = 1; k < scoreJson[bar][note]["division"]; k++) {
+      this.scoreMap.push([this.filteredprevScore[barIndex][noteIndex].divisions, PLAYED_NOTE]);
+      for (let k = 1; k < this.filteredprevScore[barIndex][noteIndex].divisions; k++) {
         this.scoreMap.push([1, REST_NOTE]);
       }
     }
   }
 
-  createOneBarScoreMap() {
-    // ..todo: fetch number of bars from library
-    this.amountOfBars = 2;
-    //
-    // todo: fetch object from
-    for (let bar = 1; bar <= this.amountOfBars; bar++) {
-      for (let note = 0; note < scoreJson[bar].length; note++) {
-        this.deconstructNote(bar, note);
+  filterPrevScore(levelJson) {
+    let barIndex = 0;
+    for (let measure of levelJson.partElements[0].children) {
+      let temp = measure.children.filter((item) => {
+        return item.name === "note";
+      });
+      this.filteredprevScore[barIndex] = temp;
+      barIndex++;
+    }
+  }
+
+  createOneBarScoreMap(levelJson) {
+    this.amountOfBars = levelJson.partElements[0].children.length;
+    this.filteredprevScore = levelJson.partElements[0].children;
+    this.filterPrevScore(levelJson);
+
+    for (let barIndex = 0; barIndex < this.amountOfBars; barIndex++) {
+      for (let noteIndex = 0; noteIndex < this.filteredprevScore[barIndex].length; noteIndex++) {
+        this.deconstructNote(barIndex, noteIndex);
       }
     }
   }
@@ -232,13 +240,17 @@ class GameScene extends Phaser.Scene {
 
   createTimingList() {
     this.timingList = [];
-
+    this.visitedNotes = [];
+    let temp;
     for (let i = 0; i < EXTRA_BEATS; i++) {
-      this.timingList.push([(i + 1) * this.divisionLength, "countDown"]);
+      this.timingList.push([(i + 1) * this.divisionLength, COUNT_NOTE]);
+      this.visitedNotes.push([this.timingList[i], false]);
     }
     let i = this.timingList.length;
     for (let j = 0; j < this.scoreMap.length; j++) {
-      this.timingList.push([(j + i + 1) * this.divisionLength, this.scoreMap[j][1]]);
+      temp = [(j + i + 1) * this.divisionLength, this.scoreMap[j][1]];
+      this.timingList.push(temp);
+      this.visitedNotes.push([temp, false]);
     }
   }
 
@@ -254,26 +266,38 @@ class GameScene extends Phaser.Scene {
     return res;
   }
 
+  missCheck(closestNote) {
+    let curNoteIndex = this.timingList.findIndex((element) => element === closestNote);
+    for (let i = 0; i < curNoteIndex; i++) {
+      if (this.visitedNotes[i][1] === false && this.visitedNotes[i][0][1] === PLAYED_NOTE) {
+        return true;
+      }
+    }
+    this.visitedNotes[curNoteIndex][1] = true;
+    return false;
+  }
+
   jumpTimingCheck() {
     this.myHero.jumpState = JUMP_STATES["goodJump"];
-
-    let jumpTime = Date.now();
-    let timePassedSinceJump = jumpTime - this.myHero.walkStartTime;
-    let delay = timePassedSinceJump % this.divisionLength;
-    let preDelay = this.divisionLength - (timePassedSinceJump % this.divisionLength);
+    const jumpTime = Date.now();
+    const timePassedSinceJump = jumpTime - this.myHero.walkStartTime;
+    const delay = timePassedSinceJump % this.divisionLength;
+    const preDelay = this.divisionLength - (timePassedSinceJump % this.divisionLength);
     const closestNote = this.getClosestNoteToKeyPress(timePassedSinceJump);
-    if (delay === 0 && closestNote[1] !== REST_NOTE) {
+    if (closestNote[1] === COUNT_NOTE) {
+      return;
+    }
+    const missedANote = this.missCheck(closestNote);
+    if (delay === 0 && closestNote[1] === PLAYED_NOTE && !missedANote) {
       console.log("just in time!");
-    } else if (delay < ACCEPTABLE_DELAY && closestNote[1] !== REST_NOTE) {
+    } else if (delay < ACCEPTABLE_DELAY && closestNote[1] === PLAYED_NOTE && !missedANote) {
       console.log("jump time is ", delay, "milliseconds late");
-    } else if (preDelay < ACCEPTABLE_DELAY && closestNote[1] !== REST_NOTE) {
+    } else if (preDelay < ACCEPTABLE_DELAY && closestNote[1] === PLAYED_NOTE && !missedANote) {
       console.log("jump time is ", preDelay, "milliseconds early");
     } else {
       console.log("BAD JUMP!!!");
-      //this.stopBlocks(this.timingList.length);
       this.myHero.jumpState = JUMP_STATES["failedJump"];
       this.levelMode = LEVEL_MODES["levelLost"];
-
       this.failSound.play();
     }
   }
