@@ -2,7 +2,6 @@ import Phaser from "phaser";
 import Hero from "../sprites/Hero";
 //import Stave from "../classes/Stave"
 import { scoreJson } from "../classes/scoreMapCopy";
-import test from "../sheets/beat";
 
 // ------------------ CONSTANTS ---------------- //
 
@@ -62,7 +61,9 @@ class GameScene extends Phaser.Scene {
   create() {
     console.log(test);
     // set game buttons
-    this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.spaceBar = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SPACE
+    );
 
     // set game sounds
     this.beatSound = this.sound.add("tick");
@@ -209,7 +210,10 @@ class GameScene extends Phaser.Scene {
         this.scoreMap.push([1, scoreJson[bar][note]["rest"]]);
       }
     } else {
-      this.scoreMap.push([scoreJson[bar][note]["division"], scoreJson[bar][note]["rest"]]);
+      this.scoreMap.push([
+        scoreJson[bar][note]["division"],
+        scoreJson[bar][note]["rest"],
+      ]);
       for (let k = 1; k < scoreJson[bar][note]["division"]; k++) {
         this.scoreMap.push([1, REST_NOTE]);
       }
@@ -238,19 +242,29 @@ class GameScene extends Phaser.Scene {
     }
     let i = this.timingList.length;
     for (let j = 0; j < this.scoreMap.length; j++) {
-      this.timingList.push([(j + i + 1) * this.divisionLength, this.scoreMap[j][1]]);
+      this.timingList.push([
+        (j + i + 1) * this.divisionLength,
+        this.scoreMap[j][1],
+      ]);
     }
   }
 
   getClosestNoteToKeyPress(timePassedSinceJump) {
-    const prevNoteDistance = Math.abs(this.curNotes[0][0] - timePassedSinceJump);
+    const prevNoteDistance = Math.abs(
+      this.curNotes[0][0] - timePassedSinceJump
+    );
     const curNoteDistance = Math.abs(this.curNotes[1][0] - timePassedSinceJump);
-    const nextNoteDistance = Math.abs(this.curNotes[2][0] - timePassedSinceJump);
+    const nextNoteDistance = Math.abs(
+      this.curNotes[2][0] - timePassedSinceJump
+    );
     const notesDistance = {};
     notesDistance[prevNoteDistance] = this.curNotes[0];
     notesDistance[curNoteDistance] = this.curNotes[1];
     notesDistance[nextNoteDistance] = this.curNotes[2];
-    const res = notesDistance[Math.min(prevNoteDistance, curNoteDistance, nextNoteDistance)];
+    const res =
+      notesDistance[
+        Math.min(prevNoteDistance, curNoteDistance, nextNoteDistance)
+      ];
     return res;
   }
 
@@ -260,7 +274,8 @@ class GameScene extends Phaser.Scene {
     let jumpTime = Date.now();
     let timePassedSinceJump = jumpTime - this.myHero.walkStartTime;
     let delay = timePassedSinceJump % this.divisionLength;
-    let preDelay = this.divisionLength - (timePassedSinceJump % this.divisionLength);
+    let preDelay =
+      this.divisionLength - (timePassedSinceJump % this.divisionLength);
     const closestNote = this.getClosestNoteToKeyPress(timePassedSinceJump);
     if (delay === 0 && closestNote[1] !== REST_NOTE) {
       console.log("just in time!");

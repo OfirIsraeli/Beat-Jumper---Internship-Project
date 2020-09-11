@@ -14,13 +14,8 @@ import * as SpinePlugin from "./SpinePlugin.js";
 
 const config = {
   type: Phaser.AUTO,
-  scale: {
-    mode: Phaser.Scale.FIT,
-    parent: "content",
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: 1280,
-    height: 760,
-  },
+  width: 1280,
+  height: 760,
   physics: {
     default: "arcade",
     arcade: {

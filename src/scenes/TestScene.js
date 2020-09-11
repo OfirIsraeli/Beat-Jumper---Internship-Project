@@ -1,6 +1,7 @@
 import Phaser from "phaser";
-import Stave from "../classes/Stave"
-import musicJson from "../../assets/musicJson/beats1"
+import Stave from "../classes/Stave";
+import { BUS_EVENTS } from "bandpad-vexflow";
+import * as ScoreManager from "bandpad-vexflow";
 
 class TestScene extends Phaser.Scene {
   constructor(test) {
@@ -10,8 +11,7 @@ class TestScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("backgroundImage", "assets/images/backgroundWithFloor.png");
-
+    this.load.image("backgroundImage", "assets/images/background.png");
   }
 
   create() {
@@ -21,19 +21,25 @@ class TestScene extends Phaser.Scene {
 
     this.add.image(0, 0, "backgroundImage").setOrigin(0, 0);
 
-    console.log("creating test")
+    console.log("creating test");
 
     // testing stave class
     new Stave({
-      x:0,
-      y:Y_TEST,
+      x: 0,
+      y: Y_TEST,
       scene: this,
-      musicJson: musicJson
     }).drawNotes();
- }
 
-  update(time, delta) {
+    test.partElements[0].mute = true;
+
+    document.addEventListener("click", () => {
+      ScoreManager.scoreGetEvent(BUS_EVENTS.PLAY, {
+        smoothNotePointer: true,
+      });
+    });
   }
+
+  update(time, delta) {}
 }
 
 export default TestScene;
