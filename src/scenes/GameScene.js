@@ -105,14 +105,14 @@ class GameScene extends Phaser.Scene {
       },
       //loop: true,
     });
-    /*
+
     this.time.addEvent({
-      delay: 2 * DEFAULT_GAME_START_DELAY,
+      delay: 2 * DEFAULT_GAME_START_DELAY + 16000,
       callback: () => {
-        this.gameBegin();
+        this.playLevel(this.sheetJson[0]);
       },
       loop: true,
-    });*/
+    });
   }
 
   // ------------------ METHODS FOR INTERVALS ---------------- //

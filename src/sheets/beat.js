@@ -1,4 +1,15 @@
+<<<<<<< HEAD
 const test = {
+=======
+module.exports = {
+  audioTracks: [
+    {
+      url: "/assets/sounds/background.mp3",
+      tempo: 90,
+      name: "background",
+    },
+  ],
+>>>>>>> f0b482dfc9e64bb921479239db7e6f97dd33a482
   millimeters: 7,
   tenthToMm: 0.1807975,
   divisions: 2,
@@ -22,7 +33,11 @@ const test = {
           name: "measure",
           attrs: {
             number: "1",
+<<<<<<< HEAD
             width: "349",
+=======
+            width: "389",
+>>>>>>> f0b482dfc9e64bb921479239db7e6f97dd33a482
           },
           children: [
             {
@@ -36,11 +51,19 @@ const test = {
                       children: [
                         {
                           name: "left-margin",
+<<<<<<< HEAD
                           text: "0",
                         },
                         {
                           name: "right-margin",
                           text: "413",
+=======
+                          text: "158",
+                        },
+                        {
+                          name: "right-margin",
+                          text: "173",
+>>>>>>> f0b482dfc9e64bb921479239db7e6f97dd33a482
                         },
                       ],
                     },
@@ -195,7 +218,7 @@ const test = {
               divisions: 1,
             },
           ],
-          leftMargin: 0,
+          leftMargin: 158,
           measureFirstInLine: true,
           measureNumber: 1,
           measureLine: 0,
@@ -206,13 +229,21 @@ const test = {
           tempo: [],
           linesInStaff: 5,
           keySign: "C",
+<<<<<<< HEAD
           xmlWidth: 349,
+=======
+          xmlWidth: 389,
+>>>>>>> f0b482dfc9e64bb921479239db7e6f97dd33a482
         },
         {
           name: "measure",
           attrs: {
             number: "2",
+<<<<<<< HEAD
             width: "292",
+=======
+            width: "334",
+>>>>>>> f0b482dfc9e64bb921479239db7e6f97dd33a482
           },
           children: [
             {
@@ -350,7 +381,11 @@ const test = {
           tempo: [],
           linesInStaff: 5,
           keySign: "C",
+<<<<<<< HEAD
           xmlWidth: 292,
+=======
+          xmlWidth: 334,
+>>>>>>> f0b482dfc9e64bb921479239db7e6f97dd33a482
         },
       ],
       instrument: {
@@ -377,7 +412,7 @@ const test = {
   },
   multiStaffScore: false,
   multiVoices: false,
-  systemLeftMargins: 0,
+  systemLeftMargins: 158,
   barLines: [
     {
       barType: 3,
