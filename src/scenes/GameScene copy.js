@@ -3,6 +3,8 @@ import Hero from "../sprites/Hero";
 //import Stave from "../classes/Stave"
 import { scoreJson } from "../classes/scoreMapCopy";
 import test from "../sheets/beat";
+import * as ScoreManager from "bandpad-vexflow";
+import { BUS_EVENTS } from "bandpad-vexflow";
 
 // ------------------ CONSTANTS ---------------- //
 
@@ -63,7 +65,9 @@ class GameScene extends Phaser.Scene {
 
   create() {
     // set game buttons
-    this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.spaceBar = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SPACE
+    );
 
     // set game sounds
     this.beatSound = this.sound.add("tick");
@@ -133,6 +137,11 @@ class GameScene extends Phaser.Scene {
     this.blocksArray = [];
     let index = 0;
     let noteIndex = index - (EXTRA_BEATS_INDEX - 4); // the exact time we need so the block spawn will reach the hero in time is 4 intervals
+
+    ScoreManager.scoreGetEvent(BUS_EVENTS.PLAY, {
+      smoothNotePointer: true,
+    });
+
     this.blockInterval = setInterval(() => {
       // metronome:
       if (index % this.noteSize === 0) {
@@ -202,12 +211,23 @@ class GameScene extends Phaser.Scene {
   // for example, 1 quarter note equals to 4 16th notes that we will insert to our score map.
   deconstructNote(barIndex, noteIndex) {
     if (this.filteredprevScore[barIndex][noteIndex]["rest"]) {
-      for (let k = 0; k < this.filteredprevScore[barIndex][noteIndex].divisions; k++) {
+      for (
+        let k = 0;
+        k < this.filteredprevScore[barIndex][noteIndex].divisions;
+        k++
+      ) {
         this.scoreMap.push([1, REST_NOTE]);
       }
     } else {
-      this.scoreMap.push([this.filteredprevScore[barIndex][noteIndex].divisions, PLAYED_NOTE]);
-      for (let k = 1; k < this.filteredprevScore[barIndex][noteIndex].divisions; k++) {
+      this.scoreMap.push([
+        this.filteredprevScore[barIndex][noteIndex].divisions,
+        PLAYED_NOTE,
+      ]);
+      for (
+        let k = 1;
+        k < this.filteredprevScore[barIndex][noteIndex].divisions;
+        k++
+      ) {
         this.scoreMap.push([1, REST_NOTE]);
       }
     }
@@ -230,7 +250,11 @@ class GameScene extends Phaser.Scene {
     this.filterPrevScore(levelJson);
 
     for (let barIndex = 0; barIndex < this.amountOfBars; barIndex++) {
-      for (let noteIndex = 0; noteIndex < this.filteredprevScore[barIndex].length; noteIndex++) {
+      for (
+        let noteIndex = 0;
+        noteIndex < this.filteredprevScore[barIndex].length;
+        noteIndex++
+      ) {
         this.deconstructNote(barIndex, noteIndex);
       }
     }
@@ -255,21 +279,33 @@ class GameScene extends Phaser.Scene {
   }
 
   getClosestNoteToKeyPress(timePassedSinceJump) {
-    const prevNoteDistance = Math.abs(this.curNotes[0][0] - timePassedSinceJump);
+    const prevNoteDistance = Math.abs(
+      this.curNotes[0][0] - timePassedSinceJump
+    );
     const curNoteDistance = Math.abs(this.curNotes[1][0] - timePassedSinceJump);
-    const nextNoteDistance = Math.abs(this.curNotes[2][0] - timePassedSinceJump);
+    const nextNoteDistance = Math.abs(
+      this.curNotes[2][0] - timePassedSinceJump
+    );
     const notesDistance = {};
     notesDistance[prevNoteDistance] = this.curNotes[0];
     notesDistance[curNoteDistance] = this.curNotes[1];
     notesDistance[nextNoteDistance] = this.curNotes[2];
-    const res = notesDistance[Math.min(prevNoteDistance, curNoteDistance, nextNoteDistance)];
+    const res =
+      notesDistance[
+        Math.min(prevNoteDistance, curNoteDistance, nextNoteDistance)
+      ];
     return res;
   }
 
   missCheck(closestNote) {
-    let curNoteIndex = this.timingList.findIndex((element) => element === closestNote);
+    let curNoteIndex = this.timingList.findIndex(
+      (element) => element === closestNote
+    );
     for (let i = 0; i < curNoteIndex; i++) {
-      if (this.visitedNotes[i][1] === false && this.visitedNotes[i][0][1] === PLAYED_NOTE) {
+      if (
+        this.visitedNotes[i][1] === false &&
+        this.visitedNotes[i][0][1] === PLAYED_NOTE
+      ) {
         return true;
       }
     }
@@ -282,7 +318,8 @@ class GameScene extends Phaser.Scene {
     const jumpTime = Date.now();
     const timePassedSinceJump = jumpTime - this.myHero.walkStartTime;
     const delay = timePassedSinceJump % this.divisionLength;
-    const preDelay = this.divisionLength - (timePassedSinceJump % this.divisionLength);
+    const preDelay =
+      this.divisionLength - (timePassedSinceJump % this.divisionLength);
     const closestNote = this.getClosestNoteToKeyPress(timePassedSinceJump);
     if (closestNote[1] === COUNT_NOTE) {
       return;
@@ -290,9 +327,17 @@ class GameScene extends Phaser.Scene {
     const missedANote = this.missCheck(closestNote);
     if (delay === 0 && closestNote[1] === PLAYED_NOTE && !missedANote) {
       console.log("just in time!");
-    } else if (delay < ACCEPTABLE_DELAY && closestNote[1] === PLAYED_NOTE && !missedANote) {
+    } else if (
+      delay < ACCEPTABLE_DELAY &&
+      closestNote[1] === PLAYED_NOTE &&
+      !missedANote
+    ) {
       console.log("jump time is ", delay, "milliseconds late");
-    } else if (preDelay < ACCEPTABLE_DELAY && closestNote[1] === PLAYED_NOTE && !missedANote) {
+    } else if (
+      preDelay < ACCEPTABLE_DELAY &&
+      closestNote[1] === PLAYED_NOTE &&
+      !missedANote
+    ) {
       console.log("jump time is ", preDelay, "milliseconds early");
     } else {
       console.log("BAD JUMP!!!");

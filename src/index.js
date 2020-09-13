@@ -3,6 +3,7 @@ import BootScene from "./scenes/BootScene";
 import TitleScene from "./scenes/TitleScene";
 import GameScene from "./scenes/GameScene";
 import * as SpinePlugin from "./SpinePlugin.js";
+import * as WaaSampler from "waa-sampler";
 
 /*
   https://github.com/nkholski/phaser3-es6-webpack
@@ -30,4 +31,16 @@ const config = {
   },
 };
 
-new Phaser.Game(config);
+WaaSampler.initWaaSampler(
+  ["metronome"],
+  "https://bandpad.co/livescoreV2/statics/create-bandpad-soundfont/soundfont",
+  "COWBELL",
+  90
+)
+  .then(function () {
+    console.log("init sampler successfully");
+    new Phaser.Game(config);
+  })
+  .catch(function (e) {
+    console.error(e);
+  });
