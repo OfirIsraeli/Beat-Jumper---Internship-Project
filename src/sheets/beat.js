@@ -1,15 +1,4 @@
-<<<<<<< HEAD
 const test = {
-=======
-module.exports = {
-  audioTracks: [
-    {
-      url: "/assets/sounds/background.mp3",
-      tempo: 90,
-      name: "background",
-    },
-  ],
->>>>>>> f0b482dfc9e64bb921479239db7e6f97dd33a482
   millimeters: 7,
   tenthToMm: 0.1807975,
   divisions: 2,
@@ -33,11 +22,7 @@ module.exports = {
           name: "measure",
           attrs: {
             number: "1",
-<<<<<<< HEAD
             width: "349",
-=======
-            width: "389",
->>>>>>> f0b482dfc9e64bb921479239db7e6f97dd33a482
           },
           children: [
             {
@@ -51,19 +36,11 @@ module.exports = {
                       children: [
                         {
                           name: "left-margin",
-<<<<<<< HEAD
                           text: "0",
                         },
                         {
                           name: "right-margin",
                           text: "413",
-=======
-                          text: "158",
-                        },
-                        {
-                          name: "right-margin",
-                          text: "173",
->>>>>>> f0b482dfc9e64bb921479239db7e6f97dd33a482
                         },
                       ],
                     },
@@ -229,21 +206,13 @@ module.exports = {
           tempo: [],
           linesInStaff: 5,
           keySign: "C",
-<<<<<<< HEAD
           xmlWidth: 349,
-=======
-          xmlWidth: 389,
->>>>>>> f0b482dfc9e64bb921479239db7e6f97dd33a482
         },
         {
           name: "measure",
           attrs: {
             number: "2",
-<<<<<<< HEAD
             width: "292",
-=======
-            width: "334",
->>>>>>> f0b482dfc9e64bb921479239db7e6f97dd33a482
           },
           children: [
             {
@@ -381,11 +350,7 @@ module.exports = {
           tempo: [],
           linesInStaff: 5,
           keySign: "C",
-<<<<<<< HEAD
           xmlWidth: 292,
-=======
-          xmlWidth: 334,
->>>>>>> f0b482dfc9e64bb921479239db7e6f97dd33a482
         },
       ],
       instrument: {

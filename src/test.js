@@ -84,10 +84,7 @@ function init() {
         .then(function () {
           console.log("init sampler successfully");
 
-          liveScore.createScore(test, "score-id", options, function (
-            event,
-            value
-          ) {
+          liveScore.createScore(test, "score-id", options, function (event, value) {
             console.log("got new event");
             console.log(event, value);
           });

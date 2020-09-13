@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import Hero from "../sprites/Hero";
 //import Stave from "../classes/Stave"
 import { scoreJson } from "../classes/scoreMapCopy";
-import test from "../sheets/beat";
+import sheetDS from "../lib/testScoreMap";
 
 // ------------------ CONSTANTS ---------------- //
 
@@ -94,7 +94,7 @@ class GameScene extends Phaser.Scene {
     // set game mode
     this.gameMode = GAME_MODES["notStarted"];
 
-    this.sheetJson = [test];
+    this.sheetJson = [sheetDS];
 
     // start game after 2 seconds
     this.time.addEvent({
@@ -122,7 +122,7 @@ class GameScene extends Phaser.Scene {
     // ..todo: fetch from sheet source
     this.tempo = 80;
     //
-    this.noteSize = test.divisions;
+    this.noteSize = 2; //sheetDS.divisions;
     // this calculates the smallest division in the game in milliseconds:
     this.divisionLength = ((60 / this.tempo) * 1000) / this.noteSize;
     this.scoreMap = [];
@@ -200,38 +200,31 @@ class GameScene extends Phaser.Scene {
 
   // taking a given note in a given bar, inserting it into our score map as the number of times the smallest note division occurs in that note.
   // for example, 1 quarter note equals to 4 16th notes that we will insert to our score map.
-  deconstructNote(barIndex, noteIndex) {
-    if (this.filteredprevScore[barIndex][noteIndex]["rest"]) {
-      for (let k = 0; k < this.filteredprevScore[barIndex][noteIndex].divisions; k++) {
+  deconstructNote(levelJson, barIndex, noteIndex) {
+    if (levelJson.partElements[0].scoreMap[barIndex][noteIndex]["rest"]) {
+      for (let k = 0; k < levelJson.partElements[0].scoreMap[barIndex][noteIndex].divisions; k++) {
         this.scoreMap.push([1, REST_NOTE]);
       }
     } else {
-      this.scoreMap.push([this.filteredprevScore[barIndex][noteIndex].divisions, PLAYED_NOTE]);
-      for (let k = 1; k < this.filteredprevScore[barIndex][noteIndex].divisions; k++) {
+      this.scoreMap.push([
+        levelJson.partElements[0].scoreMap[barIndex][noteIndex].divisions,
+        PLAYED_NOTE,
+      ]);
+      for (let k = 1; k < levelJson.partElements[0].scoreMap[barIndex][noteIndex].divisions; k++) {
         this.scoreMap.push([1, REST_NOTE]);
       }
-    }
-  }
-
-  filterPrevScore(levelJson) {
-    let barIndex = 0;
-    for (let measure of levelJson.partElements[0].children) {
-      let temp = measure.children.filter((item) => {
-        return item.name === "note";
-      });
-      this.filteredprevScore[barIndex] = temp;
-      barIndex++;
     }
   }
 
   createOneBarScoreMap(levelJson) {
-    this.amountOfBars = levelJson.partElements[0].children.length;
-    this.filteredprevScore = levelJson.partElements[0].children;
-    this.filterPrevScore(levelJson);
-
-    for (let barIndex = 0; barIndex < this.amountOfBars; barIndex++) {
-      for (let noteIndex = 0; noteIndex < this.filteredprevScore[barIndex].length; noteIndex++) {
-        this.deconstructNote(barIndex, noteIndex);
+    this.amountOfBars = Object.keys(levelJson.partElements[0].scoreMap).length;
+    for (let barIndex = 1; barIndex <= this.amountOfBars; barIndex++) {
+      for (
+        let noteIndex = 0;
+        noteIndex < levelJson.partElements[0].scoreMap[barIndex].length;
+        noteIndex++
+      ) {
+        this.deconstructNote(levelJson, barIndex, noteIndex);
       }
     }
   }
