@@ -1,6 +1,15 @@
 import Phaser from "phaser";
 import Hero from "../sprites/Hero";
 import scoreJson from "../sheets/beat";
+import scoreJson2 from "../sheets/sixh-test";
+
+import level1_1 from "../sheets/levels/level1-1";
+import level1_2 from "../sheets/levels/level1-2";
+import level1_3 from "../sheets/levels/level1-3";
+import level1_4 from "../sheets/levels/level1-4";
+import level1_5 from "../sheets/levels/level1-5";
+import level1_6 from "../sheets/levels/level1-6";
+
 import createScore from "../lib/createScore";
 import createLevelScoreMap from "../lib/createLevelScoreMap";
 import createTimingList from "../lib/createTimingList";
@@ -13,20 +22,18 @@ import { BUS_EVENTS } from "bandpad-vexflow";
 const BLOCKS_HEIGHTS = {
   1: -34,
   2: -50,
-  3: -75,
-  4: -100,
+  4: -75,
 };
 const BLOCKS_IMAGES = {
   1: "smallBlockImage",
   2: "mediumBlockImage",
-  3: "largeBlockImage",
-  4: "biggestBlockImage",
+  4: "largeBlockImage",
 };
 
 const NOTES_SIZES = {
-  quarters: 1,
-  eights: 2,
-  sixteens: 4,
+  1: 4, // 1 = quarter note
+  2: 8, // 2 = 8th note
+  4: 16, // 4 = 16th note
 };
 
 const GAME_MODES = {
@@ -58,8 +65,6 @@ const INTERVAL_TYPES = {
 };
 
 const GROUND_HEIGHT = 0.747;
-const COUNTIN_BEATS = 16;
-const EXTRA_BEATS_INDEX = COUNTIN_BEATS;
 const ACCEPTABLE_DELAY = 100;
 const DEFAULT_GAME_START_DELAY = 2000;
 
@@ -83,7 +88,6 @@ class GameScene extends Phaser.Scene {
     this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
     // set game sounds
-    this.beatSound = this.sound.add("tick");
     this.hitSound = this.sound.add("hit");
     this.failSound = this.sound.add("failure");
 
@@ -131,13 +135,9 @@ class GameScene extends Phaser.Scene {
     });*/
   }
 
-  // ------------------ METHODS FOR INTERVALS ---------------- //
-
   playLevel(levelJson) {
+    // create music score for the level
     createScore(levelJson, function (event, value) {});
-    ScoreManager.scoreGetEvent(BUS_EVENTS.PLAY, {
-      smoothNotePointer: true,
-    });
 
     // calculate division in milliseconds
     this.tempo = 80;
@@ -146,97 +146,74 @@ class GameScene extends Phaser.Scene {
     this.blocksArray = [];
 
     //level divisions. 1 = quarters, 2 = eights, 4 = 16th
-    this.divisions = 2;
+    this.divisions = levelJson.divisions;
+
+    this.divSize = NOTES_SIZES[this.divisions]; // actual size of the division. quarters = 4 etc
+
+    this.amountOfBars = Object.keys(levelJson.partElements[0].scoreMap).length;
 
     // this calculates the smallest division in the game in milliseconds:
     this.divisionDuration = ((60 / this.tempo) * 1000) / this.divisions;
 
-    this.scoreMap = createLevelScoreMap(levelJson);
+    this.scoreMap = createLevelScoreMap(levelJson, this.amountOfBars);
     this.timingList = createTimingList(this.divisionDuration, this.scoreMap);
     this.levelMode = LEVEL_MODES.levelOnMotion;
 
-    // start game
-    this.myHero.walk();
+    // start level
+    this.myHero.walk(); // there goes my hero...
+
     /*
+    variables needed for intervals:
+      intervalType: the type of interval we're in - in the countdown or in the actual sheet notes
+      noteIndex: the index regarding the notes. we spawn the blocks exactly 4 intervals prior 
 
-    let index = 0;
-    let noteIndex = index - (EXTRA_BEATS_INDEX - 4); // the exact time we need so the block spawn will reach the hero in time is 4 intervals
-
-
-    this.blockInterval = setInterval(() => {
-      // metronome:
-      if (index % this.divisions === 0) {
-        // play every quarter note
-        this.beatSound.play();
-      }
-      this.curNotes = {
-        // the 2 notes timings of the current interval and the next one. Needed for calculations for user's jump
-        curNote: this.timingList[index],
-        nextNote: this.timingList[index + 1],
-      };
-      // set blocks after countdown:
-      if (noteIndex < this.scoreMap.length - 1 && noteIndex >= 0) {
-        if (this.scoreMap[noteIndex][1] !== NOTES.REST_NOTE) {
-          let block = this.physics.add.sprite(
-            this.sys.game.config.width,
-            this.ground.y + this.getRelevantBlockHeight(noteIndex),
-            this.getRelevantBlockName(noteIndex)
-          );
-          block.setImmovable();
-          block.setVelocityX(this.getVelocityForTempo());
-          this.blocksArray.push(block);
-        }
-      }
-      this.levelStatusCheck(noteIndex);
-      index++;
-      noteIndex++;
-    }, this.divisionDuration);*/
-
-    let totalIntervals = 0;
-
-    ScoreManager.setEventFunction((event, value) => {
-      /*
-      if (event === BUS_EVENTS.UPDATE) {
-
-      }*/
-      totalIntervals++;
-      console.log(event, value);
-    });
-    /*
+    */
     let intervalType = INTERVAL_TYPES.COUNTIN_INTERVAL;
     let noteIndex = 0;
     let intervalNumber = 0;
+    const coundownIntervals = 2 * this.divSize; // 2 bars, each has divSize number of intervals
+    const totalIntervals = coundownIntervals + this.divSize * this.amountOfBars;
     ScoreManager.setEventFunction((event, value) => {
       if (event === BUS_EVENTS.UPDATE) {
-        console.log(value, intervalNumber);
-        if (value === 0 && intervalType === INTERVAL_TYPES.COUNTIN_INTERVAL) {
-          intervalType++;
-        }
         this.curNotes = {
-          // the 2 notes timings of the current interval and the next one. Needed for calculations for user's jump
+          // the 2 notes timings of the current interval and the next one. Needed for calculations for user's jump.
           curNote: this.timingList[intervalNumber],
           nextNote: this.timingList[intervalNumber + 1],
         };
         if (
-          (value >= 12 && intervalType === INTERVAL_TYPES.COUNTIN_INTERVAL) ||
-          (value < 16 - 4 && intervalType === INTERVAL_TYPES.NOTES_INTERVAL)
+          (value >= coundownIntervals - 4 && intervalType === INTERVAL_TYPES.COUNTIN_INTERVAL) || // if we're less than 4 intervals before the end of count in
+          (value < this.scoreMap.length - 4 && intervalType === INTERVAL_TYPES.NOTES_INTERVAL) // if we're more than 4 intervals before the end of notes
         ) {
           if (this.scoreMap[noteIndex][1] !== NOTES.REST_NOTE) {
-            let block = this.physics.add.sprite(
-              this.sys.game.config.width,
-              this.ground.y + this.getRelevantBlockHeight(noteIndex),
-              this.getRelevantBlockName(noteIndex)
-            );
-            block.setImmovable();
-            block.setVelocityX(this.getVelocityForTempo());
-            this.blocksArray.push(block);
+            // if current note is not a rest note
+            this.addBlock(noteIndex);
           }
           noteIndex++;
         }
         intervalNumber++;
-        this.levelStatusCheck(value, intervalType);
+        if (intervalNumber === coundownIntervals) {
+          // if countdown is done
+          intervalType = INTERVAL_TYPES.NOTES_INTERVAL; // switch to note interval type
+        }
+        this.levelStatusCheck(intervalNumber, totalIntervals); // check if there is a need to end the level
       }
-    });*/
+    });
+
+    // start the intervals
+    ScoreManager.scoreGetEvent(BUS_EVENTS.PLAY, {
+      smoothNotePointer: true,
+    });
+  }
+
+  addBlock(noteIndex) {
+    let block = this.physics.add.sprite(
+      this.sys.game.config.width,
+      this.ground.y + this.getRelevantBlockHeight(noteIndex),
+      this.getRelevantBlockName(noteIndex)
+    );
+    block.setImmovable();
+    block.setVelocityX(this.getVelocityForTempo());
+    this.blocksArray.push(block);
   }
 
   // function that gets the needed height for the current block to spawn, by the current note length
@@ -257,30 +234,11 @@ class GameScene extends Phaser.Scene {
   }
 
   // function that check for each interval if there is a need to end the level for any reason (jump failure or level won)
-  levelStatusCheck(value, intervalType) {
+  levelStatusCheck(intervalNumber, totalIntervals) {
     if (this.levelMode === LEVEL_MODES.levelLost) {
       this.removeBlocks();
       //ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // NOT WORKING
-    } else if (value === 15 && intervalType === INTERVAL_TYPES.NOTES_INTERVAL) {
-      clearInterval(this.blockInterval);
-      console.log("won level!");
-      this.levelMode = LEVEL_MODES.levelWon;
-      this.myHero.heroSprite.play("winAnimation");
-      this.myHero.heroSprite.anims.chain("standingAnimation");
-    } else {
-      return;
-    }
-  }
-
-  // function that check for each interval if there is a need to end the level for any reason (jump failure or level won)
-  levelStatusCheck1(noteIndex) {
-    if (this.levelMode === LEVEL_MODES.levelLost) {
-      this.removeBlocks();
-      //ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // NOT WORKING
-      clearInterval(this.blockInterval);
-      this.levelMode = LEVEL_MODES.levelLost;
-    } else if (noteIndex >= this.scoreMap.length - 1 + 4) {
-      clearInterval(this.blockInterval);
+    } else if (intervalNumber === totalIntervals) {
       console.log("won level!");
       this.levelMode = LEVEL_MODES.levelWon;
       this.myHero.heroSprite.play("winAnimation");

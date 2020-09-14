@@ -11,7 +11,7 @@ export default function createTimingList(divisionLength, scoreMap) {
 
   for (let i = 0; i < COUNTIN_BEATS; i++) {
     timingList.push({
-      division: (i + 1) * divisionLength,
+      division: i * divisionLength,
       noteType: NOTES.COUNT_NOTE,
       visited: false,
     });
@@ -21,7 +21,7 @@ export default function createTimingList(divisionLength, scoreMap) {
 
   for (let j = 0; j < scoreMap.length; j++) {
     timingList.push({
-      division: (j + countLength + 1) * divisionLength,
+      division: (j + countLength) * divisionLength,
       noteType: scoreMap[j][1],
       visited: false,
     });
