@@ -4,6 +4,8 @@ const NOTES = {
   COUNT_NOTE: "countDown",
 };
 
+// taking a given note in a given bar, inserting it into our score map as the number of times the smallest note division occurs in that note.
+// for example, 1 quarter note equals to 4 16th notes that we will insert to our score map.
 export default function createLevelScoreMap(levelJson) {
   let levelScoreMap = [];
   let amountOfBars = Object.keys(levelJson.partElements[0].scoreMap).length;

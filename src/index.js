@@ -25,14 +25,12 @@ const config = {
   },
   scene: [BootScene, TitleScene, GameScene],
   plugins: {
-    scene: [
-      { key: "SpinePlugin", plugin: window.SpinePlugin, mapping: "spine" },
-    ],
+    scene: [{ key: "SpinePlugin", plugin: window.SpinePlugin, mapping: "spine" }],
   },
 };
 
 WaaSampler.initWaaSampler(
-  ["metronome"],
+  ["metronome", "piano"],
   "https://bandpad.co/livescoreV2/statics/create-bandpad-soundfont/soundfont",
   "COWBELL",
   90
