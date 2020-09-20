@@ -122,12 +122,11 @@ class GameScene extends Phaser.Scene {
 
     this.gameMode = GAME_MODES.STARTED;
     this.sheetJson = [scoreJson, level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
-    this.levelMode = 2;
     // start each level after 2 seconds
     this.time.addEvent({
       delay: DEFAULT_GAME_START_DELAY,
       callback: () => {
-        this.playLevel(this.sheetJson[0]);
+        this.playLevel(this.sheetJson[1]);
       },
     });
 
@@ -194,7 +193,7 @@ class GameScene extends Phaser.Scene {
             this.curNotes.prevNote.noteType === NOTES.PLAYED_NOTE &&
             this.curNotes.prevNote.visited === false
           ) {
-            //this.levelMode = LEVEL_MODES.levelLost;
+            this.levelMode = LEVEL_MODES.levelLost;
             console.log("lost!");
           }
         }
@@ -258,7 +257,10 @@ class GameScene extends Phaser.Scene {
   levelStatusCheck(intervalNumber, totalIntervals) {
     if (this.levelMode === LEVEL_MODES.levelLost) {
       this.removeBlocks();
-      //ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // NOT WORKING
+      this.failSound.play();
+      this.myHero.heroSprite.play("hurtAnimation");
+      this.myHero.heroSprite.anims.chain("standingAnimation");
+      ScoreManager.scoreGetEvent(BUS_EVENTS.STOP);
     } else if (intervalNumber === totalIntervals) {
       console.log("won level!");
       this.levelMode = LEVEL_MODES.levelWon;
@@ -344,8 +346,6 @@ class GameScene extends Phaser.Scene {
         console.log("NOT JUMPED ON TIME!");
       }
       this.levelMode = LEVEL_MODES.levelLost;
-      this.myHero.jumpState = JUMP_STATES.failedJump;
-      this.failSound.play();
     }
   }
 

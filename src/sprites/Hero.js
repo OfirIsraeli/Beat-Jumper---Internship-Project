@@ -106,7 +106,7 @@ export default class Hero {
         first: 0,
       }),
       frameRate: 26,
-      repeat: 5,
+      repeat: 4,
     };
     this.scene.anims.create(hurtAnimationConfig);
   }
@@ -141,19 +141,20 @@ export default class Hero {
   }
 
   smallJump() {
+    this.heroSprite.play("jumpAnimation");
+    this.heroSprite.setVelocityY(-1200);
+    this.heroSprite.anims.chain("midAirAnimation");
+    this.heroSprite.anims.chain("landingAnimation");
+    this.heroSprite.anims.chain("walkAnimation");
+    /*
     if (this.jumpState === JUMP_STATES["goodJump"]) {
-      this.heroSprite.play("jumpAnimation");
-      this.heroSprite.setVelocityY(-1200);
-      this.heroSprite.anims.chain("midAirAnimation");
-      this.heroSprite.anims.chain("landingAnimation");
-      this.heroSprite.anims.chain("walkAnimation");
+
     } else {
       this.heroSprite.play("jumpAnimation");
       this.heroSprite.setVelocityY(-1200);
       this.heroSprite.anims.chain("midAirAnimation");
       this.heroSprite.anims.chain("hurtAnimation");
-      this.heroSprite.anims.chain("standingAnimation");
-    }
+      this.heroSprite.anims.chain("standingAnimation");}*/
   }
 
   /*
