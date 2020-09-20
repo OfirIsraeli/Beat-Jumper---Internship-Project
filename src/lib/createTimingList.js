@@ -6,10 +6,16 @@ const NOTES = {
   COUNT_NOTE: "countDown",
 };
 
-export default function createTimingList(divisionLength, scoreMap) {
+/**
+ * creates a data structure that for each note (including count-in) hold the next data:
+ *  - division - the time in milliseconds that note occurs in the level
+ *  - noteType - the type of note that note is
+ *  - visited - boolean that indicates if player has jumped (registered) on that note
+ */
+export default function createTimingList(divisionLength, scoreMap, coundownIntervals) {
   let timingList = [];
 
-  for (let i = 0; i < COUNTIN_BEATS; i++) {
+  for (let i = 0; i < coundownIntervals; i++) {
     timingList.push({
       division: i * divisionLength,
       noteType: NOTES.COUNT_NOTE,

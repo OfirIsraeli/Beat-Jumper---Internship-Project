@@ -65,13 +65,18 @@ const INTERVAL_TYPES = {
 };
 
 const GROUND_HEIGHT = 0.747;
-const ACCEPTABLE_DELAY = 100;
+const ACCEPTABLE_DELAY = 300;
 const DEFAULT_GAME_START_DELAY = 2000;
 
 const NOTES = {
   REST_NOTE: "noPlace",
   PLAYED_NOTE: "playedNote",
   COUNT_NOTE: "countDown",
+};
+
+const INTERVAL_PREDECESSOR = {
+  2: 4,
+  4: 8,
 };
 
 class GameScene extends Phaser.Scene {
@@ -115,16 +120,17 @@ class GameScene extends Phaser.Scene {
     // set game mode
     this.gameMode = GAME_MODES.NOT_STARTED;
 
-    this.sheetJson = [scoreJson];
-
-    // start game after 2 seconds
+    this.gameMode = GAME_MODES.STARTED;
+    this.sheetJson = [scoreJson, level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
+    this.levelMode = 2;
+    // start each level after 2 seconds
     this.time.addEvent({
       delay: DEFAULT_GAME_START_DELAY,
       callback: () => {
-        this.gameMode = GAME_MODES.STARTED;
         this.playLevel(this.sheetJson[0]);
       },
     });
+
     /*
     this.time.addEvent({
       delay: 2 * DEFAULT_GAME_START_DELAY + 16000,
@@ -142,47 +148,62 @@ class GameScene extends Phaser.Scene {
     // calculate division in milliseconds
     this.tempo = 80;
 
-    // array of block sprites
+    // array of block sprites. will be filled with sprites during the intervals
     this.blocksArray = [];
 
     //level divisions. 1 = quarters, 2 = eights, 4 = 16th
     this.divisions = levelJson.divisions;
 
-    this.divSize = NOTES_SIZES[this.divisions]; // actual size of the division. quarters = 4 etc
+    // actual size of the division. quarters = 4 etc
+    this.divSize = NOTES_SIZES[this.divisions];
 
+    // total amount of measures in this level (excluding count-in)
     this.amountOfBars = Object.keys(levelJson.partElements[0].scoreMap).length;
 
     // this calculates the smallest division in the game in milliseconds:
     this.divisionDuration = ((60 / this.tempo) * 1000) / this.divisions;
-
-    this.scoreMap = createLevelScoreMap(levelJson, this.amountOfBars);
-    this.timingList = createTimingList(this.divisionDuration, this.scoreMap);
     this.levelMode = LEVEL_MODES.levelOnMotion;
+
+    /*
+    variables needed for intervals:
+    */
+    let intervalType = INTERVAL_TYPES.COUNTIN_INTERVAL; // define the starting interval type as a count-in interval
+    let noteIndex = 0; // index that tracks the notes of our scoreMap (so excluding the count-in notes)
+    let intervalNumber = 0; // tracks the number of overall interval we're in
+    const coundownIntervals = 2 * this.divSize; // 2 bars, each has divSize number of intervals
+    const totalIntervals = coundownIntervals + this.divSize * this.amountOfBars; // total amount of intervals
+
+    // data structures processing - each one explained in its' function description
+    this.scoreMap = createLevelScoreMap(levelJson, this.amountOfBars);
+    this.timingList = createTimingList(this.divisionDuration, this.scoreMap, coundownIntervals);
 
     // start level
     this.myHero.walk(); // there goes my hero...
 
-    /*
-    variables needed for intervals:
-      intervalType: the type of interval we're in - in the countdown or in the actual sheet notes
-      noteIndex: the index regarding the notes. we spawn the blocks exactly 4 intervals prior 
-
-    */
-    let intervalType = INTERVAL_TYPES.COUNTIN_INTERVAL;
-    let noteIndex = 0;
-    let intervalNumber = 0;
-    const coundownIntervals = 2 * this.divSize; // 2 bars, each has divSize number of intervals
-    const totalIntervals = coundownIntervals + this.divSize * this.amountOfBars;
+    // the function that happens each interval
     ScoreManager.setEventFunction((event, value) => {
       if (event === BUS_EVENTS.UPDATE) {
-        this.curNotes = {
-          // the 2 notes timings of the current interval and the next one. Needed for calculations for user's jump.
-          curNote: this.timingList[intervalNumber],
-          nextNote: this.timingList[intervalNumber + 1],
-        };
+        if (0 < intervalNumber && intervalNumber < totalIntervals) {
+          this.curNotes = {
+            // the 3 notes timings of the current interval and the next one. Needed for calculations for user's jump.
+            prevNote: this.timingList[intervalNumber - 1],
+            curNote: this.timingList[intervalNumber],
+            nextNote: this.timingList[intervalNumber + 1],
+          };
+          if (
+            this.curNotes.prevNote.noteType === NOTES.PLAYED_NOTE &&
+            this.curNotes.prevNote.visited === false
+          ) {
+            //this.levelMode = LEVEL_MODES.levelLost;
+            console.log("lost!");
+          }
+        }
+
         if (
-          (value >= coundownIntervals - 4 && intervalType === INTERVAL_TYPES.COUNTIN_INTERVAL) || // if we're less than 4 intervals before the end of count in
-          (value < this.scoreMap.length - 4 && intervalType === INTERVAL_TYPES.NOTES_INTERVAL) // if we're more than 4 intervals before the end of notes
+          (value >= coundownIntervals - INTERVAL_PREDECESSOR[this.divisions] &&
+            intervalType === INTERVAL_TYPES.COUNTIN_INTERVAL) || // if we're less than 4 intervals before the end of count in
+          (value < this.scoreMap.length - INTERVAL_PREDECESSOR[this.divisions] &&
+            intervalType === INTERVAL_TYPES.NOTES_INTERVAL) // if we're more than 4 intervals before the end of notes
         ) {
           if (this.scoreMap[noteIndex][1] !== NOTES.REST_NOTE) {
             // if current note is not a rest note
@@ -199,7 +220,7 @@ class GameScene extends Phaser.Scene {
       }
     });
 
-    // start the intervals
+    // start vexflow, plays the score along with executing the intervals
     ScoreManager.scoreGetEvent(BUS_EVENTS.PLAY, {
       smoothNotePointer: true,
     });
@@ -271,7 +292,9 @@ class GameScene extends Phaser.Scene {
    * @param {*} closestNote - closest note to the user's jump
    */
   missCheck(closestNote) {
-    let curNoteIndex = this.timingList.findIndex((element) => element === closestNote);
+    let curNoteIndex = this.timingList.findIndex(
+      (element) => element === closestNote
+    ); /*
     for (let i = 0; i < curNoteIndex; i++) {
       if (
         this.timingList[i].visited === false &&
@@ -279,7 +302,7 @@ class GameScene extends Phaser.Scene {
       ) {
         return true;
       }
-    }
+    }*/
     this.timingList[curNoteIndex].visited = true;
     return false;
   }
@@ -312,8 +335,16 @@ class GameScene extends Phaser.Scene {
       console.log("jump time is ", preDelay, "milliseconds early");
     } else {
       console.log("BAD JUMP!!!");
-      this.myHero.jumpState = JUMP_STATES.failedJump;
+      if (missedANote) {
+        console.log("SKIPPED A NOTE!");
+      }
+      if (closestNote.noteType === NOTES.REST_NOTE) {
+        console.log("JUMPED ON REST!");
+      } else {
+        console.log("NOT JUMPED ON TIME!");
+      }
       this.levelMode = LEVEL_MODES.levelLost;
+      this.myHero.jumpState = JUMP_STATES.failedJump;
       this.failSound.play();
     }
   }

@@ -4,8 +4,12 @@ const NOTES = {
   COUNT_NOTE: "countDown",
 };
 
-// taking a given note in a given bar, inserting it into our score map as the number of times the smallest note division occurs in that note.
-// for example, 1 quarter note equals to 4 16th notes that we will insert to our score map.
+/**
+ * creates a data structure similar to the sub-array of the measures in a given musicJson, with the next changes:
+    - taking a given note in a given bar, inserting it into OUR score map as the number of times the smallest note division occurs in that note.
+    - for example, given 1 quarter note (that is equal to 4 16th notes), we insert 4 new 16th notes in our scoremap 
+    . first one with a "divisions" size of 4, and the three other 16th notes as rest notes.
+ */
 export default function createLevelScoreMap(levelJson, amountOfBars) {
   let levelScoreMap = [];
   for (let barIndex = 1; barIndex <= amountOfBars; barIndex++) {

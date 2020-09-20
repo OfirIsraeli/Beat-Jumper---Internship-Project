@@ -23,6 +23,7 @@ export default class Hero {
     this.heroSprite.body.collideWorldBounds = true;
     this.heroSprite.setGravityY(7000);
     this.walkStartTime;
+    this.hitPoints = 3;
   }
 
   createStandingAnimation() {
