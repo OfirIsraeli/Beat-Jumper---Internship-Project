@@ -37,15 +37,13 @@ const NOTES_SIZES = {
 };
 
 const GAME_MODES = {
+  ON_HOLD: -1,
+  ON_MOTION: 0,
   NOT_STARTED: 1,
   STARTED: 2,
   ENDED: 3,
   LOST: 4,
-};
-
-const JUMP_STATES = {
-  failedJump: 0,
-  goodJump: 1,
+  WON: 5,
 };
 
 const LEVEL_MODES = {
@@ -86,9 +84,7 @@ class GameScene extends Phaser.Scene {
     });
   }
 
-  preload() {}
-
-  create() {
+  preload() {
     // set game buttons
     this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
@@ -116,28 +112,16 @@ class GameScene extends Phaser.Scene {
 
     //set colliders
     this.physics.add.collider(this.myHero.heroSprite, this.ground);
+  }
 
+  create() {
     // set game mode
     this.gameMode = GAME_MODES.NOT_STARTED;
 
-    this.gameMode = GAME_MODES.STARTED;
-    this.sheetJson = [scoreJson, level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
-    // start each level after 2 seconds
-    this.time.addEvent({
-      delay: DEFAULT_GAME_START_DELAY,
-      callback: () => {
-        this.playLevel(this.sheetJson[1]);
-      },
-    });
+    // set the level index to the first level
+    this.levelIndex = 0;
 
-    /*
-    this.time.addEvent({
-      delay: 2 * DEFAULT_GAME_START_DELAY + 16000,
-      callback: () => {
-        this.playLevel(this.sheetJson[0]);
-      },
-      //loop: true,
-    });*/
+    this.sheetJson = [scoreJson, level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
   }
 
   playLevel(levelJson) {
@@ -169,12 +153,12 @@ class GameScene extends Phaser.Scene {
     let intervalType = INTERVAL_TYPES.COUNTIN_INTERVAL; // define the starting interval type as a count-in interval
     let noteIndex = 0; // index that tracks the notes of our scoreMap (so excluding the count-in notes)
     let intervalNumber = 0; // tracks the number of overall interval we're in
-    const coundownIntervals = 2 * this.divSize; // 2 bars, each has divSize number of intervals
-    const totalIntervals = coundownIntervals + this.divSize * this.amountOfBars; // total amount of intervals
+    const counInIntervals = 2 * this.divSize; // 2 bars, each has divSize number of intervals
+    const totalIntervals = counInIntervals + this.divSize * this.amountOfBars; // total amount of intervals
 
     // data structures processing - each one explained in its' function description
     this.scoreMap = createLevelScoreMap(levelJson, this.amountOfBars);
-    this.timingList = createTimingList(this.divisionDuration, this.scoreMap, coundownIntervals);
+    this.timingList = createTimingList(this.divisionDuration, this.scoreMap, counInIntervals);
 
     // start level
     this.myHero.walk(); // there goes my hero...
@@ -199,7 +183,7 @@ class GameScene extends Phaser.Scene {
         }
 
         if (
-          (value >= coundownIntervals - INTERVAL_PREDECESSOR[this.divisions] &&
+          (value >= counInIntervals - INTERVAL_PREDECESSOR[this.divisions] &&
             intervalType === INTERVAL_TYPES.COUNTIN_INTERVAL) || // if we're less than 4 intervals before the end of count in
           (value < this.scoreMap.length - INTERVAL_PREDECESSOR[this.divisions] &&
             intervalType === INTERVAL_TYPES.NOTES_INTERVAL) // if we're more than 4 intervals before the end of notes
@@ -211,7 +195,7 @@ class GameScene extends Phaser.Scene {
           noteIndex++;
         }
         intervalNumber++;
-        if (intervalNumber === coundownIntervals) {
+        if (intervalNumber === counInIntervals) {
           // if countdown is done
           intervalType = INTERVAL_TYPES.NOTES_INTERVAL; // switch to note interval type
         }
@@ -264,11 +248,14 @@ class GameScene extends Phaser.Scene {
     } else if (intervalNumber === totalIntervals) {
       console.log("won level!");
       this.levelMode = LEVEL_MODES.levelWon;
+      this.levelIndex++;
       this.myHero.heroSprite.play("winAnimation");
       this.myHero.heroSprite.anims.chain("standingAnimation");
     } else {
       return;
     }
+    this.gameMode = GAME_MODES.ON_HOLD;
+    ScoreManager.scoreGetEvent(BUS_EVENTS);
   }
 
   // function that calculates the needed block velocity to match the given tempo
@@ -290,56 +277,36 @@ class GameScene extends Phaser.Scene {
   }
 
   /**
-   * this functions checks if the user has not visited (jumped) a note he should have visited.
+   * this function registers the user's current jump into the timing list's visited notes array.
    * @param {*} closestNote - closest note to the user's jump
    */
-  missCheck(closestNote) {
-    let curNoteIndex = this.timingList.findIndex(
-      (element) => element === closestNote
-    ); /*
-    for (let i = 0; i < curNoteIndex; i++) {
-      if (
-        this.timingList[i].visited === false &&
-        this.timingList[i].noteType === NOTES.PLAYED_NOTE
-      ) {
-        return true;
-      }
-    }*/
+  registerJump(closestNote) {
+    let curNoteIndex = this.timingList.findIndex((element) => element === closestNote);
     this.timingList[curNoteIndex].visited = true;
-    return false;
   }
 
   // general function to check and register the user's current jump.
   jumpTimingCheck() {
-    this.myHero.jumpState = JUMP_STATES.goodJump;
     const jumpTime = Date.now();
     const timePassedSinceJump = jumpTime - this.myHero.walkStartTime;
     const delay = timePassedSinceJump % this.divisionDuration;
     const preDelay = this.divisionDuration - (timePassedSinceJump % this.divisionDuration);
     const closestNote = this.getClosestNoteToKeyPress(timePassedSinceJump);
+
+    // if we're on count-in, any jump is valid, so we jump and return
     if (closestNote.noteType === NOTES.COUNT_NOTE) {
+      this.myHero.smallJump();
       return;
     }
-    const missedANote = this.missCheck(closestNote);
-    if (delay === 0 && closestNote.noteType === NOTES.PLAYED_NOTE && !missedANote) {
+    this.registerJump(closestNote);
+    if (delay === 0 && closestNote.noteType === NOTES.PLAYED_NOTE) {
       console.log("just in time!");
-    } else if (
-      delay < ACCEPTABLE_DELAY &&
-      closestNote.noteType === NOTES.PLAYED_NOTE &&
-      !missedANote
-    ) {
+    } else if (delay < ACCEPTABLE_DELAY && closestNote.noteType === NOTES.PLAYED_NOTE) {
       console.log("jump time is ", delay, "milliseconds late");
-    } else if (
-      preDelay < ACCEPTABLE_DELAY &&
-      closestNote.noteType === NOTES.PLAYED_NOTE &&
-      !missedANote
-    ) {
+    } else if (preDelay < ACCEPTABLE_DELAY && closestNote.noteType === NOTES.PLAYED_NOTE) {
       console.log("jump time is ", preDelay, "milliseconds early");
     } else {
       console.log("BAD JUMP!!!");
-      if (missedANote) {
-        console.log("SKIPPED A NOTE!");
-      }
       if (closestNote.noteType === NOTES.REST_NOTE) {
         console.log("JUMPED ON REST!");
       } else {
@@ -347,6 +314,9 @@ class GameScene extends Phaser.Scene {
       }
       this.levelMode = LEVEL_MODES.levelLost;
     }
+    //console.log("closest div is: ", closestNote.noteSize);
+
+    this.myHero.smallJump();
   }
 
   update(time, delta) {
@@ -361,7 +331,16 @@ class GameScene extends Phaser.Scene {
     ) {
       this.hitSound.play();
       this.jumpTimingCheck();
-      this.myHero.smallJump();
+    }
+    if (this.gameMode !== GAME_MODES.ON_MOTION) {
+      this.gameMode = GAME_MODES.ON_MOTION;
+
+      this.time.addEvent({
+        delay: DEFAULT_GAME_START_DELAY + 1500,
+        callback: () => {
+          this.playLevel(this.sheetJson[this.levelIndex]);
+        },
+      });
     }
   }
 }

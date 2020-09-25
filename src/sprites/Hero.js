@@ -19,7 +19,6 @@ export default class Hero {
     this.heroSprite = this.scene.physics.add
       .sprite(150, this.scene.ground.y - 150, "walkHero")
       .play("standingAnimation");
-    this.jumpState;
     this.heroSprite.body.collideWorldBounds = true;
     this.heroSprite.setGravityY(7000);
     this.walkStartTime;
@@ -146,15 +145,6 @@ export default class Hero {
     this.heroSprite.anims.chain("midAirAnimation");
     this.heroSprite.anims.chain("landingAnimation");
     this.heroSprite.anims.chain("walkAnimation");
-    /*
-    if (this.jumpState === JUMP_STATES["goodJump"]) {
-
-    } else {
-      this.heroSprite.play("jumpAnimation");
-      this.heroSprite.setVelocityY(-1200);
-      this.heroSprite.anims.chain("midAirAnimation");
-      this.heroSprite.anims.chain("hurtAnimation");
-      this.heroSprite.anims.chain("standingAnimation");}*/
   }
 
   /*
