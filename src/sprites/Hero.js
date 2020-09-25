@@ -1,6 +1,7 @@
-const JUMP_STATES = {
-  failedJump: 0,
-  goodJump: 1,
+const JUMP_SIZE = {
+  SMALL: 1,
+  MEDIUM: 2,
+  BIG: 4,
 };
 
 export default class Hero {
@@ -139,31 +140,45 @@ export default class Hero {
     this.walkStartTime = Date.now();
   }
 
-  smallJump() {
+  smallJump(successfulJump) {
     this.heroSprite.play("jumpAnimation");
     this.heroSprite.setVelocityY(-1200);
     this.heroSprite.anims.chain("midAirAnimation");
-    this.heroSprite.anims.chain("landingAnimation");
-    this.heroSprite.anims.chain("walkAnimation");
+    if (successfulJump) {
+      this.heroSprite.anims.chain("landingAnimation");
+      this.heroSprite.anims.chain("walkAnimation");
+    }
   }
 
-  /*
-  mediumJump() {
-    
-    this.heroSprite.play('jumpAnimation');
-    this.heroSprite.setVelocityY(-155);
-    this.heroSprite.anims.chain('midAirAnimation');
-    this.heroSprite.anims.chain('landingAnimation');
-    this.heroSprite.anims.chain('walkAnimation');
-
+  mediumJump(successfulJump) {
+    this.heroSprite.play("jumpAnimation");
+    this.heroSprite.setVelocityY(-1500);
+    this.heroSprite.anims.chain("midAirAnimation");
+    if (successfulJump) {
+      this.heroSprite.anims.chain("landingAnimation");
+      this.heroSprite.anims.chain("walkAnimation");
+    }
   }
-  bigJump() {
-    
-    this.heroSprite.play('jumpAnimation');
-    this.heroSprite.setVelocityY(-155);
-    this.heroSprite.anims.chain('midAirAnimation');
-    this.heroSprite.anims.chain('landingAnimation');
-    this.heroSprite.anims.chain('walkAnimation');
 
-  }*/
+  bigJump(successfulJump) {
+    this.heroSprite.play("jumpAnimation");
+    this.heroSprite.setVelocityY(-1600);
+    this.heroSprite.anims.chain("midAirAnimation");
+    if (successfulJump) {
+      this.heroSprite.anims.chain("landingAnimation");
+      this.heroSprite.anims.chain("walkAnimation");
+    }
+  }
+
+  jump(successfulJump, jumpSize) {
+    if (jumpSize === JUMP_SIZE.SMALL) {
+      this.smallJump(successfulJump);
+    }
+    if (jumpSize === JUMP_SIZE.MEDIUM) {
+      this.smallJump(successfulJump);
+    }
+    if (jumpSize === JUMP_SIZE.BIG) {
+      this.bigJump(successfulJump);
+    }
+  }
 }

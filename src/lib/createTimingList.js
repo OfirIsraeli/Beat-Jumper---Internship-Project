@@ -30,7 +30,7 @@ export default function createTimingList(divisionLength, scoreMap, coundownInter
       division: (j + countLength) * divisionLength,
       noteType: scoreMap[j][1],
       visited: false,
-      noteSize: 4,
+      noteSize: scoreMap[j][0],
     });
   }
   return timingList;

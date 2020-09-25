@@ -9,9 +9,9 @@ class BootScene extends Phaser.Scene {
 
     this.load.image("backgroundImage", "assets/images/background.png");
     this.load.image("groundImage", "assets/images/ground.png");
-    this.load.image("smallBlockImage", "assets/images/E Block2.png");
-    this.load.image("mediumBlockImage", "assets/images/E Block.png");
-    this.load.image("largeBlockImage", "assets/images/Q Block.png");
+    this.load.image("smallBlockImage", "assets/images/small circle.png");
+    this.load.image("mediumBlockImage", "assets/images/medium circle.png");
+    this.load.image("largeBlockImage", "assets/images/big circle.png");
     this.load.audio("tick", "assets/sounds/click beat.mp3");
     this.load.audio("hit", "assets/sounds/hit.mp3");
     this.load.audio("failure", "assets/sounds/fail.mp3");
