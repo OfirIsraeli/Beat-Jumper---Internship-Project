@@ -18,10 +18,11 @@ export default function createScore(scoreJson, eventFunction) {
 
     staticFontSize: 14,
     removeExtraText: true,
-
+    scoreBackground: "white",
     // debugging
     debugDisplay: false,
   };
-
+  const scoreNode = document.getElementById("score-id");
+  scoreNode.innerHTML = "";
   liveScore.createScore(scoreJson, "score-id", options, eventFunction);
 }

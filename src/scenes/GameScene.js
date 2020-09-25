@@ -43,6 +43,10 @@ const GAME_STATES = {
   ON_MOTION: 0,
   // game did not start yet
   NOT_STARTED: 1,
+  // game lost
+  LOST: 2,
+  //game won
+  WON: 3,
 };
 
 const LEVEL_STATES = {
@@ -118,6 +122,18 @@ class GameScene extends Phaser.Scene {
 
     //set colliders
     this.physics.add.collider(this.myHero.heroSprite, this.ground);
+
+    // set count-in text that will appear on screen, countin quarter notes in the last count-in bar
+    this.countInText = this.add.text(520, 250, "", {
+      fill: "#7F7C7B",
+      align: "center",
+      fontSize: "250px",
+    });
+    let hp1 = this.add.sprite(1100, 50, "fullHitPoint");
+    let hp2 = this.add.sprite(1160, 50, "fullHitPoint");
+    let hp3 = this.add.sprite(1220, 50, "fullHitPoint");
+
+    this.hitPointsArray = [hp1, hp2, hp3];
   }
 
   create() {
@@ -128,7 +144,8 @@ class GameScene extends Phaser.Scene {
     this.levelIndex = 0;
 
     // an array that contains all of the musicJsons of each level, by ascending difficulty
-    this.sheetJson = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6, scoreJson];
+    //this.sheetJson = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6, scoreJson];
+    this.sheetJson = [level1_1, scoreJson, scoreJson2];
   }
 
   playLevel(levelJson) {
@@ -162,16 +179,16 @@ class GameScene extends Phaser.Scene {
     let intervalType = INTERVAL_TYPES.COUNTIN_INTERVAL; // define the starting interval type as a count-in interval
     let noteIndex = 0; // index that tracks the notes of our scoreMap (so excluding the count-in notes)
     let intervalNumber = 0; // tracks the number of overall interval we're in
-    const counInIntervals = 2 * this.divSize; // 2 bars, each has divSize number of intervals
-    const totalIntervals = counInIntervals + this.divSize * this.amountOfBars; // total amount of intervals
+    let countInIndex = 1;
+    const countInIntervals = 2 * this.divSize; // 2 bars, each has divSize number of intervals
+    const totalIntervals = countInIntervals + this.divSize * this.amountOfBars; // total amount of intervals
 
     // data structures processing - each one explained in its' function description
     this.scoreMap = createLevelScoreMap(levelJson, this.amountOfBars);
-    this.timingList = createTimingList(this.divisionDuration, this.scoreMap, counInIntervals);
+    this.timingList = createTimingList(this.divisionDuration, this.scoreMap, countInIntervals);
 
     // start level
     this.myHero.walk(); // there goes my hero...
-
     // the function that happens each interval
     ScoreManager.setEventFunction((event, value) => {
       if (event === BUS_EVENTS.UPDATE) {
@@ -191,6 +208,20 @@ class GameScene extends Phaser.Scene {
             console.log("lost!");
           }
         }
+
+        if (
+          value >= countInIntervals / 2 &&
+          intervalType === INTERVAL_TYPES.COUNTIN_INTERVAL &&
+          value <= countInIntervals &&
+          value % this.divisions === 0
+        ) {
+          this.countInText.text = countInIndex;
+          countInIndex++;
+        }
+
+        if (value === 0 && intervalType === INTERVAL_TYPES.NOTES_INTERVAL) {
+          this.countInText.text = "";
+        }
         /*
          add a block to the game if needed.
          we push a block to the game only if the interval is 4 or 8 intervals before the end of count in 
@@ -200,7 +231,7 @@ class GameScene extends Phaser.Scene {
           blocks 4 intervals before)
         */
         if (
-          (value >= counInIntervals - INTERVAL_PREDECESSOR[this.divisions] &&
+          (value >= countInIntervals - INTERVAL_PREDECESSOR[this.divisions] &&
             intervalType === INTERVAL_TYPES.COUNTIN_INTERVAL) || // if we're less than 4 intervals before the end of count in
           (value < this.scoreMap.length - INTERVAL_PREDECESSOR[this.divisions] &&
             intervalType === INTERVAL_TYPES.NOTES_INTERVAL) // if we're more than 4 intervals before the end of notes
@@ -212,7 +243,7 @@ class GameScene extends Phaser.Scene {
           noteIndex++;
         }
         intervalNumber++;
-        if (intervalNumber === counInIntervals) {
+        if (intervalNumber === countInIntervals) {
           // if countdown is done
           intervalType = INTERVAL_TYPES.NOTES_INTERVAL; // switch to note interval type
         }
@@ -254,6 +285,11 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  updateHitPoints() {
+    this.hitPointsArray[3 - this.myHero.hitPoints].setTexture("emptyHitPoint");
+    this.myHero.hitPoints--;
+  }
+
   // function that check for each interval if there is a need to end the level for any reason (jump failure or level won)
   levelStatusCheck(intervalNumber, totalIntervals) {
     // if player has lost the level for any reason
@@ -262,6 +298,7 @@ class GameScene extends Phaser.Scene {
       this.failSound.play(); // play a failure sound
       this.myHero.heroSprite.play("hurtAnimation"); // play failure animation
       ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
+      this.updateHitPoints();
     }
     // if player passed all intervals correctly
     else if (intervalNumber === totalIntervals) {
@@ -275,6 +312,9 @@ class GameScene extends Phaser.Scene {
       return;
     }
     this.gameState = GAME_STATES.ON_HOLD; // finished a level, so we are on hold until we start the next one
+    if (this.myHero.hitPoints === 0) {
+      this.gameState = GAME_STATES.LOST;
+    }
     this.myHero.heroSprite.anims.chain("standingAnimation"); // stand after level is finished
   }
 
@@ -381,6 +421,10 @@ class GameScene extends Phaser.Scene {
 
     // if the game is not on motion and we did not finish all of the musicJsons
     if (this.gameState !== GAME_STATES.ON_MOTION && this.levelIndex < this.sheetJson.length) {
+      if (this.gameState === GAME_STATES.LOST) {
+        console.log("lost GAME!!!");
+        return;
+      }
       // change the game to on motion
       this.gameState = GAME_STATES.ON_MOTION;
 
