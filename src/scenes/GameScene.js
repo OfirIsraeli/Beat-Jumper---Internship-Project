@@ -1,8 +1,14 @@
 import Phaser from "phaser";
 import Hero from "../sprites/Hero";
+import createScore from "../lib/createScore";
+import createLevelScoreMap from "../lib/createLevelScoreMap";
+import createTimingList from "../lib/createTimingList";
+import * as ScoreManager from "bandpad-vexflow";
+import { BUS_EVENTS } from "bandpad-vexflow";
+
+// imports of all scoreJsons as levels
 import scoreJson from "../sheets/beat";
 import scoreJson2 from "../sheets/sixh-test";
-
 import level1_1 from "../sheets/levels/level1-1";
 import level1_2 from "../sheets/levels/level1-2";
 import level1_3 from "../sheets/levels/level1-3";
@@ -10,32 +16,41 @@ import level1_4 from "../sheets/levels/level1-4";
 import level1_5 from "../sheets/levels/level1-5";
 import level1_6 from "../sheets/levels/level1-6";
 
-import createScore from "../lib/createScore";
-import createLevelScoreMap from "../lib/createLevelScoreMap";
-import createTimingList from "../lib/createTimingList";
-
-import * as ScoreManager from "bandpad-vexflow";
-import { BUS_EVENTS } from "bandpad-vexflow";
-
 // ------------------ CONSTANTS ---------------- //
 
+/**
+ * points each note division (1 as smallest note, 4 as biggest) to the relevant
+ * adjustment in height (in game) that is needed for a block of the same size
+ * so they would appear on ground
+ */
 const BLOCKS_HEIGHTS = {
   1: -34,
   2: -50,
   4: -75,
 };
+/**
+ * points each note division (1 as smallest note, 4 as biggest) to the relevant
+ * image string for image loading
+ */
 const BLOCKS_IMAGES = {
   1: "smallBlockImage",
   2: "mediumBlockImage",
   4: "largeBlockImage",
 };
 
+/**
+ * points each note division (1 as smallest note, 4 as biggest) to the relevant
+ * note size
+ */
 const NOTES_SIZES = {
   1: 4, // 1 = quarter note
   2: 8, // 2 = 8th note
   4: 16, // 4 = 16th note
 };
 
+/**
+ * various states that the game could be in
+ */
 const GAME_STATES = {
   // there is no level being played right now
   ON_HOLD: -1,
@@ -49,6 +64,9 @@ const GAME_STATES = {
   WON: 3,
 };
 
+/**
+ * various states that each level could be in
+ */
 const LEVEL_STATES = {
   // level is on motion
   ON_MOTION: -1,
@@ -60,13 +78,20 @@ const LEVEL_STATES = {
   WON: 1,
 };
 
+/**
+ * in our main interval function, we distinguish between two different interval types:
+ * intervals that are part of the count-in, and intervals that are part of the sheet music itself
+ */
 const INTERVAL_TYPES = {
   COUNTIN_INTERVAL: 1,
   NOTES_INTERVAL: 2,
 };
 
+/**
+ * types of notes that could be found in the program
+ */
 const NOTES = {
-  REST_NOTE: "noPlace",
+  REST_NOTE: "noPlace", // noPlace is the string value that occurs in the given ScoreJsons as an identifier for a rest note
   PLAYED_NOTE: "playedNote",
   COUNT_NOTE: "countDown",
 };
@@ -82,10 +107,13 @@ const INTERVAL_PREDECESSOR = {
   2: 4,
   4: 8,
 };
-
+// default ground height adjustment
 const GROUND_HEIGHT = 0.747;
+// the acceptable delay (in milliseconds, before or after a note)
+// player can be in his jump. beyond that delay, it will be considered as a bad jump
 const ACCEPTABLE_DELAY = 100;
-const DEFAULT_GAME_START_DELAY = 2000;
+// rest time in milliseconds each level will have before next one starts
+const DEFAULT_GAME_START_DELAY = 3500;
 
 class GameScene extends Phaser.Scene {
   constructor(test) {
@@ -97,6 +125,7 @@ class GameScene extends Phaser.Scene {
   preload() {
     // set game buttons
     this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.escButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
 
     // set game sounds
     this.hitSound = this.sound.add("hit");
@@ -129,14 +158,28 @@ class GameScene extends Phaser.Scene {
       align: "center",
       fontSize: "250px",
     });
+
+    // set information text. appears on screen whenever we want to inform the user about anything
+    // todo: centerize the text
+    this.infoText = this.add.text(400, 250, "", {
+      fill: "#14141f",
+      fontSize: "80px",
+    });
+
+    // define hitpoints sprites
     let hp1 = this.add.sprite(1100, 50, "fullHitPoint");
     let hp2 = this.add.sprite(1160, 50, "fullHitPoint");
     let hp3 = this.add.sprite(1220, 50, "fullHitPoint");
-
+    // define hitpoints array
     this.hitPointsArray = [hp1, hp2, hp3];
   }
 
   create() {
+    /*
+    todo: create pause method
+    this.paused = false;
+    this.input.keyboard.on("keydown_ESC", function (event) {});*/
+
     // set game mode
     this.gameState = GAME_STATES.NOT_STARTED;
 
@@ -149,6 +192,9 @@ class GameScene extends Phaser.Scene {
   }
 
   playLevel(levelJson) {
+    // at a start of each level, infoText is empty so screen would be clear
+    this.infoText.text = "";
+
     // create music score for the level
     createScore(levelJson, function (event, value) {});
 
@@ -170,16 +216,13 @@ class GameScene extends Phaser.Scene {
     //this calculates the smallest division in the game in milliseconds
     this.divisionDuration = ((60 / this.tempo) * 1000) / this.divisions;
 
-    // staring this level...
-    this.levelState = LEVEL_STATES.ON_MOTION;
-
     /*
     variables needed for intervals:
     */
     let intervalType = INTERVAL_TYPES.COUNTIN_INTERVAL; // define the starting interval type as a count-in interval
     let noteIndex = 0; // index that tracks the notes of our scoreMap (so excluding the count-in notes)
     let intervalNumber = 0; // tracks the number of overall interval we're in
-    let countInIndex = 1;
+    let countInIndex = 1; // index that will appear on screen on the final bar of count-in each quarter note
     const countInIntervals = 2 * this.divSize; // 2 bars, each has divSize number of intervals
     const totalIntervals = countInIntervals + this.divSize * this.amountOfBars; // total amount of intervals
 
@@ -188,7 +231,9 @@ class GameScene extends Phaser.Scene {
     this.timingList = createTimingList(this.divisionDuration, this.scoreMap, countInIntervals);
 
     // start level
+    this.levelState = LEVEL_STATES.ON_MOTION;
     this.myHero.walk(); // there goes my hero...
+
     // the function that happens each interval
     ScoreManager.setEventFunction((event, value) => {
       if (event === BUS_EVENTS.UPDATE) {
@@ -209,13 +254,14 @@ class GameScene extends Phaser.Scene {
           }
         }
 
+        // if we're in an interval of a quarter note in the second bar of the count-in
         if (
           value >= countInIntervals / 2 &&
           intervalType === INTERVAL_TYPES.COUNTIN_INTERVAL &&
           value <= countInIntervals &&
           value % this.divisions === 0
         ) {
-          this.countInText.text = countInIndex;
+          this.countInText.text = countInIndex; // change countInText to the number of quarter note in the bar we're in
           countInIndex++;
         }
 
@@ -421,16 +467,24 @@ class GameScene extends Phaser.Scene {
 
     // if the game is not on motion and we did not finish all of the musicJsons
     if (this.gameState !== GAME_STATES.ON_MOTION && this.levelIndex < this.sheetJson.length) {
+      // if player has failed 3 times, tell him that and don't start a new level (by doing return)
       if (this.gameState === GAME_STATES.LOST) {
-        console.log("lost GAME!!!");
+        this.infoText.text = "you lost";
         return;
       }
       // change the game to on motion
       this.gameState = GAME_STATES.ON_MOTION;
 
+      // inform the player about current level
+      if (this.levelState === LEVEL_STATES.LOST) {
+        this.infoText.text = "starting again";
+      } else {
+        this.infoText.text = "level " + (this.levelIndex + 1);
+      }
+
       // play a level with a slight delay
       this.time.addEvent({
-        delay: DEFAULT_GAME_START_DELAY + 1500,
+        delay: DEFAULT_GAME_START_DELAY,
         callback: () => {
           this.playLevel(this.sheetJson[this.levelIndex]);
         },
