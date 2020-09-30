@@ -6,24 +6,14 @@ import createTimingList from "../lib/createTimingList";
 import * as ScoreManager from "bandpad-vexflow";
 import { BUS_EVENTS } from "bandpad-vexflow";
 
-// imports of all scoreJsons as levels
-import scoreJson from "../sheets/beat";
-import scoreJson2 from "../sheets/sixh-test";
-import level1_1 from "../sheets/levels/level1-1";
-import level1_2 from "../sheets/levels/level1-2";
-import level1_3 from "../sheets/levels/level1-3";
-import level1_4 from "../sheets/levels/level1-4";
-import level1_5 from "../sheets/levels/level1-5";
-import level1_6 from "../sheets/levels/level1-6";
-
 // ------------------ CONSTANTS ---------------- //
 
 /**
  * points each note division (1 as smallest note, 4 as biggest) to the relevant
- * adjustment in height (in game) that is needed for a block of the same size
+ * adjustment in height (in game) that is needed for a boulder of the same size
  * so they would appear on ground
  */
-const BLOCKS_HEIGHTS = {
+const BOULDER_HEIGHTS = {
   1: -34,
   2: -50,
   4: -75,
@@ -32,10 +22,20 @@ const BLOCKS_HEIGHTS = {
  * points each note division (1 as smallest note, 4 as biggest) to the relevant
  * image string for image loading
  */
-const BLOCKS_IMAGES = {
+const BOULDER_IMAGES = {
   1: "smallBlockImage",
   2: "mediumBlockImage",
   4: "largeBlockImage",
+};
+
+/**
+ * points a size of a boulder to the relevant
+ * image string for image loading
+ */
+const BOULDER_SIZES = {
+  SMALL: "smallBlockImage",
+  MEDIUM: "mediumBlockImage",
+  LARGE: "largeBlockImage",
 };
 
 /**
@@ -97,11 +97,11 @@ const NOTES = {
 };
 
 /*
-  we push a block to the game only if the interval is 4 or 8 intervals before the end of count in 
-  and 4 or 8 intervals before the end of the playrd notes. reason for that is so blocks will reach the player in time,
-  so we want to push a block exactly 4 or 8 intervals before the time we want it to reach the player.
+  we push a boulder to the game only if the interval is 4 or 8 intervals before the end of count in 
+  and 4 or 8 intervals before the end of the playrd notes. reason for that is so boulders will reach the player in time,
+  so we want to push a boulder exactly 4 or 8 intervals before the time we want it to reach the player.
   4 or 8 intervals is dependent on the given smallest division (16th notes will be 8 intervals, else we want to spawn
-  blocks 4 intervals before)
+  boulders 4 intervals before)
 */
 const INTERVAL_PREDECESSOR = {
   2: 4,
@@ -111,7 +111,7 @@ const INTERVAL_PREDECESSOR = {
 const GROUND_HEIGHT = 0.747;
 // the acceptable delay (in milliseconds, before or after a note)
 // player can be in his jump. beyond that delay, it will be considered as a bad jump
-const ACCEPTABLE_DELAY = 100;
+const ACCEPTABLE_DELAY = 140;
 // rest time in milliseconds each level will have before next one starts
 const DEFAULT_GAME_START_DELAY = 3500;
 
@@ -120,6 +120,16 @@ class GameScene extends Phaser.Scene {
     super({
       key: "GameScene",
     });
+  }
+
+  init(data) {
+    // an array that contains all of the musicJsons of each level, by ascending difficulty
+    if (!data.level) {
+      this.levelIndex = 0;
+    } else {
+      this.levelIndex = data.level;
+    }
+    this.sheetJson = data.phase;
   }
 
   preload() {
@@ -165,10 +175,22 @@ class GameScene extends Phaser.Scene {
       fill: "#14141f",
       fontSize: "80px",
     });
+    this.infoMessage = "level " + (this.levelIndex + 1);
+
+    //
+    this.pointsUpperText = this.add.text(0, 0, "Points:", {
+      fill: "#14141f",
+      fontSize: "40px",
+    });
+    this.totalPoints = 0;
+    this.pointsLowerText = this.add.text(20, 40, this.totalPoints, {
+      fill: "#14141f",
+      fontSize: "80px",
+    });
 
     // define hitpoints sprites
-    let hp1 = this.add.sprite(1100, 50, "fullHitPoint");
-    let hp2 = this.add.sprite(1160, 50, "fullHitPoint");
+    let hp1 = this.add.sprite(1060, 50, "fullHitPoint");
+    let hp2 = this.add.sprite(1140, 50, "fullHitPoint");
     let hp3 = this.add.sprite(1220, 50, "fullHitPoint");
     // define hitpoints array
     this.hitPointsArray = [hp1, hp2, hp3];
@@ -184,28 +206,38 @@ class GameScene extends Phaser.Scene {
     this.gameState = GAME_STATES.NOT_STARTED;
 
     // set the level index to the first level
-    this.levelIndex = 0;
+    //this.levelIndex = 0;
 
-    // an array that contains all of the musicJsons of each level, by ascending difficulty
-    //this.sheetJson = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6, scoreJson];
-    this.sheetJson = [level1_1, scoreJson, scoreJson2];
+    // ------ data regarding the points system :
+
+    // an array in the same size of sheetJson (meaning the amount of levels) that will keep track
+    // of the scoring system (game-points wise, not music scores..) of each level
+    this.gamePointsArray = [];
+
+    // an array  that will keep track of the points in the CURRENT level.
+    // size will be the amount of times user is required to jump.
+    this.levelPointsArray = [];
   }
 
   playLevel(levelJson) {
     // at a start of each level, infoText is empty so screen would be clear
     this.infoText.text = "";
 
-    // create music score for the level
-    createScore(levelJson, function (event, value) {});
-
-    // calculate division in milliseconds
-    this.tempo = 80;
-
-    // array of block sprites. will be filled with sprites during the intervals
-    this.blocksArray = [];
-
     //level divisions. 1 = quarters, 2 = eights, 4 = 16th
     this.divisions = levelJson.divisions;
+
+    // set tempo for this level
+    this.tempo = 80;
+
+    if (this.divisions === 4) {
+      this.tempo = this.tempo / 2;
+    }
+
+    // create music score for the level
+    createScore(levelJson, this.tempo, function (event, value) {});
+
+    // array of boulder sprites. will be filled with sprites during the intervals
+    this.bouldersArray = [];
 
     // actual size of the division. quarters = 4 etc
     this.divSize = NOTES_SIZES[this.divisions];
@@ -250,6 +282,7 @@ class GameScene extends Phaser.Scene {
             this.curNotes.prevNote.visited === false
           ) {
             this.levelState = LEVEL_STATES.LOST;
+            this.infoMessage = "skipped a note";
             console.log("lost!");
           }
         }
@@ -269,12 +302,12 @@ class GameScene extends Phaser.Scene {
           this.countInText.text = "";
         }
         /*
-         add a block to the game if needed.
-         we push a block to the game only if the interval is 4 or 8 intervals before the end of count in 
-         and 4 or 8 intervals before the end of the playrd notes. reason for that is so blocks will reach the player in time,
-         so we want to push a block exactly 4 or 8 intervals before the time we want it to reach the player.
+         add a boulder to the game if needed.
+         we push a boulder to the game only if the interval is 4 or 8 intervals before the end of count in 
+         and 4 or 8 intervals before the end of the playrd notes. reason for that is so boulders will reach the player in time,
+         so we want to push a boulder exactly 4 or 8 intervals before the time we want it to reach the player.
          4 or 8 intervals is dependent on the given smallest division (16th notes will be 8 intervals, else we want to spawn
-          blocks 4 intervals before)
+          boulders 4 intervals before)
         */
         if (
           (value >= countInIntervals - INTERVAL_PREDECESSOR[this.divisions] &&
@@ -284,7 +317,7 @@ class GameScene extends Phaser.Scene {
         ) {
           if (this.scoreMap[noteIndex][1] !== NOTES.REST_NOTE) {
             // if current note is not a rest note
-            this.addBlock(noteIndex); // add a block to the game
+            this.addBoulder(noteIndex); // add a boulder to the game
           }
           noteIndex++;
         }
@@ -303,31 +336,42 @@ class GameScene extends Phaser.Scene {
     });
   }
 
-  addBlock(noteIndex) {
-    let block = this.physics.add.sprite(
+  addBoulder(noteIndex) {
+    const boulderName = this.getRelevantBoulderName(noteIndex);
+    let newBoulder = this.physics.add.sprite(
       this.sys.game.config.width,
-      this.ground.y + this.getRelevantBlockHeight(noteIndex),
-      this.getRelevantBlockName(noteIndex)
+      this.ground.y + this.getRelevantBoulderHeight(noteIndex),
+      boulderName
     );
-    block.setImmovable();
-    block.setVelocityX(this.getVelocityForTempo());
-    this.blocksArray.push(block);
+    newBoulder.setImmovable();
+    newBoulder.setVelocityX(this.getVelocityForTempo());
+
+    let newBoulderDust = this.physics.add.sprite(
+      this.sys.game.config.width + 30,
+      this.ground.y - 20,
+      "dustCloudImage"
+    );
+    newBoulderDust.setImmovable();
+    newBoulderDust.setVelocityX(this.getVelocityForTempo());
+
+    this.bouldersArray.push({ sprite: newBoulder, size: boulderName, dustSprite: newBoulderDust });
   }
 
-  // function that gets the needed height for the current block to spawn, by the current note length
-  getRelevantBlockName(index) {
-    return BLOCKS_IMAGES[this.scoreMap[index][0]];
+  // function that gets the needed height for the current boulder to spawn, by the current note length
+  getRelevantBoulderName(index) {
+    return BOULDER_IMAGES[this.scoreMap[index][0]];
   }
 
-  // function that gets the needed height for the current block to spawn, by the current note length
-  getRelevantBlockHeight(index) {
-    return BLOCKS_HEIGHTS[this.scoreMap[index][0]];
+  // function that gets the needed height for the current boulder to spawn, by the current note length
+  getRelevantBoulderHeight(index) {
+    return BOULDER_HEIGHTS[this.scoreMap[index][0]];
   }
 
-  // function that remove all block sprite objects from the game. Used in case of losing a level.
-  removeBlocks() {
-    for (let i = 0; i < this.blocksArray.length; i++) {
-      this.blocksArray[i].destroy();
+  // function that remove all boulder sprite objects from the game. Used in case of losing a level.
+  removeBoulders() {
+    for (let i = 0; i < this.bouldersArray.length; i++) {
+      this.bouldersArray[i].sprite.destroy();
+      this.bouldersArray[i].dustSprite.destroy();
     }
   }
 
@@ -336,11 +380,19 @@ class GameScene extends Phaser.Scene {
     this.myHero.hitPoints--;
   }
 
+  calculateLevelPoints() {
+    let average = (array) => array.reduce((a, b) => a + b) / array.length;
+    this.gamePointsArray.push(average(this.levelPointsArray));
+    this.totalPoints += Math.floor(average(this.levelPointsArray));
+    this.pointsLowerText.text = this.totalPoints;
+    console.log("final is: ", this.gamePointsArray[this.levelIndex]);
+  }
+
   // function that check for each interval if there is a need to end the level for any reason (jump failure or level won)
   levelStatusCheck(intervalNumber, totalIntervals) {
     // if player has lost the level for any reason
     if (this.levelState === LEVEL_STATES.LOST) {
-      this.removeBlocks(); // remove all blocks from game
+      this.removeBoulders(); // remove all boulders from game
       this.failSound.play(); // play a failure sound
       this.myHero.heroSprite.play("hurtAnimation"); // play failure animation
       ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
@@ -348,9 +400,11 @@ class GameScene extends Phaser.Scene {
     }
     // if player passed all intervals correctly
     else if (intervalNumber === totalIntervals) {
+      this.calculateLevelPoints();
       console.log("won level!");
       this.levelState = LEVEL_STATES.WON;
       this.levelIndex++; // advance to next level
+      this.infoMessage = "level " + (this.levelIndex + 1); // set infoMessage to display the next level user is going to face
       this.myHero.heroSprite.play("winAnimation"); // play winning animation
     }
     // if level should not end for any reason, return and continue the intervals
@@ -364,7 +418,7 @@ class GameScene extends Phaser.Scene {
     this.myHero.heroSprite.anims.chain("standingAnimation"); // stand after level is finished
   }
 
-  // function that calculates the needed block velocity to match the given tempo
+  // function that calculates the needed boulder velocity to match the given tempo
   getVelocityForTempo() {
     return -8 * this.tempo - 40;
   }
@@ -393,6 +447,15 @@ class GameScene extends Phaser.Scene {
     let curNoteIndex = this.timingList.findIndex((element) => element === closestNote);
     // mark that note as visited
     this.timingList[curNoteIndex].visited = true;
+  }
+
+  registerScore(JumpDelay) {
+    // jumpScore is calculated by how big of a delay the jump is in relation
+    // to the maximum delay of a valid jump (which is the ACCEPTABLE_DELAY constant),
+    // normalized to max points of 100
+    let jumpScore = 100 - (JumpDelay / ACCEPTABLE_DELAY) * 100;
+    this.levelPointsArray.push(jumpScore);
+    console.log("jump score is: ", jumpScore);
   }
 
   // general function to check and register the user's current jump.
@@ -424,20 +487,22 @@ class GameScene extends Phaser.Scene {
 
     //if jump is good, in the next if statement we log to the console details regarding the jump.
     if (delay === 0 && closestNote.noteType === NOTES.PLAYED_NOTE) {
+      this.registerScore(delay);
       console.log("just in time!");
     } else if (delay < ACCEPTABLE_DELAY && closestNote.noteType === NOTES.PLAYED_NOTE) {
+      this.registerScore(delay);
       console.log("jump time is ", delay, "milliseconds late");
     } else if (preDelay < ACCEPTABLE_DELAY && closestNote.noteType === NOTES.PLAYED_NOTE) {
+      this.registerScore(preDelay);
       console.log("jump time is ", preDelay, "milliseconds early");
     }
-    // if jump was not good, we log to the console details regarding the jump, and update level to lost
+    // if jump was not good, we inform to the user the details regarding the jump, and update level to lost
     else {
       successfulJump = false;
-      console.log("BAD JUMP!!!");
       if (closestNote.noteType === NOTES.REST_NOTE) {
-        console.log("JUMPED ON REST!");
+        this.infoMessage = "jumped on rest";
       } else {
-        console.log("NOT JUMPED ON TIME!");
+        this.infoMessage = "not jumped on time";
       }
       this.levelState = LEVEL_STATES.LOST;
     }
@@ -446,12 +511,23 @@ class GameScene extends Phaser.Scene {
     this.myHero.jump(successfulJump, closestNote.noteSize);
   }
 
+  // each boulder of each size will get a different roation speed
+  rotateBoulderAccordingToSize(boulderIndex) {
+    if (this.bouldersArray[boulderIndex].size === BOULDER_SIZES.SMALL) {
+      this.bouldersArray[boulderIndex].sprite.angle -= 15;
+    } else if (this.bouldersArray[boulderIndex].size === BOULDER_SIZES.MEDIUM) {
+      this.bouldersArray[boulderIndex].sprite.angle -= 10;
+    } else {
+      this.bouldersArray[boulderIndex].sprite.angle -= 5;
+    }
+  }
+
   update(time, delta) {
-    // if level is on motion, move the background image and rotate all blocks
+    // if level is on motion, move the background image and rotate all boulders
     if (this.levelState === LEVEL_STATES.ON_MOTION) {
       this.background.tilePositionX += 6;
-      for (let i = 0; i < this.blocksArray.length; i++) {
-        this.blocksArray[i].angle -= 5;
+      for (let i = 0; i < this.bouldersArray.length; i++) {
+        this.rotateBoulderAccordingToSize(i);
       }
     }
 
@@ -461,7 +537,9 @@ class GameScene extends Phaser.Scene {
       this.myHero.heroSprite.body.touching.down &&
       this.levelState === LEVEL_STATES.ON_MOTION
     ) {
+      // play a sound for that jump
       this.hitSound.play();
+      // check if jump is valid according to game rules, and act according to the user's input
       this.jumpTimingCheck();
     }
 
@@ -475,12 +553,9 @@ class GameScene extends Phaser.Scene {
       // change the game to on motion
       this.gameState = GAME_STATES.ON_MOTION;
 
-      // inform the player about current level
-      if (this.levelState === LEVEL_STATES.LOST) {
-        this.infoText.text = "starting again";
-      } else {
-        this.infoText.text = "level " + (this.levelIndex + 1);
-      }
+      // inform the player about current level -
+      // if player lost last level, inform him why, if he won inform about next level
+      this.infoText.text = this.infoMessage;
 
       // play a level with a slight delay
       this.time.addEvent({
