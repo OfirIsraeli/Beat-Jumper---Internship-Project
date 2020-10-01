@@ -51,7 +51,7 @@ const NOTES_SIZES = {
 /**
  * various states that the game could be in
  */
-const GAME_STATES = {
+const STAGE_STATES = {
   // there is no level being played right now
   ON_HOLD: -1,
   // a level is being plyed
@@ -129,7 +129,12 @@ class GameScene extends Phaser.Scene {
     } else {
       this.levelIndex = data.level;
     }
-    this.sheetJson = data.phase;
+    if (!data.stage) {
+      this.stageIndex = 0;
+    } else {
+      this.stageIndex = data.stage;
+    }
+    this.sheetJson = data.stageJson;
   }
 
   preload() {
@@ -171,10 +176,12 @@ class GameScene extends Phaser.Scene {
 
     // set information text. appears on screen whenever we want to inform the user about anything
     // todo: centerize the text
+
     this.infoText = this.add.text(400, 250, "", {
       fill: "#14141f",
       fontSize: "80px",
     });
+    // .setOrigin(0.5, 0.5);
     this.infoMessage = "level " + (this.levelIndex + 1);
 
     //
@@ -203,7 +210,7 @@ class GameScene extends Phaser.Scene {
     this.input.keyboard.on("keydown_ESC", function (event) {});*/
 
     // set game mode
-    this.gameState = GAME_STATES.NOT_STARTED;
+    this.stageState = STAGE_STATES.NOT_STARTED;
 
     // set the level index to the first level
     //this.levelIndex = 0;
@@ -269,21 +276,24 @@ class GameScene extends Phaser.Scene {
     // the function that happens each interval
     ScoreManager.setEventFunction((event, value) => {
       if (event === BUS_EVENTS.UPDATE) {
-        if (0 < intervalNumber && intervalNumber < totalIntervals) {
+        if (intervalNumber < totalIntervals) {
           this.curNotes = {
             // the 3 notes items closest to the current interval. Needed for calculations for user's jump.
             prevNote: this.timingList[intervalNumber - 1],
             curNote: this.timingList[intervalNumber],
             nextNote: this.timingList[intervalNumber + 1],
           };
-          // check if user jumped (visited) the previous note (if it was a played note). level lost if not.
-          if (
-            this.curNotes.prevNote.noteType === NOTES.PLAYED_NOTE &&
-            this.curNotes.prevNote.visited === false
-          ) {
-            this.levelState = LEVEL_STATES.LOST;
-            this.infoMessage = "skipped a note";
-            console.log("lost!");
+          // if we are not in count-in
+          if (intervalType !== INTERVAL_TYPES.COUNTIN_INTERVAL) {
+            // check if user jumped (visited) the previous note, if it was a played note. level lost if not.
+            if (
+              this.curNotes.prevNote.noteType === NOTES.PLAYED_NOTE &&
+              this.curNotes.prevNote.visited === false
+            ) {
+              this.levelState = LEVEL_STATES.LOST;
+              this.infoMessage = "skipped a note";
+              console.log("lost level!");
+            }
           }
         }
 
@@ -388,34 +398,74 @@ class GameScene extends Phaser.Scene {
     console.log("final is: ", this.gamePointsArray[this.levelIndex]);
   }
 
+  // function to check and execute stuff related to the current stage
+  stageStatusCheck() {
+    // if hitpoints reaches zero, player need to restart this stage
+
+    if (this.myHero.hitPoints === 0) {
+      this.stageState = STAGE_STATES.LOST;
+
+      // change localStorage data to restart stage (so same stage with first level)
+      localStorage.setItem("LastLevelWon", JSON.stringify({ stage: this.stageIndex, level: 0 }));
+      return;
+    }
+
+    // if player won this level, update indexes accordingli
+    if (this.levelState === LEVEL_STATES.WON) {
+      // first, check if we have just finished a stage, update indexes accordingly
+
+      // if we finished a level without ending a stage, so we are on hold until we start the next level
+      if (this.levelIndex < 5) {
+        // if this is not the last level of this stage
+        this.levelIndex++; // advance to next level in this stage
+        this.stageState = STAGE_STATES.ON_HOLD;
+      }
+      // else advance to new stage
+      else {
+        this.levelIndex = 0;
+        this.stageIndex++;
+        this.stageState = STAGE_STATES.WON;
+      }
+
+      // change localStorage data to the new next level
+      localStorage.setItem(
+        "LastLevelWon",
+        JSON.stringify({ stage: this.stageIndex, level: this.levelIndex })
+      );
+    } else if (this.levelState === LEVEL_STATES.LOST) {
+      this.stageState = STAGE_STATES.ON_HOLD;
+    }
+  }
+
   // function that check for each interval if there is a need to end the level for any reason (jump failure or level won)
   levelStatusCheck(intervalNumber, totalIntervals) {
     // if player has lost the level for any reason
     if (this.levelState === LEVEL_STATES.LOST) {
       this.removeBoulders(); // remove all boulders from game
-      this.failSound.play(); // play a failure sound
+      //this.failSound.play(); // play a failure sound
       this.myHero.heroSprite.play("hurtAnimation"); // play failure animation
       ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
       this.updateHitPoints();
     }
     // if player passed all intervals correctly
     else if (intervalNumber === totalIntervals) {
-      this.calculateLevelPoints();
       console.log("won level!");
-      this.levelState = LEVEL_STATES.WON;
-      this.levelIndex++; // advance to next level
-      this.infoMessage = "level " + (this.levelIndex + 1); // set infoMessage to display the next level user is going to face
+      this.levelState = LEVEL_STATES.WON; // player has won the level
+      this.calculateLevelPoints(); // calculate points for that level, add to total points
       this.myHero.heroSprite.play("winAnimation"); // play winning animation
     }
     // if level should not end for any reason, return and continue the intervals
     else {
       return;
     }
-    this.gameState = GAME_STATES.ON_HOLD; // finished a level, so we are on hold until we start the next one
-    if (this.myHero.hitPoints === 0) {
-      this.gameState = GAME_STATES.LOST;
-    }
+    // in any case of a level ending, do these:
     this.myHero.heroSprite.anims.chain("standingAnimation"); // stand after level is finished
+    this.stageStatusCheck(); // check and update data regarding the stage and the new level
+    // if level was not lost, set infoMessage to display the next level user is going to face
+    // if level lost, we inform the player details regarding failure in the jumpTimingCheck function
+    if (this.levelState !== LEVEL_STATES.LOST) {
+      this.infoMessage = "level " + (this.levelIndex + 1);
+    }
   }
 
   // function that calculates the needed boulder velocity to match the given tempo
@@ -427,6 +477,8 @@ class GameScene extends Phaser.Scene {
 
   // function that gets the note that is closest to the user's jump.
   getClosestNoteToKeyPress(timePassedSinceJump) {
+    console.log(this.curNotes);
+
     // calculate the distance between curNote and timePassedSinceJump
     const curNoteDistance = Math.abs(this.curNotes.curNote.division - timePassedSinceJump);
     // calculate the distance between nextNote and timePassedSinceJump
@@ -522,7 +574,20 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  goBackToMenu(delay = DEFAULT_GAME_START_DELAY) {
+    this.time.addEvent({
+      delay: delay,
+      callback: () => {
+        this.scene.start("TitleScene");
+      },
+    });
+  }
+
   update(time, delta) {
+    if (Phaser.Input.Keyboard.JustDown(this.escButton)) {
+      this.infoText.text = "exiting...";
+      this.goBackToMenu(1000);
+    }
     // if level is on motion, move the background image and rotate all boulders
     if (this.levelState === LEVEL_STATES.ON_MOTION) {
       this.background.tilePositionX += 6;
@@ -544,14 +609,22 @@ class GameScene extends Phaser.Scene {
     }
 
     // if the game is not on motion and we did not finish all of the musicJsons
-    if (this.gameState !== GAME_STATES.ON_MOTION && this.levelIndex < this.sheetJson.length) {
+    if (this.stageState !== STAGE_STATES.ON_MOTION && this.levelIndex < this.sheetJson.length) {
       // if player has failed 3 times, tell him that and don't start a new level (by doing return)
-      if (this.gameState === GAME_STATES.LOST) {
+      if (this.stageState === STAGE_STATES.LOST) {
         this.infoText.text = "you lost";
+        this.goBackToMenu();
+        return;
+      }
+      // if player has won, tell him that and don't start a new level (by doing return)
+      if (this.stageState === STAGE_STATES.WON) {
+        this.infoText.text = "you won";
+        ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // remove the sheet from screen
+        this.goBackToMenu();
         return;
       }
       // change the game to on motion
-      this.gameState = GAME_STATES.ON_MOTION;
+      this.stageState = STAGE_STATES.ON_MOTION;
 
       // inform the player about current level -
       // if player lost last level, inform him why, if he won inform about next level

@@ -8,6 +8,7 @@ class BootScene extends Phaser.Scene {
     const progress = this.add.graphics();
 
     this.load.image("backgroundImage", "assets/images/background.png");
+    this.load.image("menuBackgroundImage", "assets/images/menuBackground.png");
     this.load.image("groundImage", "assets/images/ground.png");
     this.load.image("smallBlockImage", "assets/images/little stone grey.png");
     this.load.image("mediumBlockImage", "assets/images/little stone 1 grey.png");
@@ -17,6 +18,8 @@ class BootScene extends Phaser.Scene {
     this.load.image("emptyHitPoint", "assets/images/LifeGrey.png");
     this.load.image("unlockedLevelImage", "assets/images/unlocked level.png");
     this.load.image("lockedLevelImage", "assets/images/locked level.png");
+    this.load.image("unlockedStageImage", "assets/images/unlocked stage.png");
+    this.load.image("lockedStageImage", "assets/images/locked stage.png");
 
     this.load.audio("tick", "assets/sounds/click beat.mp3");
     this.load.audio("hit", "assets/sounds/hit.mp3");
