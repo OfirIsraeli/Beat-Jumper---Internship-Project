@@ -18,12 +18,40 @@ class TitleScene extends Phaser.Scene {
     });
   }
   preload() {
+    // remove the score DIV element that can be left out from game scene
+    let scoreDIVElement = document.getElementById("score-id");
+    scoreDIVElement.style.display = "none";
     // set background
     this.background = this.add
       .tileSprite(0, 0, this.width, this.height, "menuBackgroundImage")
       .setOrigin(0, 0);
   }
   create() {
+    // fetch previous best scores from localStorage
+    this.userHighScores = JSON.parse(localStorage.getItem("userHighScores"));
+    // if user did not play before, define a new matrix (of 6 stages with 6 levels each) that contains best user score for each level.
+    // with a default value of 0
+    if (this.userHighScores === null) {
+      this.userHighScores = [];
+      // first for loop is for stages, inner for loop is for levels per stage
+      for (let stageIndex = 0; stageIndex < NUMBER_OF_STAGES; stageIndex++) {
+        this.userHighScores[stageIndex] = []; // define new sub-array to hold this stage's levels
+        // add 6 level best scores to this stage, with default value of 0
+        for (let levelIndex = 0; levelIndex < NUMBER_OF_LEVELS; levelIndex++) {
+          this.userHighScores[stageIndex][levelIndex] = 0;
+        }
+      }
+    }
+
+    //localStorage.clear(); // here for debugging...
+
+    // fetch the last level the user has won from localStorage
+    this.LastLevelUnlocked = JSON.parse(localStorage.getItem("LastLevelUnlocked"));
+    // if user did not play before, define stage and level as 0
+    if (this.LastLevelUnlocked === null) {
+      this.LastLevelUnlocked = { stage: 4, level: 4 };
+    }
+
     //define each stage as an array of levels
     const stageOne = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
     const stageTwo = [scoreJson, scoreJson, scoreJson, scoreJson, scoreJson, scoreJson];
@@ -51,21 +79,21 @@ class TitleScene extends Phaser.Scene {
       }
     }
 
-    //localStorage.clear(); // here for debugging
-    // fetch the last level the user has won from localStorage
-    this.LastLevelWon = JSON.parse(localStorage.getItem("LastLevelWon"));
-    // if user did not play before, define stage and level as 0
-    if (this.LastLevelWon === null) {
-      this.LastLevelWon = { stage: 0, level: 0 };
-    }
     // unlock needed levels according to localStorage
-    for (let stageIndex = 0; stageIndex <= this.LastLevelWon.stage; stageIndex++) {
+    for (let stageIndex = 0; stageIndex <= this.LastLevelUnlocked.stage; stageIndex++) {
       // for each stage iteration we unlock the image object of that stage
       this.stageImages[stageIndex].setTexture("unlockedStageImage");
       // if we're in the last iteration
-      if (stageIndex === this.LastLevelWon.stage) {
+      if (stageIndex === this.LastLevelUnlocked.stage) {
         // unlock only levels up to the last level won by user of his last stage
-        for (let levelIndex = 0; levelIndex <= this.LastLevelWon.level; levelIndex++) {
+        for (let levelIndex = 0; levelIndex <= this.LastLevelUnlocked.level; levelIndex++) {
+          // if we're in the final iteration, put on the last unlocked level image
+          if (levelIndex === this.LastLevelUnlocked.level) {
+            // todo: change to last unlocked level image
+            this.levelButtons[stageIndex][levelIndex].button.setTexture("unlockedLevelImage");
+            this.levelButtons[stageIndex][levelIndex].locked = false;
+            break;
+          }
           // change image to unlocked
           this.levelButtons[stageIndex][levelIndex].button.setTexture("unlockedLevelImage");
           // change level to unlocked
@@ -101,6 +129,8 @@ class TitleScene extends Phaser.Scene {
       .setOrigin(0.5, 0.5); // centerize text to image
     this.stageImages[stageIndex] = newStageImage; // add the image object to our array
   }
+
+  // creating a new button for a specific level, defining all of its' utillities
   createNewLevelButton(stageIndex, levelIndex) {
     // add a new sprite of a locked level to the scene.
     let newButton = this.add
@@ -115,8 +145,24 @@ class TitleScene extends Phaser.Scene {
           stageJson: this.stages[stageIndex],
           stage: stageIndex,
           level: levelIndex,
+          userHighScores: this.userHighScores,
+          lastLevelUnlocked: this.LastLevelUnlocked,
         });
       }
+    });
+
+    // if cursor is over the button, change the tint accordingly. red if level is locked, green otherwise
+    newButton.on("pointerover", () => {
+      if (this.levelButtons[stageIndex][levelIndex].locked) {
+        newButton.setTint(0xff0000);
+      } else {
+        newButton.setTint(0x26ff00);
+      }
+    });
+
+    // remove tint after cursor leaves this button
+    newButton.on("pointerout", () => {
+      newButton.clearTint();
     });
 
     // add a new text with the needed level number in the same location
@@ -131,12 +177,7 @@ class TitleScene extends Phaser.Scene {
       .text(newButton.x, newButton.y, levelIndex + 1, style)
       .setOrigin(0.5, 0.5); // centerize text to image
 
-    // todo: change cursor over sprites
-    /*
-  newButton.on("pointerover", () => {
-    console.log("hia");
-  });*/
-    // add the button sprite to our array
+    // add this button and its' locked state (true by default) to the level buttons array
     this.levelButtons[stageIndex][levelIndex] = { button: newButton, locked: true };
   }
 

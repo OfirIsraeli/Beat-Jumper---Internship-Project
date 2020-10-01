@@ -68,6 +68,8 @@ const STAGE_STATES = {
  * various states that each level could be in
  */
 const LEVEL_STATES = {
+  // not started yet
+  NOT_STARTED: -2,
   // level is on motion
   ON_MOTION: -1,
 
@@ -135,9 +137,14 @@ class GameScene extends Phaser.Scene {
       this.stageIndex = data.stage;
     }
     this.sheetJson = data.stageJson;
+    this.userHighScores = data.userHighScores;
+    this.LastLevelUnlocked = data.lastLevelUnlocked;
   }
 
   preload() {
+    // show the score DIV element
+    let scoreDIVElement = document.getElementById("score-id");
+    scoreDIVElement.style.display = "block";
     // set game buttons
     this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.escButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
@@ -177,23 +184,42 @@ class GameScene extends Phaser.Scene {
     // set information text. appears on screen whenever we want to inform the user about anything
     // todo: centerize the text
 
-    this.infoText = this.add.text(400, 250, "", {
-      fill: "#14141f",
-      fontSize: "80px",
-    });
+    this.infoText = this.add
+      .text(640, 350, "", {
+        fill: "#14141f",
+        fontSize: "80px",
+      })
+      .setOrigin(0.5, 0.5);
     // .setOrigin(0.5, 0.5);
     this.infoMessage = "level " + (this.levelIndex + 1);
 
     //
-    this.pointsUpperText = this.add.text(0, 0, "Points:", {
-      fill: "#14141f",
-      fontSize: "40px",
-    });
+    this.pointsUpperText = this.add
+      .text(130, 130, "Points:", {
+        fill: "#14141f",
+        fontSize: "40px",
+      })
+      .setOrigin(0.5, 0.5);
     this.totalPoints = 0;
-    this.pointsLowerText = this.add.text(20, 40, this.totalPoints, {
-      fill: "#14141f",
-      fontSize: "80px",
-    });
+    this.pointsLowerText = this.add
+      .text(110, 180, this.totalPoints, {
+        fill: "#14141f",
+        fontSize: "80px",
+      })
+      .setOrigin(0.5, 0.5);
+
+    this.highScoreUpperText = this.add
+      .text(130, 25, "Highscore:", {
+        fill: "#14141f",
+        fontSize: "40px",
+      })
+      .setOrigin(0.5, 0.5);
+    this.highScoreLowerText = this.add
+      .text(110, 80, this.userHighScores[this.stageIndex][this.levelIndex], {
+        fill: "#14141f",
+        fontSize: "80px",
+      })
+      .setOrigin(0.5, 0.5);
 
     // define hitpoints sprites
     let hp1 = this.add.sprite(1060, 50, "fullHitPoint");
@@ -211,6 +237,7 @@ class GameScene extends Phaser.Scene {
 
     // set game mode
     this.stageState = STAGE_STATES.NOT_STARTED;
+    this.levelState = LEVEL_STATES.NOT_STARTED;
 
     // set the level index to the first level
     //this.levelIndex = 0;
@@ -227,6 +254,9 @@ class GameScene extends Phaser.Scene {
   }
 
   playLevel(levelJson) {
+    // inform player what the high score of this level is
+    this.highScoreLowerText.text = this.userHighScores[this.stageIndex][this.levelIndex];
+    this.pointsLowerText.text = 0;
     // at a start of each level, infoText is empty so screen would be clear
     this.infoText.text = "";
 
@@ -390,12 +420,24 @@ class GameScene extends Phaser.Scene {
     this.myHero.hitPoints--;
   }
 
+  // we calculate the average jump rating (from 0 to 100 per jump) of user in this level, and multiply that by 5,
+  // so overall level will get jump points between 0 and 500.
   calculateLevelPoints() {
+    // define a mini arrow function that will calculate an average of the items in an array
     let average = (array) => array.reduce((a, b) => a + b) / array.length;
-    this.gamePointsArray.push(average(this.levelPointsArray));
-    this.totalPoints += Math.floor(average(this.levelPointsArray));
+    // calculate the average of our level points array using that function, multiply by 5 to get a points range of 0-500.
+    // floor it down so it will be an integer
+    const levelPoints = Math.floor(average(this.levelPointsArray) * 5);
+    this.gamePointsArray.push(levelPoints);
+    this.totalPoints = levelPoints;
     this.pointsLowerText.text = this.totalPoints;
-    console.log("final is: ", this.gamePointsArray[this.levelIndex]);
+    console.log("final level score is: ", this.gamePointsArray[this.levelIndex]);
+    if (this.userHighScores[this.stageIndex][this.levelIndex] < levelPoints) {
+      this.highScoreLowerText.text = levelPoints;
+      console.log("passed your highscore!");
+      this.userHighScores[this.stageIndex][this.levelIndex] = levelPoints;
+      localStorage.setItem("userHighScores", JSON.stringify(this.userHighScores));
+    }
   }
 
   // function to check and execute stuff related to the current stage
@@ -405,8 +447,18 @@ class GameScene extends Phaser.Scene {
     if (this.myHero.hitPoints === 0) {
       this.stageState = STAGE_STATES.LOST;
 
-      // change localStorage data to restart stage (so same stage with first level)
-      localStorage.setItem("LastLevelWon", JSON.stringify({ stage: this.stageIndex, level: 0 }));
+      // change localStorage data to restart stage (so same stage with first level), if it is the last unlocked level
+      if (
+        this.stageIndex === this.LastLevelUnlocked.stage &&
+        this.levelIndex === this.LastLevelUnlocked.level
+      ) {
+        console.log("starting stage from start...");
+        localStorage.setItem(
+          "LastLevelUnlocked",
+          JSON.stringify({ stage: this.stageIndex, level: 0 })
+        );
+      }
+
       return;
     }
 
@@ -429,7 +481,7 @@ class GameScene extends Phaser.Scene {
 
       // change localStorage data to the new next level
       localStorage.setItem(
-        "LastLevelWon",
+        "LastLevelUnlocked",
         JSON.stringify({ stage: this.stageIndex, level: this.levelIndex })
       );
     } else if (this.levelState === LEVEL_STATES.LOST) {
@@ -477,8 +529,6 @@ class GameScene extends Phaser.Scene {
 
   // function that gets the note that is closest to the user's jump.
   getClosestNoteToKeyPress(timePassedSinceJump) {
-    console.log(this.curNotes);
-
     // calculate the distance between curNote and timePassedSinceJump
     const curNoteDistance = Math.abs(this.curNotes.curNote.division - timePassedSinceJump);
     // calculate the distance between nextNote and timePassedSinceJump
@@ -585,6 +635,7 @@ class GameScene extends Phaser.Scene {
 
   update(time, delta) {
     if (Phaser.Input.Keyboard.JustDown(this.escButton)) {
+      ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
       this.infoText.text = "exiting...";
       this.goBackToMenu(1000);
     }
