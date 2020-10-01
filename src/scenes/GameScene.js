@@ -142,9 +142,6 @@ class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    // show the score DIV element
-    let scoreDIVElement = document.getElementById("score-id");
-    scoreDIVElement.style.display = "block";
     // set game buttons
     this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.escButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
@@ -220,11 +217,17 @@ class GameScene extends Phaser.Scene {
         fontSize: "80px",
       })
       .setOrigin(0.5, 0.5);
+    this.levelInfoText = this.add
+      .text(1150, 40, "Stage " + (this.stageIndex + 1) + "\nLevel " + (this.levelIndex + 1), {
+        fill: "#14141f",
+        fontSize: "40px",
+      })
+      .setOrigin(0.5, 0.5);
 
     // define hitpoints sprites
-    let hp1 = this.add.sprite(1060, 50, "fullHitPoint");
-    let hp2 = this.add.sprite(1140, 50, "fullHitPoint");
-    let hp3 = this.add.sprite(1220, 50, "fullHitPoint");
+    let hp1 = this.add.sprite(1060, 140, "fullHitPoint");
+    let hp2 = this.add.sprite(1140, 140, "fullHitPoint");
+    let hp3 = this.add.sprite(1220, 140, "fullHitPoint");
     // define hitpoints array
     this.hitPointsArray = [hp1, hp2, hp3];
   }
@@ -254,6 +257,13 @@ class GameScene extends Phaser.Scene {
   }
 
   playLevel(levelJson) {
+    // show the score DIV element
+    let scoreDIVElement = document.getElementById("score-id");
+    scoreDIVElement.style.display = "block";
+
+    // check if level we're about to play is the last level unlocked by user.
+    this.levelIsLastUnlocked = this.checkIfLastLevelUnlocked();
+
     // inform player what the high score of this level is
     this.highScoreLowerText.text = this.userHighScores[this.stageIndex][this.levelIndex];
     this.pointsLowerText.text = 0;
@@ -322,7 +332,6 @@ class GameScene extends Phaser.Scene {
             ) {
               this.levelState = LEVEL_STATES.LOST;
               this.infoMessage = "skipped a note";
-              console.log("lost level!");
             }
           }
         }
@@ -448,10 +457,7 @@ class GameScene extends Phaser.Scene {
       this.stageState = STAGE_STATES.LOST;
 
       // change localStorage data to restart stage (so same stage with first level), if it is the last unlocked level
-      if (
-        this.stageIndex === this.LastLevelUnlocked.stage &&
-        this.levelIndex === this.LastLevelUnlocked.level
-      ) {
+      if (this.levelIsLastUnlocked) {
         console.log("starting stage from start...");
         localStorage.setItem(
           "LastLevelUnlocked",
@@ -470,6 +476,10 @@ class GameScene extends Phaser.Scene {
       if (this.levelIndex < 5) {
         // if this is not the last level of this stage
         this.levelIndex++; // advance to next level in this stage
+        // if it's the last level unlocked, also update this.LastLevelUnlocked to be the newly unlocked level
+        if (this.levelIsLastUnlocked) {
+          this.LastLevelUnlocked.level++;
+        }
         this.stageState = STAGE_STATES.ON_HOLD;
       }
       // else advance to new stage
@@ -477,6 +487,11 @@ class GameScene extends Phaser.Scene {
         this.levelIndex = 0;
         this.stageIndex++;
         this.stageState = STAGE_STATES.WON;
+        // if it's the last level unlocked, also update this.LastLevelUnlocked to be the newly unlocked level
+        if (this.levelIsLastUnlocked) {
+          this.LastLevelUnlocked.stage++;
+          this.LastLevelUnlocked.level = 0;
+        }
       }
 
       // change localStorage data to the new next level
@@ -484,12 +499,29 @@ class GameScene extends Phaser.Scene {
         "LastLevelUnlocked",
         JSON.stringify({ stage: this.stageIndex, level: this.levelIndex })
       );
-    } else if (this.levelState === LEVEL_STATES.LOST) {
+      // inform player on the next level
+      this.levelInfoText.text =
+        "Stage " + (this.stageIndex + 1) + "\nLevel " + (this.levelIndex + 1);
+    }
+    // if just lost a level but not the whole stage, just redo the level. put stageStage on hold until we restart
+    else if (this.levelState === LEVEL_STATES.LOST) {
       this.stageState = STAGE_STATES.ON_HOLD;
     }
   }
 
+  // checks if current level is the last one player unlocked. return true if it does, false otherwise
+  checkIfLastLevelUnlocked() {
+    if (
+      this.stageIndex === this.LastLevelUnlocked.stage &&
+      this.levelIndex === this.LastLevelUnlocked.level
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   // function that check for each interval if there is a need to end the level for any reason (jump failure or level won)
+  // if so, update everything regarding level, stage, hero and user accordingly
   levelStatusCheck(intervalNumber, totalIntervals) {
     // if player has lost the level for any reason
     if (this.levelState === LEVEL_STATES.LOST) {
@@ -497,7 +529,7 @@ class GameScene extends Phaser.Scene {
       //this.failSound.play(); // play a failure sound
       this.myHero.heroSprite.play("hurtAnimation"); // play failure animation
       ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
-      this.updateHitPoints();
+      this.updateHitPoints(); // update hitpoints after level failure
     }
     // if player passed all intervals correctly
     else if (intervalNumber === totalIntervals) {
@@ -636,6 +668,7 @@ class GameScene extends Phaser.Scene {
   update(time, delta) {
     if (Phaser.Input.Keyboard.JustDown(this.escButton)) {
       ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
+      this.countInText.text = "";
       this.infoText.text = "exiting...";
       this.goBackToMenu(1000);
     }

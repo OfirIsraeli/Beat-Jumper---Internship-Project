@@ -49,7 +49,7 @@ class TitleScene extends Phaser.Scene {
     this.LastLevelUnlocked = JSON.parse(localStorage.getItem("LastLevelUnlocked"));
     // if user did not play before, define stage and level as 0
     if (this.LastLevelUnlocked === null) {
-      this.LastLevelUnlocked = { stage: 4, level: 4 };
+      this.LastLevelUnlocked = { stage: 0, level: 0 };
     }
 
     //define each stage as an array of levels
