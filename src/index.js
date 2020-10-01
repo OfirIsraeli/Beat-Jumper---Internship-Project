@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import BootScene from "./scenes/BootScene";
 import TitleScene from "./scenes/TitleScene";
-import GameScene from "./scenes/GameScene";
+import GameScene from "./scenes/Game/GameScene";
 import * as SpinePlugin from "./SpinePlugin.js";
 import * as WaaSampler from "waa-sampler";
 
@@ -25,7 +25,9 @@ const config = {
   },
   scene: [BootScene, TitleScene, GameScene],
   plugins: {
-    scene: [{ key: "SpinePlugin", plugin: window.SpinePlugin, mapping: "spine" }],
+    scene: [
+      { key: "SpinePlugin", plugin: window.SpinePlugin, mapping: "spine" },
+    ],
   },
 };
 
