@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import BootScene from "./scenes/BootScene";
 import TitleScene from "./scenes/TitleScene";
 import LevelMenuScene from "./scenes/LevelMenuScene";
-import GameScene from "./scenes/GameScene";
+import GameScene from "./scenes/Game/GameScene";
 import * as SpinePlugin from "./SpinePlugin.js";
 import * as WaaSampler from "waa-sampler";
 

@@ -11,7 +11,10 @@ class BootScene extends Phaser.Scene {
     this.load.image("menuBackgroundImage", "assets/images/menuBackground.png");
     this.load.image("groundImage", "assets/images/ground.png");
     this.load.image("smallBlockImage", "assets/images/little stone grey.png");
-    this.load.image("mediumBlockImage", "assets/images/little stone 1 grey.png");
+    this.load.image(
+      "mediumBlockImage",
+      "assets/images/little stone 1 grey.png"
+    );
     this.load.image("largeBlockImage", "assets/images/mid stone.png");
     this.load.image("dustCloudImage", "assets/images/dust cloud.png");
     this.load.image("fullHitPoint", "assets/images/Life.png");
@@ -59,19 +62,6 @@ class BootScene extends Phaser.Scene {
       progress.destroy();
       this.scene.start("TitleScene");
     });
-
-    /**
-     * Load audio
-     */
-    // Music to play. It's not properly edited for an continuous loop, but game play experience isn't really the aim of this repository either.
-    // this.load.audio("big-laser", ["assets/audio/NFF-big-laser.wav"]);
-
-    /**
-     * Load spines
-     */
-    // changing the assets folder for sprite
-    // this.load.setPath("assets/spines/plane");
-    // this.load.spine("plane", "skeleton.json", "skeleton.atlas", true);
   }
 
   create() {}

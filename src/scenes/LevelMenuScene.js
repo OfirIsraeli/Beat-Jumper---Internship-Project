@@ -120,6 +120,7 @@ class LevelMenuScene extends Phaser.Scene {
     const text = "Stage " + (stageIndex + 1);
     this.add
       .text(newStageImage.x, newStageImage.y, text, {
+        fontFamily: "Chewy",
         fill: "#ffffff",
         wordWrap: true,
         wordWrapWidth: newStageImage.width,
@@ -184,6 +185,7 @@ class LevelMenuScene extends Phaser.Scene {
 
     // add a new text with the needed level number in the same location
     let style = {
+      fontFamily: "Chewy",
       fill: "#ffffff",
       wordWrap: true,
       wordWrapWidth: newButton.width,

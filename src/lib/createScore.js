@@ -1,6 +1,6 @@
 import * as liveScore from "bandpad-vexflow";
 import Phaser from "phaser";
-import GameScene from "../scenes/GameScene";
+import GameScene from "../scenes/Game/GameScene";
 export default function createScore(scoreJson, levelTempo, eventFunction) {
   let options = {
     interludeQuarters: 0,
