@@ -155,7 +155,7 @@ class GameScene extends Phaser.Scene {
       .tileSprite(0, 0, this.width, this.height, "backgroundImage")
       .setOrigin(0, 0);
     this.background.setScrollFactor(0);
-
+    this.setStageTintForBackground();
     // set game ground
     this.ground = this.physics.add.sprite(
       this.sys.game.config.width / 2,
@@ -383,6 +383,30 @@ class GameScene extends Phaser.Scene {
     ScoreManager.scoreGetEvent(BUS_EVENTS.PLAY, {
       smoothNotePointer: true,
     });
+  }
+
+  setStageTintForBackground() {
+    if (this.stageIndex === 1) {
+      // sunset vibes
+      this.background.setTint(0xcfe2f3);
+    }
+    if (this.stageIndex === 2) {
+      // air polllution vibes...
+      this.background.setTint(0xfff2cc);
+    }
+    if (this.stageIndex === 3) {
+      // late sunset, early night
+      this.background.setTint(0xa57bc1);
+    }
+
+    if (this.stageIndex === 4) {
+      console.log("hi");
+      this.background.setTint(0xf4cccc);
+    }
+    if (this.stageIndex === 5) {
+      console.log("hi");
+      this.background.setTint(0xcfe2f3);
+    }
   }
 
   addBoulder(noteIndex) {
@@ -660,14 +684,16 @@ class GameScene extends Phaser.Scene {
     this.time.addEvent({
       delay: delay,
       callback: () => {
-        this.scene.start("TitleScene");
+        this.scene.start("LevelMenuScene");
       },
     });
   }
 
   update(time, delta) {
     if (Phaser.Input.Keyboard.JustDown(this.escButton)) {
-      ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
+      if (this.levelState === LEVEL_STATES.ON_MOTION) {
+        ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
+      }
       this.countInText.text = "";
       this.infoText.text = "exiting...";
       this.goBackToMenu(1000);
