@@ -43,13 +43,13 @@ class LevelMenuScene extends Phaser.Scene {
       }
     }
 
-    localStorage.clear(); // here for debugging...
+    //localStorage.clear(); // here for debugging...
 
     // fetch the last level the user has won from localStorage
     this.LastLevelUnlocked = JSON.parse(localStorage.getItem("LastLevelUnlocked"));
     // if user did not play before, define stage and level as 0
     if (this.LastLevelUnlocked === null) {
-      this.LastLevelUnlocked = { stage: 5, level: 5 };
+      this.LastLevelUnlocked = { stage: 0, level: 0 };
     }
 
     //define each stage as an array of levels
