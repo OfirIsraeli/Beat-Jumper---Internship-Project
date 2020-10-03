@@ -10,6 +10,7 @@ import level1_6 from "../sheets/levels/level1-6";
 
 const NUMBER_OF_STAGES = 6;
 const NUMBER_OF_LEVELS = 6;
+const NO_HP_SUBTRACTED = 0;
 
 class LevelMenuScene extends Phaser.Scene {
   constructor(test) {
@@ -85,7 +86,7 @@ class LevelMenuScene extends Phaser.Scene {
       }
     }
 
-    //localStorage.clear(); // here for debugging...
+    localStorage.clear(); // here for debugging...
 
     // fetch the last level the user has won from localStorage
     this.LastLevelUnlocked = JSON.parse(localStorage.getItem("LastLevelUnlocked"));
@@ -94,14 +95,20 @@ class LevelMenuScene extends Phaser.Scene {
       this.LastLevelUnlocked = { stage: 0, level: 0 };
     }
 
+    // fetch hitpoints subracted from latest try of last level
+    this.hitPointsSubtracted = JSON.parse(localStorage.getItem("hitPointsSubtracted"));
+    if (this.hitPointsSubtracted === null) {
+      this.hitPointsSubtracted = NO_HP_SUBTRACTED;
+    }
+
     //define each stage as an array of levels
     const stageOne = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
-    const stageTwo = [scoreJson, scoreJson, scoreJson, scoreJson, scoreJson, scoreJson];
+    const stageTwo = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
     const stageThree = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
     const stageFour = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
-    const stageFive = [scoreJson, scoreJson, scoreJson, scoreJson, scoreJson, scoreJson];
+    const stageFive = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
     const stageSix = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
-    //define all stages as an array of stages (meaning it's a matrix of levels)
+    //define all stages as an array of stages (so it's a matrix of levels)
     this.stages = [stageOne, stageTwo, stageThree, stageFour, stageFive, stageSix];
     // define an array that will contain the following:
     // each index is a stage number, and each item is an array containing all of the levels of that stage
@@ -203,6 +210,7 @@ class LevelMenuScene extends Phaser.Scene {
           level: levelIndex,
           userHighScores: this.userHighScores,
           lastLevelUnlocked: this.LastLevelUnlocked,
+          hitPointsSubtracted: this.hitPointsSubtracted,
         });
       }
       // when a locked level is pressed, we shake the button sprite

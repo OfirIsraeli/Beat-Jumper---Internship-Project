@@ -1,11 +1,20 @@
 import Phaser from "phaser";
 import Hero from "../../sprites/Hero";
-import createScore from "../../lib/createScore";
-import createLevelScoreMap from "../../lib/createLevelScoreMap";
-import createTimingList from "../../lib/createTimingList";
-import * as ScoreManager from "bandpad-vexflow";
-import { BUS_EVENTS } from "bandpad-vexflow";
+// text utillities, positioning and styling
 import { initText } from "./textUtils";
+// ---imports of various needed data structures---
+// a function that creates a data structure used to track note placements in a level
+import createLevelScoreMap from "../../lib/createLevelScoreMap";
+// a function that creates a data structure used to track note data regarding user's behavior in a level.
+import createTimingList from "../../lib/createTimingList";
+// --- BandPad utillites ---
+// creates the music sheet element and processes the given musicJsons
+import createScore from "../../lib/createScore";
+// handles score intervals and general sheet music execution
+import * as ScoreManager from "bandpad-vexflow";
+// handles specific events during the intervals
+import { BUS_EVENTS } from "bandpad-vexflow";
+// -------
 
 // ------------------ CONSTANTS ---------------- //
 
@@ -19,6 +28,7 @@ const BOULDER_HEIGHTS = {
   2: -50,
   4: -75,
 };
+
 /**
  * points each note division (1 as smallest note, 4 as biggest) to the relevant
  * image string for image loading
@@ -50,7 +60,7 @@ const NOTES_SIZES = {
 };
 
 /**
- * various states that the game could be in
+ * various states that each stage could be in
  */
 const STAGE_STATES = {
   // there is no level being played right now
@@ -73,10 +83,8 @@ const LEVEL_STATES = {
   NOT_STARTED: -2,
   // level is on motion
   ON_MOTION: -1,
-
   // level lost
   LOST: 0,
-
   // level win
   WON: 1,
 };
@@ -110,6 +118,7 @@ const INTERVAL_PREDECESSOR = {
   2: 4,
   4: 8,
 };
+
 // default ground height adjustment
 const GROUND_HEIGHT = 0.747;
 
@@ -120,35 +129,39 @@ const ACCEPTABLE_DELAY = 140;
 // rest time in milliseconds each level will have before next one starts
 const DEFAULT_GAME_START_DELAY = 3500;
 
+const SIXTEENTH_DIVISIONS = 4;
+
+//  font style and color for a text in the scene
 export const FONT_STYLE = {
   fontFamily: "Chewy",
   fill: "#14141f",
 };
 
+// and now for the scene itself...
 class GameScene extends Phaser.Scene {
+  // inherits Phaser Scenes. constructor uses "super" of ES6
   constructor(test) {
     super({
       key: "GameScene",
     });
   }
 
+  // scene initialization, with given data. Only scene we run GameScene with is the LevelMenuScene.
   init(data) {
-    // an array that contains all of the musicJsons of each level, by ascending difficulty
-    if (!data.level) {
-      this.levelIndex = 0;
-    } else {
-      this.levelIndex = data.level;
-    }
-    if (!data.stage) {
-      this.stageIndex = 0;
-    } else {
-      this.stageIndex = data.stage;
-    }
+    // first we receive the given stage and level user wishes to play. GameScene is defined to run an entire stage at a time.
+    this.stageIndex = data.stage;
+    this.levelIndex = data.level;
+    // all of the stages' musicJsons(Json data structure of BandPad that represent sheet music).
     this.sheetJson = data.stageJson;
+    // user's current highscore.
     this.userHighScores = data.userHighScores;
-    this.LastLevelUnlocked = data.lastLevelUnlocked;
+    // the user's last level unlocked (so last level not won). comes with stage and level numbers.
+    this.lastLevelUnlocked = data.lastLevelUnlocked;
+    //
+    this.hitPointsSubtracted = data.hitPointsSubtracted;
   }
 
+  // Loading images, sounds etc...
   preload() {
     // set game keys
     this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -160,62 +173,60 @@ class GameScene extends Phaser.Scene {
 
     // set game background
     this.background = this.add
-      .tileSprite(0, 0, this.width, this.height, "backgroundImage")
-      .setOrigin(0, 0);
+      .tileSprite(0, 0, this.width, this.height, "backgroundImage") // tileSprite so we can "roll" it as a level is playing
+      .setOrigin(0, 0); // so while we roll it, background will stay in position
     this.background.setScrollFactor(0);
-    this.setStageTintForBackground();
+    this.setStageTintForBackground(); // each stage gets a little different tint
     // set game ground
     this.ground = this.physics.add.sprite(
+      // sprite so other game objects can interact with it
       this.sys.game.config.width / 2,
       this.sys.game.config.height * GROUND_HEIGHT,
       "groundImage"
     );
-    this.ground.setVisible(false);
-    this.ground.setImmovable();
+    this.ground.setVisible(false); // invisible ground
+    this.ground.setImmovable(); // ground stays in the same place no matter what
 
-    // set hero
+    // set hero.
     this.myHero = new Hero({ scene: this.scene });
 
-    //set colliders
+    //set collider between hero and ground
     this.physics.add.collider(this.myHero.heroSprite, this.ground);
 
     // init text
     initText(this);
 
-    // define hit points sprites
+    // define hit points sprites. by default we have 3 hitpoints per stage (so 3 chances)
     this.hitPointsArray = [
       this.add.sprite(1060, 60, "fullHitPoint"),
       this.add.sprite(1140, 60, "fullHitPoint"),
       this.add.sprite(1220, 60, "fullHitPoint"),
     ];
+    console.log();
+    if (this.stageIndex === this.lastLevelUnlocked.stage) {
+      for (let i = 0; i < this.hitPointsSubtracted; i++) {
+        this.hitPointsArray[3 - this.myHero.hitPoints].setTexture("emptyHitPoint");
+        this.myHero.hitPoints--;
+      }
+    }
   }
 
+  // setting properties regarding this scene's run (so properties regarding stage and not properties regarding just a level)
   create() {
-    /*
-    todo: create pause method
-    this.paused = false;
-    this.input.keyboard.on("keydown_ESC", function (event) {});*/
-
-    // set game mode
+    // set stage and level states. at this points, nothing has started yet so default values of NOT_STARTED
     this.stageState = STAGE_STATES.NOT_STARTED;
     this.levelState = LEVEL_STATES.NOT_STARTED;
 
-    // set the level index to the first level
-    //this.levelIndex = 0;
-
     // ------ data regarding the points system :
-
-    // an array in the same size of sheetJson (meaning the amount of levels) that will keep track
-    // of the scoring system (game-points wise, not music scores..) of each level
-    this.gamePointsArray = [];
 
     // an array  that will keep track of the points in the CURRENT level.
     // size will be the amount of times user is required to jump.
     this.levelPointsArray = [];
   }
 
+  // main function that runs a level with a given musicJson
   playLevel(levelJson) {
-    // show the score DIV element
+    // show the score DIV element.
     let scoreDIVElement = document.getElementById("score-id");
     scoreDIVElement.style.display = "block";
 
@@ -224,6 +235,7 @@ class GameScene extends Phaser.Scene {
 
     // inform player what the high score of this level is
     this.highScoreLowerText.text = this.userHighScores[this.stageIndex][this.levelIndex];
+    // until this level is complete so we can calculate the score (points), we set default value of 0
     this.pointsLowerText.text = 0;
     // at a start of each level, infoText is empty so screen would be clear
     this.infoText.text = "";
@@ -234,7 +246,8 @@ class GameScene extends Phaser.Scene {
     // set tempo for this level
     this.tempo = 80;
 
-    if (this.divisions === 4) {
+    // if level is based on 16th notes, play in hald tempo (it's a game for children after all...)
+    if (this.divisions === SIXTEENTH_DIVISIONS) {
       this.tempo = this.tempo / 2;
     }
 
@@ -271,12 +284,12 @@ class GameScene extends Phaser.Scene {
     this.levelState = LEVEL_STATES.ON_MOTION;
     this.myHero.walk(); // there goes my hero...
 
-    // the function that happens each interval
+    // the arrow function that happens each interval
     ScoreManager.setEventFunction((event, value) => {
       if (event === BUS_EVENTS.UPDATE) {
         if (intervalNumber < totalIntervals) {
+          // the 3 notes items closest to the current interval. Needed for calculations for user's jump.
           this.curNotes = {
-            // the 3 notes items closest to the current interval. Needed for calculations for user's jump.
             prevNote: this.timingList[intervalNumber - 1],
             curNote: this.timingList[intervalNumber],
             nextNote: this.timingList[intervalNumber + 1],
@@ -289,24 +302,25 @@ class GameScene extends Phaser.Scene {
               this.curNotes.prevNote.visited === false
             ) {
               this.levelState = LEVEL_STATES.LOST;
-              this.infoMessage = "skipped a note";
+              this.infoMessage = "Skipped a Note";
             }
           }
         }
 
-        // if we're in an interval of a quarter note in the second bar of the count-in
+        // if we're in an interval of a quarter note in the second bar of the count-in.
+        // happens 4 times overall regardless of divisions
         if (
-          value >= countInIntervals / 2 &&
-          intervalType === INTERVAL_TYPES.COUNT_IN_INTERVAL &&
+          value >= countInIntervals / 2 && // second bar
+          intervalType === INTERVAL_TYPES.COUNT_IN_INTERVAL && // of the count-in
           value <= countInIntervals &&
-          value % this.divisions === 0
+          value % this.divisions === 0 // we're in a quarter note interval
         ) {
           this.countInText.text = countInIndex; // change countInText to the number of quarter note in the bar we're in
           countInIndex++;
         }
-
+        // after we're done with count-in, show no text from countInText
         if (value === 0 && intervalType === INTERVAL_TYPES.NOTES_INTERVAL) {
-          this.countInText.text = "";
+          //this.countInText.text = "";
         }
         /*
          add a boulder to the game if needed.
@@ -328,12 +342,14 @@ class GameScene extends Phaser.Scene {
           }
           noteIndex++;
         }
+
         intervalNumber++;
+        // if countdown is done
         if (intervalNumber === countInIntervals) {
-          // if countdown is done
           intervalType = INTERVAL_TYPES.NOTES_INTERVAL; // switch to note interval type
+          this.countInText.text = ""; // after we're done with count-in, show no text from countInText
         }
-        this.levelStatusCheck(intervalNumber, totalIntervals); // check if there is a need to end the level
+        this.levelStatusCheck(intervalNumber, totalIntervals); // check if there is a need to end the level.
       }
     });
 
@@ -343,6 +359,7 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  // each stage gets a little different tint
   setStageTintForBackground() {
     if (this.stageIndex === 1) {
       // sunset vibes
@@ -358,33 +375,37 @@ class GameScene extends Phaser.Scene {
     }
 
     if (this.stageIndex === 4) {
-      console.log("hi");
       this.background.setTint(0xf4cccc);
     }
     if (this.stageIndex === 5) {
-      console.log("hi");
       this.background.setTint(0xcfe2f3);
     }
   }
 
+  // function that defines a boulder sprite and it's needed attributes for the level
   addBoulder(noteIndex) {
+    // name of the needed boulder. Needed to load the relevant image
     const boulderName = this.getRelevantBoulderName(noteIndex);
     let newBoulder = this.physics.add.sprite(
+      // define a new sprite
       this.sys.game.config.width,
       this.ground.y + this.getRelevantBoulderHeight(noteIndex),
       boulderName
     );
-    newBoulder.setImmovable();
-    newBoulder.setVelocityX(this.getVelocityForTempo());
+    newBoulder.setImmovable(); // boulders are heavy...
+    newBoulder.setVelocityX(this.getVelocityForTempo()); // and fast...
 
+    // add the dust cloud sprite for this boulder
     let newBoulderDust = this.physics.add.sprite(
       this.sys.game.config.width + 30,
       this.ground.y - 20,
       "dustCloudImage"
     );
+    // appreantly dust clouds are as heavy and fast as the boulders...
     newBoulderDust.setImmovable();
     newBoulderDust.setVelocityX(this.getVelocityForTempo());
 
+    // update the boudler array with the new items
     this.bouldersArray.push({
       sprite: newBoulder,
       size: boulderName,
@@ -410,9 +431,12 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  updateHitPoints() {
+  // when player has lost a level, we subtract one hitpoint, and update the relevant hitpoint image to look that way
+  subtractHitPoints() {
     this.hitPointsArray[3 - this.myHero.hitPoints].setTexture("emptyHitPoint");
     this.myHero.hitPoints--;
+    let newHitPointsForLevel = JSON.parse(localStorage.getItem("hitPointsSubtracted")) + 1;
+    localStorage.setItem("hitPointsSubtracted", JSON.stringify(newHitPointsForLevel));
   }
 
   // we calculate the average jump rating (from 0 to 100 per jump) of user in this level, and multiply that by 5,
@@ -424,22 +448,20 @@ class GameScene extends Phaser.Scene {
     // calculate the average of our level points array using that function, multiply by 5 to get a points range of 0-500.
     // floor it down so it will be an integer
     const levelPoints = Math.floor(average(this.levelPointsArray) * 5);
-    this.gamePointsArray.push(levelPoints);
-    this.totalPoints = levelPoints;
-    this.pointsLowerText.text = this.totalPoints;
-    console.log("final level score is: ", this.gamePointsArray[this.levelIndex]);
+    this.pointsLowerText.text = levelPoints;
+    console.log("final level score is: ", levelPoints); // log it to console
+    // if user passed his previous highscore
     if (this.userHighScores[this.stageIndex][this.levelIndex] < levelPoints) {
-      this.highScoreLowerText.text = levelPoints;
-      console.log("passed your highscore!");
-      this.userHighScores[this.stageIndex][this.levelIndex] = levelPoints;
-      localStorage.setItem("userHighScores", JSON.stringify(this.userHighScores));
+      console.log("passed your highscore!"); // log it to console
+      this.highScoreLowerText.text = levelPoints; // update the highscore text
+      this.userHighScores[this.stageIndex][this.levelIndex] = levelPoints; // update the highscore in the highscore matrix
+      localStorage.setItem("userHighScores", JSON.stringify(this.userHighScores)); // update the highscore matrix in localStorage
     }
   }
 
   // function to check and execute stuff related to the current stage
   stageStatusCheck() {
     // if hit points reaches zero, player need to restart this stage
-
     if (this.myHero.hitPoints === 0) {
       this.stageState = STAGE_STATES.LOST;
 
@@ -451,37 +473,39 @@ class GameScene extends Phaser.Scene {
           JSON.stringify({ stage: this.stageIndex, level: 0 })
         );
       }
+      // reset hitPointsSubtracted. new chance...
+      localStorage.removeItem("hitPointsSubtracted");
 
       return;
     }
 
     // if player won this level, update indexes accordingli
     if (this.levelState === LEVEL_STATES.WON) {
-      // first, check if we have just finished a stage, update indexes accordingly
-
-      // if we finished a level without ending a stage, so we are on hold until we start the next level
+      // if this is not the last level of this stage
       if (this.levelIndex < 5) {
-        // if this is not the last level of this stage
         this.levelIndex++; // advance to next level in this stage
         // if it's the last level unlocked, also update this.LastLevelUnlocked to be the newly unlocked level
         if (this.levelIsLastUnlocked) {
-          this.LastLevelUnlocked.level++;
+          this.lastLevelUnlocked.level++;
         }
+        // if we finished a level without ending a stage, we are on hold until we start the next level
         this.stageState = STAGE_STATES.ON_HOLD;
       }
-      // else advance to new stage
+
+      // if this is the last level of this stage, advance to new stage
       else {
         this.levelIndex = 0;
         this.stageIndex++;
         this.stageState = STAGE_STATES.WON;
+        localStorage.removeItem("hitPointsSubtracted");
         // if it's the last level unlocked, also update this.LastLevelUnlocked to be the newly unlocked level
         if (this.levelIsLastUnlocked) {
-          this.LastLevelUnlocked.stage++;
-          this.LastLevelUnlocked.level = 0;
+          this.lastLevelUnlocked.stage++;
+          this.lastLevelUnlocked.level = 0; // first level in the new stage...
         }
       }
 
-      // change localStorage data to the new next level
+      // change localStorage data to the new next level, after we updated the indexes accordingly
       localStorage.setItem(
         "LastLevelUnlocked",
         JSON.stringify({ stage: this.stageIndex, level: this.levelIndex })
@@ -499,8 +523,8 @@ class GameScene extends Phaser.Scene {
   // checks if current level is the last one player unlocked. return true if it does, false otherwise
   checkIfLastLevelUnlocked() {
     if (
-      this.stageIndex === this.LastLevelUnlocked.stage &&
-      this.levelIndex === this.LastLevelUnlocked.level
+      this.stageIndex === this.lastLevelUnlocked.stage &&
+      this.levelIndex === this.lastLevelUnlocked.level
     ) {
       return true;
     }
@@ -516,7 +540,7 @@ class GameScene extends Phaser.Scene {
       //this.failSound.play(); // play a failure sound
       this.myHero.heroSprite.play("hurtAnimation"); // play failure animation
       ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
-      this.updateHitPoints(); // update hitpoints after level failure
+      this.subtractHitPoints(); // subtract hitpoints after level failure
     }
     // if player passed all intervals correctly
     else if (intervalNumber === totalIntervals) {
@@ -580,7 +604,7 @@ class GameScene extends Phaser.Scene {
     console.log("jump score is: ", jumpScore);
   }
 
-  // general function to check and register the user's current jump.
+  // general function to check, register and execute user's jump.
   jumpTimingCheck() {
     // current jump time
     const jumpTime = Date.now();
@@ -597,7 +621,7 @@ class GameScene extends Phaser.Scene {
     // get the note element that is closest to the jump
     const closestNote = this.getClosestNoteToKeyPress(timePassedSinceJump);
 
-    let successfulJump = true;
+    let successfulJump = true; // jump is okay until proven else...
 
     // if we're on count-in, any jump is valid, so we jump and return
     if (closestNote.noteType === NOTES.COUNT_NOTE) {
@@ -607,7 +631,7 @@ class GameScene extends Phaser.Scene {
     // register the jump in our timing list
     this.registerJump(closestNote);
 
-    //if jump is good, in the next if statement we log to the console details regarding the jump.
+    //if jump is good, in the next if statement we log to the console details regarding the jump, and register the score in our score array.
     if (delay === 0 && closestNote.noteType === NOTES.PLAYED_NOTE) {
       this.registerScore(delay);
       console.log("just in time!");
@@ -618,13 +642,13 @@ class GameScene extends Phaser.Scene {
       this.registerScore(preDelay);
       console.log("jump time is ", preDelay, "milliseconds early");
     }
-    // if jump was not good, we inform to the user the details regarding the jump, and update level to lost
+    // if jump was not good, we inform to the user the details regarding the jump, and update level status to lost
     else {
       successfulJump = false;
       if (closestNote.noteType === NOTES.REST_NOTE) {
-        this.infoMessage = "jumped on rest";
+        this.infoMessage = "Jumped on a Rest Note";
       } else {
-        this.infoMessage = "not jumped on time";
+        this.infoMessage = "Not Jumped on Time";
       }
       this.levelState = LEVEL_STATES.LOST;
     }
@@ -644,6 +668,7 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  // when called upon, go back to level menu with the given time
   goBackToMenu(delay = DEFAULT_GAME_START_DELAY) {
     this.time.addEvent({
       delay: delay,
@@ -654,14 +679,18 @@ class GameScene extends Phaser.Scene {
   }
 
   update(time, delta) {
+    // if user presses ESC button, leave scene
     if (Phaser.Input.Keyboard.JustDown(this.escButton)) {
+      // if level was rolling, stop the intervals
       if (this.levelState === LEVEL_STATES.ON_MOTION) {
         ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
       }
-      this.countInText.text = "";
-      this.infoText.text = "exiting...";
-      this.goBackToMenu(1000);
+      this.removeBoulders();
+      this.countInText.text = ""; // making sure there is no text overload if we're in count-in
+      this.infoText.text = "Exiting"; // and informing the player of his\her choice
+      this.goBackToMenu(1000); // and aborting mission...
     }
+
     // if level is on motion, move the background image and rotate all boulders
     if (this.levelState === LEVEL_STATES.ON_MOTION) {
       this.background.tilePositionX += 6;
@@ -686,13 +715,13 @@ class GameScene extends Phaser.Scene {
     if (this.stageState !== STAGE_STATES.ON_MOTION && this.levelIndex < this.sheetJson.length) {
       // if player has failed 3 times, tell him that and don't start a new level (by doing return)
       if (this.stageState === STAGE_STATES.LOST) {
-        this.infoText.text = "you lost";
+        this.infoText.text = "You Lost";
         this.goBackToMenu();
         return;
       }
       // if player has won, tell him that and don't start a new level (by doing return)
       if (this.stageState === STAGE_STATES.WON) {
-        this.infoText.text = "you won";
+        this.infoText.text = "You Won!";
         ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // remove the sheet from screen
         this.goBackToMenu();
         return;
