@@ -25,7 +25,49 @@ class LevelMenuScene extends Phaser.Scene {
     this.background = this.add
       .tileSprite(0, 0, this.width, this.height, "menuBackgroundImage")
       .setOrigin(0, 0);
+
+    // title text - select a level
+    let style = {
+      fontFamily: "Chewy",
+      fill: "#ffffff",
+      fontSize: "60px",
+    };
+    this.add.text(this.sys.game.config.width / 2, 60, "Select a Level", style).setOrigin(0.5, 0.5);
+
+    // button so player can go back to main menu
+    let backToMenuButton = this.add
+      .sprite(100, 60, "unlockedStageImage")
+      .setInteractive({ cursor: "pointer", useHandCursor: true }); // so we can press it
+    // pressing the sprite causing the next arrow function to execute:
+
+    backToMenuButton.on("pointerdown", () => {
+      // when a unlocked level is pressed, start GameScene with current stage and level
+      this.scene.start("TitleScene");
+    });
+    // if cursor is over the button, change the tint accordingly. red if level is locked, green otherwise
+    backToMenuButton.on("pointerover", () => {
+      backToMenuButton.setTint(0x26ff00);
+    });
+
+    // remove tint after cursor leaves this button
+    backToMenuButton.on("pointerout", () => {
+      backToMenuButton.clearTint();
+    });
+
+    // add a new text with the needed level number in the same location
+    style = {
+      fontFamily: "Chewy",
+      fill: "#ffffff",
+      wordWrap: true,
+      wordWrapWidth: backToMenuButton.width,
+      align: "center",
+      fontSize: "30px",
+    };
+    let buttonText = this.add
+      .text(backToMenuButton.x, backToMenuButton.y, "Main Menu", style)
+      .setOrigin(0.5, 0.5); // centerize text to image
   }
+
   create() {
     // fetch previous best scores from localStorage
     this.userHighScores = JSON.parse(localStorage.getItem("userHighScores"));
