@@ -42,10 +42,10 @@ class LevelMenuScene extends Phaser.Scene {
     // pressing the sprite causing the next arrow function to execute:
 
     backToMenuButton.on("pointerdown", () => {
-      // when a unlocked level is pressed, start GameScene with current stage and level
+      // when a button is pressed, go back to main menu
       this.scene.start("TitleScene");
     });
-    // if cursor is over the button, change the tint accordingly. red if level is locked, green otherwise
+    // if cursor is over the button, change the tint to green
     backToMenuButton.on("pointerover", () => {
       backToMenuButton.setTint(0x26ff00);
     });
@@ -55,7 +55,7 @@ class LevelMenuScene extends Phaser.Scene {
       backToMenuButton.clearTint();
     });
 
-    // add a new text with the needed level number in the same location
+    // add a new text for this button
     style = {
       fontFamily: "Chewy",
       fill: "#ffffff",

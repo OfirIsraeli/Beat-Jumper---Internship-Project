@@ -3,6 +3,8 @@ import BootScene from "./scenes/BootScene";
 import TitleScene from "./scenes/TitleScene";
 import LevelMenuScene from "./scenes/LevelMenuScene";
 import GameScene from "./scenes/Game/GameScene";
+import HighScoreMenuScene from "./scenes/Highscores/HighScoreMenuScene";
+import StageHighScoreScene from "./scenes/Highscores/StageHighScoreScene";
 import * as SpinePlugin from "./SpinePlugin.js";
 import * as WaaSampler from "waa-sampler";
 
@@ -24,7 +26,14 @@ const config = {
       debug: false,
     },
   },
-  scene: [BootScene, TitleScene, LevelMenuScene, GameScene],
+  scene: [
+    BootScene,
+    TitleScene,
+    HighScoreMenuScene,
+    StageHighScoreScene,
+    LevelMenuScene,
+    GameScene,
+  ],
   plugins: {
     scene: [{ key: "SpinePlugin", plugin: window.SpinePlugin, mapping: "spine" }],
   },

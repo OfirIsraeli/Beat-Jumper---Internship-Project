@@ -39,7 +39,7 @@ class TitleScene extends Phaser.Scene {
     this.createNewMenuButton("Play", "LevelMenuScene", 0);
     // todo: create scenes for each of these:
     this.createNewMenuButton("How to Play", "LevelMenuScene", 1);
-    this.createNewMenuButton("Highscores", "LevelMenuScene", 2);
+    this.createNewMenuButton("Highscores", "HighScoreMenuScene", 2);
     this.createNewMenuButton("Options", "LevelMenuScene", 3); // todo: reset game data option
     this.createNewMenuButton("Credits", "LevelMenuScene", 4);
   }
