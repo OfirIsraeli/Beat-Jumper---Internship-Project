@@ -11,10 +11,7 @@ class BootScene extends Phaser.Scene {
     this.load.image("menuBackgroundImage", "assets/images/menuBackground.png");
     this.load.image("groundImage", "assets/images/ground.png");
     this.load.image("smallBlockImage", "assets/images/little stone grey.png");
-    this.load.image(
-      "mediumBlockImage",
-      "assets/images/little stone 1 grey.png"
-    );
+    this.load.image("mediumBlockImage", "assets/images/little stone 1 grey.png");
     this.load.image("largeBlockImage", "assets/images/mid stone.png");
     this.load.image("dustCloudImage", "assets/images/dust cloud.png");
     this.load.image("fullHitPoint", "assets/images/Life.png");

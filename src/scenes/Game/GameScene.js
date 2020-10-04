@@ -1,5 +1,7 @@
 import Phaser from "phaser";
 import Hero from "../../sprites/Hero";
+import Boulder from "../../sprites/Boulder";
+
 // text utillities, positioning and styling
 import { initText } from "./textUtils";
 // ---imports of various needed data structures---
@@ -17,37 +19,6 @@ import { BUS_EVENTS } from "bandpad-vexflow";
 // -------
 
 // ------------------ CONSTANTS ---------------- //
-
-/**
- * points each note division (1 as smallest note, 4 as biggest) to the relevant
- * adjustment in height (in game) that is needed for a boulder of the same size
- * so they would appear on ground
- */
-const BOULDER_HEIGHTS = {
-  1: -34,
-  2: -50,
-  4: -75,
-};
-
-/**
- * points each note division (1 as smallest note, 4 as biggest) to the relevant
- * image string for image loading
- */
-const BOULDER_IMAGES = {
-  1: "smallBlockImage",
-  2: "mediumBlockImage",
-  4: "largeBlockImage",
-};
-
-/**
- * points a size of a boulder to the relevant
- * image string for image loading
- */
-const BOULDER_SIZES = {
-  SMALL: "smallBlockImage",
-  MEDIUM: "mediumBlockImage",
-  LARGE: "largeBlockImage",
-};
 
 /**
  * points each note division (1 as smallest note, 4 as biggest) to the relevant
@@ -155,9 +126,9 @@ class GameScene extends Phaser.Scene {
     this.sheetJson = data.stageJson;
     // user's current highscore.
     this.userHighScores = data.userHighScores;
-    // the user's last level unlocked (so last level not won). comes with stage and level numbers.
+    // user's last level unlocked (so last level not won). comes with stage and level numbers.
     this.lastLevelUnlocked = data.lastLevelUnlocked;
-    //
+    // amount of hitpoints subtracted from hero (so number of failed attempts) in his last attempt playing the last unlocked stage.
     this.hitPointsSubtracted = data.hitPointsSubtracted;
   }
 
@@ -202,11 +173,12 @@ class GameScene extends Phaser.Scene {
       this.add.sprite(1140, 60, "fullHitPoint"),
       this.add.sprite(1220, 60, "fullHitPoint"),
     ];
-    console.log();
+    // if we're in the last unlocked stage by user
     if (this.stageIndex === this.lastLevelUnlocked.stage) {
+      // subtract the needed amount of HP from hero, so he will have the same HP as he did in his last attempt of this stage
       for (let i = 0; i < this.hitPointsSubtracted; i++) {
-        this.hitPointsArray[3 - this.myHero.hitPoints].setTexture("emptyHitPoint");
-        this.myHero.hitPoints--;
+        this.hitPointsArray[3 - this.myHero.hitPoints].setTexture("emptyHitPoint"); // change texture to subtracted HP
+        this.myHero.hitPoints--; // subtract HP from hero
       }
     }
   }
@@ -382,61 +354,26 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  // function that defines a boulder sprite and it's needed attributes for the level
+  // function that adds a boulder to the level and pushes it into our bouldersArray
   addBoulder(noteIndex) {
-    // name of the needed boulder. Needed to load the relevant image
-    const boulderName = this.getRelevantBoulderName(noteIndex);
-    let newBoulder = this.physics.add.sprite(
-      // define a new sprite
-      this.sys.game.config.width,
-      this.ground.y + this.getRelevantBoulderHeight(noteIndex),
-      boulderName
-    );
-    newBoulder.setImmovable(); // boulders are heavy...
-    newBoulder.setVelocityX(this.getVelocityForTempo()); // and fast...
-
-    // add the dust cloud sprite for this boulder
-    let newBoulderDust = this.physics.add.sprite(
-      this.sys.game.config.width + 30,
-      this.ground.y - 20,
-      "dustCloudImage"
-    );
-    // appreantly dust clouds are as heavy and fast as the boulders...
-    newBoulderDust.setImmovable();
-    newBoulderDust.setVelocityX(this.getVelocityForTempo());
-
-    // update the boudler array with the new items
-    this.bouldersArray.push({
-      sprite: newBoulder,
-      size: boulderName,
-      dustSprite: newBoulderDust,
-    });
-  }
-
-  // function that gets the needed height for the current boulder to spawn, by the current note length
-  getRelevantBoulderName(index) {
-    return BOULDER_IMAGES[this.scoreMap[index][0]];
-  }
-
-  // function that gets the needed height for the current boulder to spawn, by the current note length
-  getRelevantBoulderHeight(index) {
-    return BOULDER_HEIGHTS[this.scoreMap[index][0]];
+    let newBoulder = new Boulder({ scene: this.scene, noteIndex: noteIndex });
+    this.bouldersArray.push(newBoulder);
   }
 
   // function that remove all boulder sprite objects from the game. Used in case of losing a level.
   removeBoulders() {
-    for (let i = 0; i < this.bouldersArray.length; i++) {
-      this.bouldersArray[i].sprite.destroy();
-      this.bouldersArray[i].dustSprite.destroy();
-    }
+    this.bouldersArray.forEach((boulder) => {
+      boulder.destroy();
+    });
   }
 
   // when player has lost a level, we subtract one hitpoint, and update the relevant hitpoint image to look that way
   subtractHitPoints() {
     this.hitPointsArray[3 - this.myHero.hitPoints].setTexture("emptyHitPoint");
     this.myHero.hitPoints--;
-    let newHitPointsForLevel = JSON.parse(localStorage.getItem("hitPointsSubtracted")) + 1;
-    localStorage.setItem("hitPointsSubtracted", JSON.stringify(newHitPointsForLevel));
+    // we add one more HP subtracted to the one we had before in localStore
+    let newhitPointsSubtracted = JSON.parse(localStorage.getItem("hitPointsSubtracted")) + 1;
+    localStorage.setItem("hitPointsSubtracted", JSON.stringify(newhitPointsSubtracted));
   }
 
   // we calculate the average jump rating (from 0 to 100 per jump) of user in this level, and multiply that by 5,
@@ -473,9 +410,7 @@ class GameScene extends Phaser.Scene {
           JSON.stringify({ stage: this.stageIndex, level: 0 })
         );
       }
-      // reset hitPointsSubtracted. new chance...
-      localStorage.removeItem("hitPointsSubtracted");
-
+      localStorage.removeItem("hitPointsSubtracted"); // reset hitPointsSubtracted. new chance...
       return;
     }
 
@@ -497,7 +432,7 @@ class GameScene extends Phaser.Scene {
         this.levelIndex = 0;
         this.stageIndex++;
         this.stageState = STAGE_STATES.WON;
-        localStorage.removeItem("hitPointsSubtracted");
+        localStorage.removeItem("hitPointsSubtracted"); // reset hitPointsSubtracted. new chance per new stage...
         // if it's the last level unlocked, also update this.LastLevelUnlocked to be the newly unlocked level
         if (this.levelIsLastUnlocked) {
           this.lastLevelUnlocked.stage++;
@@ -538,7 +473,7 @@ class GameScene extends Phaser.Scene {
     if (this.levelState === LEVEL_STATES.LOST) {
       this.removeBoulders(); // remove all boulders from game
       //this.failSound.play(); // play a failure sound
-      this.myHero.heroSprite.play("hurtAnimation"); // play failure animation
+      this.myHero.hurt(); // play failure animation
       ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
       this.subtractHitPoints(); // subtract hitpoints after level failure
     }
@@ -547,25 +482,20 @@ class GameScene extends Phaser.Scene {
       console.log("won level!");
       this.levelState = LEVEL_STATES.WON; // player has won the level
       this.calculateLevelPoints(); // calculate points for that level, add to total points
-      this.myHero.heroSprite.play("winAnimation"); // play winning animation
+      this.myHero.cheer(); // play winning animation
     }
     // if level should not end for any reason, return and continue the intervals
     else {
       return;
     }
     // in any case of a level ending, do these:
-    this.myHero.heroSprite.anims.chain("standingAnimation"); // stand after level is finished
+    this.myHero.stand(); // stand after level is finished
     this.stageStatusCheck(); // check and update data regarding the stage and the new level
     // if level was not lost, set infoMessage to display the next level user is going to face
     // if level lost, we inform the player details regarding failure in the jumpTimingCheck function
     if (this.levelState !== LEVEL_STATES.LOST) {
       this.infoMessage = "Level " + (this.levelIndex + 1);
     }
-  }
-
-  // function that calculates the needed boulder velocity to match the given tempo
-  getVelocityForTempo() {
-    return -8 * this.tempo - 40;
   }
 
   // ------------------ UPDATE METHODS ---------------- //
@@ -657,24 +587,11 @@ class GameScene extends Phaser.Scene {
     this.myHero.jump(successfulJump, closestNote.noteSize);
   }
 
-  // each boulder of each size will get a different roation speed
-  rotateBoulderAccordingToSize(boulderIndex) {
-    if (this.bouldersArray[boulderIndex].size === BOULDER_SIZES.SMALL) {
-      this.bouldersArray[boulderIndex].sprite.angle -= 15;
-    } else if (this.bouldersArray[boulderIndex].size === BOULDER_SIZES.MEDIUM) {
-      this.bouldersArray[boulderIndex].sprite.angle -= 10;
-    } else {
-      this.bouldersArray[boulderIndex].sprite.angle -= 5;
-    }
-  }
-
   // when called upon, go back to level menu with the given time
   goBackToMenu(delay = DEFAULT_GAME_START_DELAY) {
     this.time.addEvent({
       delay: delay,
-      callback: () => {
-        this.scene.start("LevelMenuScene");
-      },
+      callback: () => this.scene.start("LevelMenuScene"),
     });
   }
 
@@ -694,15 +611,15 @@ class GameScene extends Phaser.Scene {
     // if level is on motion, move the background image and rotate all boulders
     if (this.levelState === LEVEL_STATES.ON_MOTION) {
       this.background.tilePositionX += 6;
-      for (let i = 0; i < this.bouldersArray.length; i++) {
-        this.rotateBoulderAccordingToSize(i);
-      }
+      this.bouldersArray.forEach((boulder) => {
+        boulder.roll();
+      });
     }
 
     // if player has pressed space-bar while hero was touching the ground and level is played, start jump calculations and excecutions
     if (
       Phaser.Input.Keyboard.JustDown(this.spaceBar) &&
-      this.myHero.heroSprite.body.touching.down &&
+      this.myHero.onGround() &&
       this.levelState === LEVEL_STATES.ON_MOTION
     ) {
       // play a sound for that jump
@@ -736,9 +653,7 @@ class GameScene extends Phaser.Scene {
       // play a level with a slight delay
       this.time.addEvent({
         delay: DEFAULT_GAME_START_DELAY,
-        callback: () => {
-          this.playLevel(this.sheetJson[this.levelIndex]);
-        },
+        callback: () => this.playLevel(this.sheetJson[this.levelIndex]),
       });
     }
   }
