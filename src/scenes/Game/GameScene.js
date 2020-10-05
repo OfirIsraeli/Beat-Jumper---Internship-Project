@@ -4,35 +4,18 @@ import Boulder from "../../sprites/Boulder";
 
 // text utillities, positioning and styling
 import { initText } from "./textUtils";
-// ---imports of various needed data structures---
-// a function that creates a data structure used to track note placements in a level
-import createLevelScoreMap from "../../lib/createLevelScoreMap";
-// a function that creates a data structure used to track note data regarding user's behavior in a level.
-import createTimingList from "../../lib/createTimingList";
 // --- BandPad utillites ---
-// creates the music sheet element and processes the given musicJsons
-import createScore from "../../lib/createScore";
 // handles score intervals and general sheet music execution
 import * as ScoreManager from "bandpad-vexflow";
 // handles specific events during the intervals
 import { BUS_EVENTS } from "bandpad-vexflow";
+// handles specific events during the intervals
+import { playLevel } from "./PlayLevel";
 // -------
 
 // ------------------ CONSTANTS ---------------- //
 
-/**
- * points each note division (1 as smallest note, 4 as biggest) to the relevant
- * note size
- */
-const NOTES_SIZES = {
-  1: 4, // 1 = quarter note
-  2: 8, // 2 = 8th note
-  4: 16, // 4 = 16th note
-};
-
-/**
- * various states that each stage could be in
- */
+// various states that each stage could be in
 const STAGE_STATES = {
   // there is no level being played right now
   ON_HOLD: -1,
@@ -46,9 +29,7 @@ const STAGE_STATES = {
   WON: 3,
 };
 
-/**
- * various states that each level could be in
- */
+// various states that each level could be in
 const LEVEL_STATES = {
   // not started yet
   NOT_STARTED: -2,
@@ -60,34 +41,11 @@ const LEVEL_STATES = {
   WON: 1,
 };
 
-/**
- * in our main interval function, we distinguish between two different interval types:
- * intervals that are part of the count-in, and intervals that are part of the sheet music itself
- */
-const INTERVAL_TYPES = {
-  COUNT_IN_INTERVAL: 1,
-  NOTES_INTERVAL: 2,
-};
-
-/**
- * types of notes that could be found in the program
- */
+// types of notes that could be found in the program
 const NOTES = {
   REST_NOTE: "noPlace", // noPlace is the string value that occurs in the given ScoreJsons as an identifier for a rest note
   PLAYED_NOTE: "playedNote",
   COUNT_NOTE: "countDown",
-};
-
-/*
-  we push a boulder to the game only if the interval is 4 or 8 intervals before the end of count in 
-  and 4 or 8 intervals before the end of the played notes. reason for that is so boulders will reach the player in time,
-  so we want to push a boulder exactly 4 or 8 intervals before the time we want it to reach the player.
-  4 or 8 intervals is dependent on the given smallest division (16th notes will be 8 intervals, else we want to spawn
-  boulders 4 intervals before)
-*/
-const INTERVAL_PREDECESSOR = {
-  2: 4,
-  4: 8,
 };
 
 // default ground height adjustment
@@ -95,17 +53,24 @@ const GROUND_HEIGHT = 0.747;
 
 // the acceptable delay (in milliseconds, before or after a note)
 // player can be in his jump. beyond that delay, it will be considered as a bad jump
-const ACCEPTABLE_DELAY = 140;
+const ACCEPTABLE_DELAY = 150;
 
 // rest time in milliseconds each level will have before next one starts
 const DEFAULT_GAME_START_DELAY = 3500;
 
-const SIXTEENTH_DIVISIONS = 4;
+// from this level onwards, blocks are invisible
+const INVISIBLE_BOULDERS_LVL_THRESHOLD = 4;
+
+const EARLY_JUMP_MSG = "You jumped too early!";
+const LATE_JUMP_MSG = "You jumped too late!";
+const WRONG_JUMP_MSG = "You jumped at the wrong time!";
+const NO_BOULDERS_MSG = "\nNow without boulders!";
 
 //  font style and color for a text in the scene
 export const FONT_STYLE = {
   fontFamily: "Chewy",
   fill: "#14141f",
+  align: "center",
 };
 
 // and now for the scene itself...
@@ -194,141 +159,6 @@ class GameScene extends Phaser.Scene {
     // an array  that will keep track of the points in the CURRENT level.
     // size will be the amount of times user is required to jump.
     this.levelPointsArray = [];
-  }
-
-  // main function that runs a level with a given musicJson
-  playLevel(levelJson) {
-    // show the score DIV element.
-    let scoreDIVElement = document.getElementById("score-id");
-    scoreDIVElement.style.display = "block";
-
-    // check if level we're about to play is the last level unlocked by user.
-    this.levelIsLastUnlocked = this.checkIfLastLevelUnlocked();
-
-    // inform player what the high score of this level is
-    this.highScoreLowerText.text = this.userHighScores[this.stageIndex][this.levelIndex];
-    // until this level is complete so we can calculate the score (points), we set default value of 0
-    this.pointsLowerText.text = 0;
-    // at a start of each level, infoText is empty so screen would be clear
-    this.infoText.text = "";
-
-    //level divisions. 1 = quarters, 2 = eights, 4 = 16th
-    this.divisions = levelJson.divisions;
-
-    // set tempo for this level
-    this.tempo = 80;
-
-    // if level is based on 16th notes, play in hald tempo (it's a game for children after all...)
-    if (this.divisions === SIXTEENTH_DIVISIONS) {
-      this.tempo = this.tempo / 2;
-    }
-
-    // create music score for the level
-    createScore(levelJson, this.tempo, function (event, value) {});
-
-    // array of boulder sprites. will be filled with sprites during the intervals
-    this.bouldersArray = [];
-
-    // actual size of the division. quarters = 4 etc
-    this.divSize = NOTES_SIZES[this.divisions];
-
-    // total amount of measures in this level (excluding count-in)
-    this.amountOfBars = Object.keys(levelJson.partElements[0].scoreMap).length;
-
-    //this calculates the smallest division in the game in milliseconds
-    this.divisionDuration = ((60 / this.tempo) * 1000) / this.divisions;
-
-    /*
-    variables needed for intervals:
-    */
-    let intervalType = INTERVAL_TYPES.COUNT_IN_INTERVAL; // define the starting interval type as a count-in interval
-    let noteIndex = 0; // index that tracks the notes of our scoreMap (so excluding the count-in notes)
-    let intervalNumber = 0; // tracks the number of overall interval we're in
-    let countInIndex = 1; // index that will appear on screen on the final bar of count-in each quarter note
-    const countInIntervals = 2 * this.divSize; // 2 bars, each has divSize number of intervals
-    const totalIntervals = countInIntervals + this.divSize * this.amountOfBars; // total amount of intervals
-
-    // data structures processing - each one explained in its' function description
-    this.scoreMap = createLevelScoreMap(levelJson, this.amountOfBars);
-    this.timingList = createTimingList(this.divisionDuration, this.scoreMap, countInIntervals);
-
-    // start level
-    this.levelState = LEVEL_STATES.ON_MOTION;
-    this.myHero.walk(); // there goes my hero...
-
-    // the arrow function that happens each interval
-    ScoreManager.setEventFunction((event, value) => {
-      if (event === BUS_EVENTS.UPDATE) {
-        if (intervalNumber < totalIntervals) {
-          // the 3 notes items closest to the current interval. Needed for calculations for user's jump.
-          this.curNotes = {
-            prevNote: this.timingList[intervalNumber - 1],
-            curNote: this.timingList[intervalNumber],
-            nextNote: this.timingList[intervalNumber + 1],
-          };
-          // if we are not in count-in
-          if (intervalType !== INTERVAL_TYPES.COUNT_IN_INTERVAL) {
-            // check if user jumped (visited) the previous note, if it was a played note. level lost if not.
-            if (
-              this.curNotes.prevNote.noteType === NOTES.PLAYED_NOTE &&
-              this.curNotes.prevNote.visited === false
-            ) {
-              this.levelState = LEVEL_STATES.LOST;
-              this.infoMessage = "Skipped a Note";
-            }
-          }
-        }
-
-        // if we're in an interval of a quarter note in the second bar of the count-in.
-        // happens 4 times overall regardless of divisions
-        if (
-          value >= countInIntervals / 2 && // second bar
-          intervalType === INTERVAL_TYPES.COUNT_IN_INTERVAL && // of the count-in
-          value <= countInIntervals &&
-          value % this.divisions === 0 // we're in a quarter note interval
-        ) {
-          this.countInText.text = countInIndex; // change countInText to the number of quarter note in the bar we're in
-          countInIndex++;
-        }
-        // after we're done with count-in, show no text from countInText
-        if (value === 0 && intervalType === INTERVAL_TYPES.NOTES_INTERVAL) {
-          //this.countInText.text = "";
-        }
-        /*
-         add a boulder to the game if needed.
-         we push a boulder to the game only if the interval is 4 or 8 intervals before the end of count in 
-         and 4 or 8 intervals before the end of the playrd notes. reason for that is so boulders will reach the player in time,
-         so we want to push a boulder exactly 4 or 8 intervals before the time we want it to reach the player.
-         4 or 8 intervals is dependent on the given smallest division (16th notes will be 8 intervals, else we want to spawn
-          boulders 4 intervals before)
-        */
-        if (
-          (value >= countInIntervals - INTERVAL_PREDECESSOR[this.divisions] &&
-            intervalType === INTERVAL_TYPES.COUNT_IN_INTERVAL) || // if we're less than 4 intervals before the end of count in
-          (value < this.scoreMap.length - INTERVAL_PREDECESSOR[this.divisions] &&
-            intervalType === INTERVAL_TYPES.NOTES_INTERVAL) // if we're more than 4 intervals before the end of notes
-        ) {
-          if (this.scoreMap[noteIndex][1] !== NOTES.REST_NOTE) {
-            // if current note is not a rest note
-            this.addBoulder(noteIndex); // add a boulder to the game
-          }
-          noteIndex++;
-        }
-
-        intervalNumber++;
-        // if countdown is done
-        if (intervalNumber === countInIntervals) {
-          intervalType = INTERVAL_TYPES.NOTES_INTERVAL; // switch to note interval type
-          this.countInText.text = ""; // after we're done with count-in, show no text from countInText
-        }
-        this.levelStatusCheck(intervalNumber, totalIntervals); // check if there is a need to end the level.
-      }
-    });
-
-    // start vexflow, plays the score along with executing the intervals
-    ScoreManager.scoreGetEvent(BUS_EVENTS.PLAY, {
-      smoothNotePointer: true,
-    });
   }
 
   // each stage gets a little different tint
@@ -495,18 +325,21 @@ class GameScene extends Phaser.Scene {
     // if level lost, we inform the player details regarding failure in the jumpTimingCheck function
     if (this.levelState !== LEVEL_STATES.LOST) {
       this.infoMessage = "Level " + (this.levelIndex + 1);
+      if (this.levelIndex >= INVISIBLE_BOULDERS_LVL_THRESHOLD) {
+        this.infoMessage += NO_BOULDERS_MSG;
+      }
     }
   }
 
   // ------------------ UPDATE METHODS ---------------- //
 
   // function that gets the note that is closest to the user's jump.
-  getClosestNoteToKeyPress(timePassedSinceJump) {
-    // calculate the distance between curNote and timePassedSinceJump
-    const curNoteDistance = Math.abs(this.curNotes.curNote.division - timePassedSinceJump);
+  getClosestNoteToKeyPress(timePassedSinceLevelStart) {
+    // calculate the distance between curNote and timePassedSinceLevelStart
+    const curNoteDistance = Math.abs(this.curNotes.curNote.division - timePassedSinceLevelStart);
 
-    // calculate the distance between nextNote and timePassedSinceJump
-    const nextNoteDistance = Math.abs(this.curNotes.nextNote.division - timePassedSinceJump);
+    // calculate the distance between nextNote and timePassedSinceLevelStart
+    const nextNoteDistance = Math.abs(this.curNotes.nextNote.division - timePassedSinceLevelStart);
     const notesDistance = {};
     notesDistance[curNoteDistance] = this.curNotes.curNote;
     notesDistance[nextNoteDistance] = this.curNotes.nextNote;
@@ -540,19 +373,18 @@ class GameScene extends Phaser.Scene {
     const jumpTime = Date.now();
 
     // time passed since the start of the level until the jump
-    const timePassedSinceJump = jumpTime - this.myHero.walkStartTime;
+    const timePassedSinceLevelStart = jumpTime - this.myHero.walkStartTime;
 
     // calculates the delay of the jump from the note timing (if the player is dragging)
-    const delay = timePassedSinceJump % this.divisionDuration;
+    const delay = timePassedSinceLevelStart % this.divisionDuration;
 
     // calculates the pre-delay of the jump from the note timing (if the player is rushing)
-    const preDelay = this.divisionDuration - (timePassedSinceJump % this.divisionDuration);
+    const preDelay = this.divisionDuration - (timePassedSinceLevelStart % this.divisionDuration);
 
     // get the note element that is closest to the jump
-    const closestNote = this.getClosestNoteToKeyPress(timePassedSinceJump);
+    const closestNote = this.getClosestNoteToKeyPress(timePassedSinceLevelStart);
 
     let successfulJump = true; // jump is okay until proven else...
-
     // if we're on count-in, any jump is valid, so we jump and return
     if (closestNote.noteType === NOTES.COUNT_NOTE) {
       this.myHero.smallJump(successfulJump);
@@ -560,7 +392,6 @@ class GameScene extends Phaser.Scene {
     }
     // register the jump in our timing list
     this.registerJump(closestNote);
-
     //if jump is good, in the next if statement we log to the console details regarding the jump, and register the score in our score array.
     if (delay === 0 && closestNote.noteType === NOTES.PLAYED_NOTE) {
       this.registerScore(delay);
@@ -576,9 +407,15 @@ class GameScene extends Phaser.Scene {
     else {
       successfulJump = false;
       if (closestNote.noteType === NOTES.REST_NOTE) {
-        this.infoMessage = "Jumped on a Rest Note";
-      } else {
-        this.infoMessage = "Not Jumped on Time";
+        this.infoMessage = WRONG_JUMP_MSG;
+      }
+      // else, if the the jump failed because of delay, tell that to user
+      else if (Math.min(delay, preDelay) === delay) {
+        this.infoMessage = LATE_JUMP_MSG;
+      }
+      // else, it failed because user jumped too early. tell that to user
+      else {
+        this.infoMessage = EARLY_JUMP_MSG;
       }
       this.levelState = LEVEL_STATES.LOST;
     }
@@ -651,9 +488,15 @@ class GameScene extends Phaser.Scene {
       this.infoText.text = this.infoMessage;
 
       // play a level with a slight delay
+      // also, from level  (INVISIBLE_BOULDERS_LVL_THRESHOLD) onwards, we ask playLevel to make blocks invisible
       this.time.addEvent({
         delay: DEFAULT_GAME_START_DELAY,
-        callback: () => this.playLevel(this.sheetJson[this.levelIndex]),
+        callback: () =>
+          playLevel(
+            this,
+            this.sheetJson[this.levelIndex],
+            INVISIBLE_BOULDERS_LVL_THRESHOLD <= this.levelIndex
+          ),
       });
     }
   }

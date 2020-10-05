@@ -6,6 +6,7 @@
 const BOULDER_HEIGHTS = {
   1: -34,
   2: -50,
+  3: -60,
   4: -75,
 };
 
@@ -14,9 +15,10 @@ const BOULDER_HEIGHTS = {
  * image string for image loading
  */
 const BOULDER_IMAGES = {
-  1: "smallBlockImage",
-  2: "mediumBlockImage",
-  4: "largeBlockImage",
+  1: "smallBoulderImage",
+  2: "mediumBoulderImage",
+  3: "bigBoulderImage",
+  4: "largeBoulderImage",
 };
 
 /**
@@ -24,9 +26,10 @@ const BOULDER_IMAGES = {
  * image string for image loading
  */
 const BOULDER_SIZES = {
-  SMALL: "smallBlockImage",
-  MEDIUM: "mediumBlockImage",
-  LARGE: "largeBlockImage",
+  SMALL: "smallBoulderImage",
+  MEDIUM: "mediumBoulderImage",
+  BIG: "bigBoulderImage",
+  LARGE: "largeBoulderImage",
 };
 
 export default class Boulder {

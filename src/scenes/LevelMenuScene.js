@@ -1,12 +1,45 @@
 // imports of all scoreJsons as levels
-import scoreJson from "../sheets/beat";
-import scoreJson2 from "../sheets/sixh-test";
-import level1_1 from "../sheets/levels/level1-1";
-import level1_2 from "../sheets/levels/level1-2";
-import level1_3 from "../sheets/levels/level1-3";
-import level1_4 from "../sheets/levels/level1-4";
-import level1_5 from "../sheets/levels/level1-5";
-import level1_6 from "../sheets/levels/level1-6";
+import level1_1 from "../sheets/levels/level1/level1-1";
+import level1_2 from "../sheets/levels/level1/level1-2";
+import level1_3 from "../sheets/levels/level1/level1-3";
+import level1_4 from "../sheets/levels/level1/level1-4";
+import level1_5 from "../sheets/levels/level1/level1-5";
+import level1_6 from "../sheets/levels/level1/level1-6";
+
+import level2_1 from "../sheets/levels/level2/level2-1";
+import level2_2 from "../sheets/levels/level2/level2-2";
+import level2_3 from "../sheets/levels/level2/level2-3";
+import level2_4 from "../sheets/levels/level2/level2-4";
+import level2_5 from "../sheets/levels/level2/level2-5";
+import level2_6 from "../sheets/levels/level2/level2-6";
+
+import level3_1 from "../sheets/levels/level3/level3-1";
+import level3_2 from "../sheets/levels/level3/level3-2";
+import level3_3 from "../sheets/levels/level3/level3-3";
+import level3_4 from "../sheets/levels/level3/level3-4";
+import level3_5 from "../sheets/levels/level3/level3-5";
+import level3_6 from "../sheets/levels/level3/level3-6";
+
+import level4_1 from "../sheets/levels/level4/level4-1";
+import level4_2 from "../sheets/levels/level4/level4-2";
+import level4_3 from "../sheets/levels/level4/level4-3";
+import level4_4 from "../sheets/levels/level4/level4-4";
+import level4_5 from "../sheets/levels/level4/level4-5";
+import level4_6 from "../sheets/levels/level4/level4-6";
+
+import level5_1 from "../sheets/levels/level5/level5-1";
+import level5_2 from "../sheets/levels/level5/level5-2";
+import level5_3 from "../sheets/levels/level5/level5-3";
+import level5_4 from "../sheets/levels/level5/level5-4";
+import level5_5 from "../sheets/levels/level5/level5-5";
+import level5_6 from "../sheets/levels/level5/level5-6";
+
+import level6_1 from "../sheets/levels/level6/level6-1";
+import level6_2 from "../sheets/levels/level6/level6-2";
+import level6_3 from "../sheets/levels/level6/level6-3";
+import level6_4 from "../sheets/levels/level6/level6-4";
+import level6_5 from "../sheets/levels/level6/level6-5";
+import level6_6 from "../sheets/levels/level6/level6-6";
 
 const NUMBER_OF_STAGES = 6;
 const NUMBER_OF_LEVELS = 6;
@@ -102,12 +135,13 @@ class LevelMenuScene extends Phaser.Scene {
     }
 
     //define each stage as an array of levels
+
     const stageOne = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
-    const stageTwo = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
-    const stageThree = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
-    const stageFour = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
-    const stageFive = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
-    const stageSix = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
+    const stageTwo = [level2_1, level2_2, level2_3, level2_4, level2_5, level2_6];
+    const stageThree = [level3_1, level3_2, level3_3, level3_4, level3_5, level3_6];
+    const stageFour = [level4_1, level4_2, level4_3, level4_4, level4_5, level4_6];
+    const stageFive = [level5_1, level5_2, level5_3, level5_4, level5_5, level5_6];
+    const stageSix = [level6_1, level6_2, level6_3, level6_4, level6_5, level6_6];
     //define all stages as an array of stages (so it's a matrix of levels)
     this.stages = [stageOne, stageTwo, stageThree, stageFour, stageFive, stageSix];
     // define an array that will contain the following:

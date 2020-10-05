@@ -5,6 +5,8 @@ import LevelMenuScene from "./scenes/LevelMenuScene";
 import GameScene from "./scenes/Game/GameScene";
 import HighScoreMenuScene from "./scenes/Highscores/HighScoreMenuScene";
 import StageHighScoreScene from "./scenes/Highscores/StageHighScoreScene";
+import TutorialScene from "./scenes/TutorialScene";
+import CreditsScene from "./scenes/CreditsScene";
 import * as SpinePlugin from "./SpinePlugin.js";
 import * as WaaSampler from "waa-sampler";
 
@@ -29,6 +31,8 @@ const config = {
   scene: [
     BootScene,
     TitleScene,
+    TutorialScene,
+    CreditsScene,
     HighScoreMenuScene,
     StageHighScoreScene,
     LevelMenuScene,

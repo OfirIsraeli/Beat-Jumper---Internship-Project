@@ -1,7 +1,8 @@
 const JUMP_SIZE = {
   SMALL: 1,
   MEDIUM: 2,
-  BIG: 4,
+  BIG: 3,
+  LARGE: 4,
 };
 const DEFAULT_HIT_POINTS = 3;
 const DEFAULT_GRAVITY = 7000;
@@ -187,7 +188,7 @@ export default class Hero {
   // method for a medium hero jump. plays needed animations (if jump was either successful or not) and sets the needed negative gravity so jump will reach needed height
   mediumJump(successfulJump) {
     this.heroSprite.play("jumpAnimation");
-    this.heroSprite.setVelocityY(-1500);
+    this.heroSprite.setVelocityY(-1400);
     this.heroSprite.anims.chain("midAirAnimation");
     // if the jump is a successful one, finish the jump with landing and keep walking
     // if jump was not successful, game level will take care of the rest, so no need to finish the jump
@@ -218,6 +219,9 @@ export default class Hero {
       this.smallJump(successfulJump);
     }
     if (jumpSize === JUMP_SIZE.BIG) {
+      this.mediumJump(successfulJump);
+    }
+    if (jumpSize === JUMP_SIZE.LARGE) {
       this.bigJump(successfulJump);
     }
   }

@@ -1,13 +1,3 @@
-// imports of all scoreJsons as levels
-import scoreJson from "../sheets/beat";
-import scoreJson2 from "../sheets/sixh-test";
-import level1_1 from "../sheets/levels/level1-1";
-import level1_2 from "../sheets/levels/level1-2";
-import level1_3 from "../sheets/levels/level1-3";
-import level1_4 from "../sheets/levels/level1-4";
-import level1_5 from "../sheets/levels/level1-5";
-import level1_6 from "../sheets/levels/level1-6";
-
 const NUMBER_OF_STAGES = 6;
 const NUMBER_OF_LEVELS = 6;
 
@@ -38,16 +28,16 @@ class TitleScene extends Phaser.Scene {
   create() {
     this.createNewMenuButton("Play", "LevelMenuScene", 0);
     // todo: create scenes for each of these:
-    this.createNewMenuButton("How to Play", "LevelMenuScene", 1);
+    this.createNewMenuButton("Tutorial", "TutorialScene", 1);
     this.createNewMenuButton("Highscores", "HighScoreMenuScene", 2);
-    this.createNewMenuButton("Options", "LevelMenuScene", 3); // todo: reset game data option
-    this.createNewMenuButton("Credits", "LevelMenuScene", 4);
+    this.createNewMenuButton("Credits", "CreditsScene", 3);
+    //this.createNewMenuButton("Options", "LevelMenuScene", 3); for later use
   }
 
   createNewMenuButton(buttonText, sceneName, buttonNumber) {
     // add a new sprite of a locked level to the scene.
     let newButton = this.add
-      .sprite(this.sys.game.config.width / 2, 250 + buttonNumber * 100, "unlockedStageImage")
+      .sprite(this.sys.game.config.width / 2, 250 + buttonNumber * 130, "unlockedStageImage")
       .setInteractive({ cursor: "pointer", useHandCursor: true }); // so we can press it
     // pressing the sprite causing the next arrow function to execute:
 

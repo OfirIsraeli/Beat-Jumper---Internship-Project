@@ -10,9 +10,10 @@ class BootScene extends Phaser.Scene {
     this.load.image("backgroundImage", "assets/images/background.png");
     this.load.image("menuBackgroundImage", "assets/images/menuBackground.png");
     this.load.image("groundImage", "assets/images/ground.png");
-    this.load.image("smallBlockImage", "assets/images/little stone grey.png");
-    this.load.image("mediumBlockImage", "assets/images/little stone 1 grey.png");
-    this.load.image("largeBlockImage", "assets/images/mid stone.png");
+    this.load.image("smallBoulderImage", "assets/images/small boulder.png");
+    this.load.image("mediumBoulderImage", "assets/images/medium boulder.png");
+    this.load.image("bigBoulderImage", "assets/images/big boulder.png");
+    this.load.image("largeBoulderImage", "assets/images/large boulder.png");
     this.load.image("dustCloudImage", "assets/images/dust cloud.png");
     this.load.image("fullHitPoint", "assets/images/Life.png");
     this.load.image("emptyHitPoint", "assets/images/LifeGrey.png");
@@ -21,7 +22,6 @@ class BootScene extends Phaser.Scene {
     this.load.image("unlockedStageImage", "assets/images/unlocked stage.png");
     this.load.image("lockedStageImage", "assets/images/locked stage.png");
 
-    this.load.audio("tick", "assets/sounds/click beat.mp3");
     this.load.audio("hit", "assets/sounds/hit.mp3");
     this.load.audio("failure", "assets/sounds/fail.mp3");
 
