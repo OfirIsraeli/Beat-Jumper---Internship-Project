@@ -7,6 +7,7 @@ class BootScene extends Phaser.Scene {
   preload() {
     const progress = this.add.graphics();
 
+    // loading images
     this.load.image("backgroundImage", "assets/images/background.png");
     this.load.image("menuBackgroundImage", "assets/images/menuBackground.png");
     this.load.image("groundImage", "assets/images/ground.png");
@@ -22,9 +23,7 @@ class BootScene extends Phaser.Scene {
     this.load.image("unlockedStageImage", "assets/images/unlocked stage.png");
     this.load.image("lockedStageImage", "assets/images/locked stage.png");
 
-    this.load.audio("hit", "assets/sounds/hit.mp3");
-    this.load.audio("failure", "assets/sounds/fail.mp3");
-
+    // loading sprites
     this.load.spritesheet("walkHero", "assets/images/walkHero.png", {
       frameWidth: 140,
       frameHeight: 200,
@@ -45,6 +44,10 @@ class BootScene extends Phaser.Scene {
       frameHeight: 200,
       endFrame: 15,
     });
+
+    // loading sounds
+    this.load.audio("hit", "assets/sounds/hitLowerVolume.mp3");
+    this.load.audio("failure", "assets/sounds/fail.mp3");
 
     // Register a load progress event to show a load bar
     this.load.on("progress", (value) => {

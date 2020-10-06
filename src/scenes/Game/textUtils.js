@@ -17,7 +17,7 @@ export function initText(that) {
   that.infoText = that.add
     .text(640, 350, "", {
       ...FONT_STYLE,
-      fontSize: "80px",
+      fontSize: "70px",
     })
     .setOrigin(0.5, 0.5);
   that.infoMessage = "Level " + (that.levelIndex + 1);

@@ -7,7 +7,6 @@ import HighScoreMenuScene from "./scenes/Highscores/HighScoreMenuScene";
 import StageHighScoreScene from "./scenes/Highscores/StageHighScoreScene";
 import TutorialScene from "./scenes/TutorialScene";
 import CreditsScene from "./scenes/CreditsScene";
-import * as SpinePlugin from "./SpinePlugin.js";
 import * as WaaSampler from "waa-sampler";
 
 /*
@@ -22,6 +21,9 @@ const config = {
   type: Phaser.AUTO,
   width: 1280,
   height: 760,
+  scale: {
+    autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
+  },
   physics: {
     default: "arcade",
     arcade: {
@@ -38,13 +40,10 @@ const config = {
     LevelMenuScene,
     GameScene,
   ],
-  plugins: {
-    scene: [{ key: "SpinePlugin", plugin: window.SpinePlugin, mapping: "spine" }],
-  },
 };
 
 WaaSampler.initWaaSampler(
-  ["metronome", "piano"],
+  ["metronome"],
   "https://bandpad.co/livescoreV2/statics/create-bandpad-soundfont/soundfont",
   "COWBELL",
   90

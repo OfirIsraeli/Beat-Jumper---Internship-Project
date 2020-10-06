@@ -6,7 +6,8 @@
   "scripts": {
     "build": "webpack --config webpack/prod.js ",
     "start": "webpack-dev-server --config webpack/base.js --open",
-    "test": "webpack-dev-server --config webpack/test.js --open"
+    "test": "webpack-dev-server --config webpack/test.js --open",
+    "deploy": "rsync -aP dist/ bandpad@bandpad.co:bandpad/beat-jumper"
   },
   "repository": {
     "type": "git",
