@@ -1,3 +1,4 @@
+// scene to display game credits
 class CreditsScene extends Phaser.Scene {
   constructor(test) {
     super({

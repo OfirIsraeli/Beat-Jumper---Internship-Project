@@ -60,12 +60,17 @@ export default class Boulder {
     this.dustCloud.setImmovable();
     this.dustCloud.setVelocityX(this.getVelocityForTempo());
   }
+  /**
+   * destory this boulder's sprites
+   */
   destroy() {
     this.sprite.destroy();
     this.dustCloud.destroy();
   }
 
-  // each boulder of each size will get a different roation speed
+  /**
+   * each boulder of each size will get a different roation speed
+   */
   roll() {
     if (this.size === BOULDER_SIZES.SMALL) {
       this.sprite.angle -= 15;
@@ -76,16 +81,22 @@ export default class Boulder {
     }
   }
 
-  // function that gets the needed height for the current boulder to spawn, by the current note length
+  /**
+   * function that gets the needed height for the current boulder to spawn, by the current note length
+   */
   getRelevantBoulderName() {
     return BOULDER_IMAGES[this.scene.scoreMap[this.noteIndex][0]];
   }
 
-  // function that gets the needed height for the current boulder to spawn, by the current note length
+  /**
+   *  function that gets the needed height for the current boulder to spawn, by the current note length
+   */
   getRelevantBoulderHeight() {
     return BOULDER_HEIGHTS[this.scene.scoreMap[this.noteIndex][0]];
   }
-  // function that calculates the needed boulder velocity to match the given tempo
+  /**
+   * function that calculates the needed boulder velocity to match the given tempo
+   */
   getVelocityForTempo() {
     return -8 * this.scene.tempo - 40;
   }

@@ -67,7 +67,12 @@ const INTERVAL_PREDECESSOR = {
 const SIXTEENTH_DIVISIONS = 4;
 const LATE_JUMP_MSG = "You jumped too late!";
 
-// main function that runs a level in GameScene with a given musicJson
+/**
+ * main function that runs a level in GameScene with a given musicJson
+ * @param {*} that - a Phaser scene. In our case, it will always be GameScene
+ * @param {*} levelJson - the musicJson we base this level on
+ * @param {*} invisibleLevel - a flag that indicates if blocks should be invisible this time or not
+ */
 export function playLevel(that, levelJson, invisibleLevel) {
   // show the score DIV element.
   let scoreDIVElement = document.getElementById("score-id");

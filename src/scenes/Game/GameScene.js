@@ -15,7 +15,9 @@ import { playLevel } from "./PlayLevel";
 
 // ------------------ CONSTANTS ---------------- //
 
-// various states that each stage could be in
+/**
+ * various states that each stage could be in
+ */
 const STAGE_STATES = {
   // there is no level being played right now
   ON_HOLD: -1,
@@ -29,7 +31,9 @@ const STAGE_STATES = {
   WON: 3,
 };
 
-// various states that each level could be in
+/**
+ * various states that each level could be in
+ */
 const LEVEL_STATES = {
   // not started yet
   NOT_STARTED: -2,
@@ -41,7 +45,9 @@ const LEVEL_STATES = {
   WON: 1,
 };
 
-// types of notes that could be found in the program
+/**
+ * types of notes that could be found in the program
+ */
 const NOTES = {
   REST_NOTE: "noPlace", // noPlace is the string value that occurs in the given ScoreJsons as an identifier for a rest note
   PLAYED_NOTE: "playedNote",
@@ -51,8 +57,10 @@ const NOTES = {
 // default ground height adjustment
 const GROUND_HEIGHT = 0.747;
 
-// the acceptable delay (in milliseconds, before or after a note)
-// player can be in his jump. beyond that delay, it will be considered as a bad jump
+/**
+ * the acceptable delay (in milliseconds, before or after a note)
+ * player can be in his jump. beyond that delay, it will be considered as a bad jump
+ */
 const ACCEPTABLE_DELAY = 150;
 
 // rest time in milliseconds each level will have before next one starts
@@ -61,12 +69,13 @@ const DEFAULT_GAME_START_DELAY = 3500;
 // from this level onwards, blocks are invisible
 const INVISIBLE_BOULDERS_LVL_THRESHOLD = 4;
 
+// different messages for user
 const EARLY_JUMP_MSG = "You jumped too early!";
 const LATE_JUMP_MSG = "You jumped too late!";
 const WRONG_JUMP_MSG = "You jumped at the wrong time!";
 const NO_BOULDERS_MSG = "\nNow without boulders!";
 
-//  font style and color for a text in the scene
+// font style and color for a text in the scene
 export const FONT_STYLE = {
   fontFamily: "Chewy",
   fill: "#14141f",
@@ -82,7 +91,10 @@ class GameScene extends Phaser.Scene {
     });
   }
 
-  // scene initialization, with given data. Only scene we run GameScene with is the LevelMenuScene.
+  /**
+   * scene initialization, with given data. Only scene we run GameScene with is the LevelMenuScene.
+   * @param {*} data - data from the previous scene that started this one
+   */
   init(data) {
     // first we receive the given stage and level user wishes to play. GameScene is defined to run an entire stage at a time.
     this.stageIndex = data.stage;
@@ -97,15 +109,13 @@ class GameScene extends Phaser.Scene {
     this.hitPointsSubtracted = data.hitPointsSubtracted;
   }
 
-  // Loading images, sounds etc...
+  /**
+   * Loading images, sounds etc...
+   */
   preload() {
     // set game keys
-    this.spaceBar = this.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.SPACE
-    );
-    this.escButton = this.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.ESC
-    );
+    this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.escButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
 
     // set game sounds
     this.hitSound = this.sound.add("hit");
@@ -146,15 +156,15 @@ class GameScene extends Phaser.Scene {
     if (this.stageIndex === this.lastLevelUnlocked.stage) {
       // subtract the needed amount of HP from hero, so he will have the same HP as he did in his last attempt of this stage
       for (let i = 0; i < this.hitPointsSubtracted; i++) {
-        this.hitPointsArray[3 - this.myHero.hitPoints].setTexture(
-          "emptyHitPoint"
-        ); // change texture to subtracted HP
+        this.hitPointsArray[3 - this.myHero.hitPoints].setTexture("emptyHitPoint"); // change texture to subtracted HP
         this.myHero.hitPoints--; // subtract HP from hero
       }
     }
   }
 
-  // setting properties regarding this scene's run (so properties regarding stage and not properties regarding just a level)
+  /**
+   * setting properties regarding this scene's run (so properties regarding stage and not properties regarding just a level)
+   */
   create() {
     // set stage and level states. at this points, nothing has started yet so default values of NOT_STARTED
     this.stageState = STAGE_STATES.NOT_STARTED;
@@ -167,7 +177,9 @@ class GameScene extends Phaser.Scene {
     this.levelPointsArray = [];
   }
 
-  // each stage gets a little different tint
+  /**
+   * each stage gets a little different tint
+   */
   setStageTintForBackground() {
     if (this.stageIndex === 1) {
       // sunset vibes
@@ -190,34 +202,39 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  // function that adds a boulder to the level and pushes it into our bouldersArray
+  /**
+   * function that adds a boulder to the level and pushes it into our bouldersArray
+   * @param {*} noteIndex - the index of the note out of the total amount of played notes
+   */
   addBoulder(noteIndex) {
     let newBoulder = new Boulder({ scene: this.scene, noteIndex: noteIndex });
     this.bouldersArray.push(newBoulder);
   }
 
-  // function that remove all boulder sprite objects from the game. Used in case of losing a level.
+  /**
+   *  function that remove all boulder sprite objects from the game. Used in case of losing a level.
+   */
   removeBoulders() {
     this.bouldersArray.forEach((boulder) => {
       boulder.destroy();
     });
   }
 
-  // when player has lost a level, we subtract one hitpoint, and update the relevant hitpoint image to look that way
+  /**
+   * when player has lost a level, we subtract one hitpoint, and update the relevant hitpoint image to look that way
+   */
   subtractHitPoints() {
     this.hitPointsArray[3 - this.myHero.hitPoints].setTexture("emptyHitPoint");
     this.myHero.hitPoints--;
     // we add one more HP subtracted to the one we had before in localStore
-    let newhitPointsSubtracted =
-      JSON.parse(localStorage.getItem("hitPointsSubtracted")) + 1;
-    localStorage.setItem(
-      "hitPointsSubtracted",
-      JSON.stringify(newhitPointsSubtracted)
-    );
+    let newhitPointsSubtracted = JSON.parse(localStorage.getItem("hitPointsSubtracted")) + 1;
+    localStorage.setItem("hitPointsSubtracted", JSON.stringify(newhitPointsSubtracted));
   }
 
-  // we calculate the average jump rating (from 0 to 100 per jump) of user in this level, and multiply that by 5,
-  // so overall level will get jump points between 0 and 500.
+  /**
+   * we calculate the average jump rating (from 0 to 100 per jump) of user in this level, and multiply that by 5,
+   * so overall level will get jump points between 0 and 500.
+   */
   calculateLevelPoints() {
     // define a mini arrow function that will calculate an average of the items in an array
     let average = (array) => array.reduce((a, b) => a + b) / array.length;
@@ -232,14 +249,13 @@ class GameScene extends Phaser.Scene {
       console.log("passed your highscore!"); // log it to console
       this.highScoreLowerText.text = levelPoints; // update the highscore text
       this.userHighScores[this.stageIndex][this.levelIndex] = levelPoints; // update the highscore in the highscore matrix
-      localStorage.setItem(
-        "userHighScores",
-        JSON.stringify(this.userHighScores)
-      ); // update the highscore matrix in localStorage
+      localStorage.setItem("userHighScores", JSON.stringify(this.userHighScores)); // update the highscore matrix in localStorage
     }
   }
 
-  // function to check and execute stuff related to the current stage
+  /**
+   * function to check and execute stuff related to the current stage
+   */
   stageStatusCheck() {
     // if hit points reaches zero, player need to restart this stage
     if (this.myHero.hitPoints === 0) {
@@ -298,7 +314,9 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  // checks if current level is the last one player unlocked. return true if it does, false otherwise
+  /**
+   * checks if current level is the last one player unlocked. return true if it does, false otherwise
+   */
   checkIfLastLevelUnlocked() {
     if (
       this.stageIndex === this.lastLevelUnlocked.stage &&
@@ -312,8 +330,8 @@ class GameScene extends Phaser.Scene {
   /**
    *  check for each interval if there is a need to end the level for any reason (jump failure or level won)
       if so, update everything regarding level, stage, hero and user accordingly
-   * @param intervalNumber
-   * @param totalIntervals
+   * @param intervalNumber - the number of interval we're in
+   * @param totalIntervals - total amount of intervals that will run
    */
 
   levelStatusCheck(intervalNumber, totalIntervals) {
@@ -352,17 +370,16 @@ class GameScene extends Phaser.Scene {
 
   // ------------------ UPDATE METHODS ---------------- //
 
-  // function that gets the note that is closest to the user's jump.
+  /**
+   * function that gets the note that is closest to the user's jump.
+   * @param {*} timePassedSinceLevelStart - jump time of the user relative to the level's start time
+   */
   getClosestNoteToKeyPress(timePassedSinceLevelStart) {
     // calculate the distance between curNote and timePassedSinceLevelStart
-    const curNoteDistance = Math.abs(
-      this.curNotes.curNote.division - timePassedSinceLevelStart
-    );
+    const curNoteDistance = Math.abs(this.curNotes.curNote.division - timePassedSinceLevelStart);
 
     // calculate the distance between nextNote and timePassedSinceLevelStart
-    const nextNoteDistance = Math.abs(
-      this.curNotes.nextNote.division - timePassedSinceLevelStart
-    );
+    const nextNoteDistance = Math.abs(this.curNotes.nextNote.division - timePassedSinceLevelStart);
     const notesDistance = {};
     notesDistance[curNoteDistance] = this.curNotes.curNote;
     notesDistance[nextNoteDistance] = this.curNotes.nextNote;
@@ -376,13 +393,15 @@ class GameScene extends Phaser.Scene {
    */
   registerJump(closestNote) {
     // find the index in the timing list in which the note (element) is our given closestNote
-    let curNoteIndex = this.timingList.findIndex(
-      (element) => element === closestNote
-    );
+    let curNoteIndex = this.timingList.findIndex((element) => element === closestNote);
     // mark that note as visited
     this.timingList[curNoteIndex].visited = true;
   }
 
+  /**
+   * this function calculates and registers the score for one user jump
+   * @param {*} JumpDelay - the delay between the time user should have jump and the time he actually jumped for this jump
+   */
   registerScore(JumpDelay) {
     // jumpScore is calculated by how big of a delay the jump is in relation
     // to the maximum delay of a valid jump (which is the ACCEPTABLE_DELAY constant),
@@ -392,7 +411,9 @@ class GameScene extends Phaser.Scene {
     console.log("jump score is: ", jumpScore);
   }
 
-  // general function to check, register and execute user's jump.
+  /**
+   * general function to check, register and execute user's jump.
+   */
   jumpTimingCheck() {
     // current jump time
     const jumpTime = Date.now();
@@ -404,14 +425,10 @@ class GameScene extends Phaser.Scene {
     const delay = timePassedSinceLevelStart % this.divisionDuration;
 
     // calculates the pre-delay of the jump from the note timing (if the player is rushing)
-    const preDelay =
-      this.divisionDuration -
-      (timePassedSinceLevelStart % this.divisionDuration);
+    const preDelay = this.divisionDuration - (timePassedSinceLevelStart % this.divisionDuration);
 
     // get the note element that is closest to the jump
-    const closestNote = this.getClosestNoteToKeyPress(
-      timePassedSinceLevelStart
-    );
+    const closestNote = this.getClosestNoteToKeyPress(timePassedSinceLevelStart);
 
     let successfulJump = true; // jump is okay until proven else...
     // if we're on count-in, any jump is valid, so we jump and return
@@ -425,16 +442,10 @@ class GameScene extends Phaser.Scene {
     if (delay === 0 && closestNote.noteType === NOTES.PLAYED_NOTE) {
       this.registerScore(delay);
       console.log("just in time!");
-    } else if (
-      delay < ACCEPTABLE_DELAY &&
-      closestNote.noteType === NOTES.PLAYED_NOTE
-    ) {
+    } else if (delay < ACCEPTABLE_DELAY && closestNote.noteType === NOTES.PLAYED_NOTE) {
       this.registerScore(delay);
       console.log("jump time is ", delay, "milliseconds late");
-    } else if (
-      preDelay < ACCEPTABLE_DELAY &&
-      closestNote.noteType === NOTES.PLAYED_NOTE
-    ) {
+    } else if (preDelay < ACCEPTABLE_DELAY && closestNote.noteType === NOTES.PLAYED_NOTE) {
       this.registerScore(preDelay);
       console.log("jump time is ", preDelay, "milliseconds early");
     }
@@ -459,7 +470,10 @@ class GameScene extends Phaser.Scene {
     this.myHero.jump(successfulJump, closestNote.noteSize);
   }
 
-  // when called upon, go back to level menu with the given time
+  /**
+   * when called upon, go back to level menu with the given time
+   * @param {*} delay  - after how many milliseconds we want to go back to menu
+   */
   goBackToMenu(delay = DEFAULT_GAME_START_DELAY) {
     this.time.addEvent({
       delay: delay,
@@ -467,6 +481,9 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * main update function that checks various actions that need to be checked constantly
+   */
   update(time, delta) {
     // if user presses ESC button, leave scene
     if (Phaser.Input.Keyboard.JustDown(this.escButton)) {
@@ -501,10 +518,7 @@ class GameScene extends Phaser.Scene {
     }
 
     // if the game is not on motion and we did not finish all of the musicJsons
-    if (
-      this.stageState !== STAGE_STATES.ON_MOTION &&
-      this.levelIndex < this.sheetJson.length
-    ) {
+    if (this.stageState !== STAGE_STATES.ON_MOTION && this.levelIndex < this.sheetJson.length) {
       // if player has failed 3 times, tell him that and don't start a new level (by doing return)
       if (this.stageState === STAGE_STATES.LOST) {
         this.infoText.text = "You Lost";

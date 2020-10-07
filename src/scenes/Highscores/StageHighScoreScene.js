@@ -1,3 +1,4 @@
+// scene that presents the highscore of a given stage
 class StageHighScoreScene extends Phaser.Scene {
   constructor(test) {
     super({
@@ -70,8 +71,15 @@ class StageHighScoreScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * this function creates button to go back into other scenes. in this case, it can be either main menu or highscore menu
+   * @param {*} text - text that will be diplayed on the button
+   * @param {*} scene - the scene we wish this button would direct to
+   * @param {*} style - style of the text
+   * @param {*} buttonIndex - the index of the button, so we will know where to place it in relation to other buttons
+   */
   createBackButtons(text, scene, style, buttonIndex) {
-    // button so player can go back to main menu
+    // button so player can go back to menu
     let backToMenuButton = this.add
       .sprite(100, 60 + buttonIndex * 100, "unlockedStageImage")
       .setInteractive({ cursor: "pointer", useHandCursor: true }); // so we can press it

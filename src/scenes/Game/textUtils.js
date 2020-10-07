@@ -4,6 +4,10 @@ import { FONT_STYLE } from "./GameScene";
 const INVISIBLE_BOULDERS_LVL_THRESHOLD = 4;
 const NO_BOULDERS_MSG = "\nNo boulders";
 
+/**
+ * function that sets the many texts needed for GameScene
+ * @param {*} that - a Phaser scene. in our case, always GameScene
+ */
 export function initText(that) {
   // set count-in text
   that.countInText = that.add.text(520, 250, "", {

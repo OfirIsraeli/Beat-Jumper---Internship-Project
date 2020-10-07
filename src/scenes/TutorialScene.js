@@ -1,3 +1,4 @@
+// scene for a brief explanation of how to play the game
 class TutorialScene extends Phaser.Scene {
   constructor(test) {
     super({

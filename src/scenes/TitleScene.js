@@ -1,6 +1,4 @@
-const NUMBER_OF_STAGES = 6;
-const NUMBER_OF_LEVELS = 6;
-
+// scene for main menu
 class TitleScene extends Phaser.Scene {
   constructor(test) {
     super({
@@ -34,6 +32,12 @@ class TitleScene extends Phaser.Scene {
     //this.createNewMenuButton("Options", "LevelMenuScene", 3); for later use
   }
 
+  /**
+   * this function creates a button that directs into a different scene.
+   * @param {*} buttonText - text that will be diplayed on the button
+   * @param {*} sceneName - the scene we wish this button would direct to
+   * @param {*} buttonNumber - the index of the button, so we will know where to place it in relation to other buttons
+   */
   createNewMenuButton(buttonText, sceneName, buttonNumber) {
     // add a new sprite of a locked level to the scene.
     let newButton = this.add

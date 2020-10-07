@@ -195,6 +195,10 @@ class LevelMenuScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * this function creates a new image for a stage
+   * @param {*} stageIndex - the number of stage
+   */
   createNewStageImage(stageIndex) {
     // add a new image of a locked stage to the scene
     let newStageImage = this.add.sprite(330, 150 + stageIndex * 90, "lockedStageImage");
@@ -214,7 +218,10 @@ class LevelMenuScene extends Phaser.Scene {
     this.stageImages[stageIndex] = newStageImage; // add the image object to our array
   }
 
-  // when a locked level is pressed, we shake the button sprite
+  /**
+   * when a locked level is pressed, we shake the button sprite
+   * @param {*} button - a Phaser sprite we want to apply the tween on
+   */
   applyShakingTween(button) {
     const tween = this.tweens.add({
       targets: button,
@@ -227,7 +234,11 @@ class LevelMenuScene extends Phaser.Scene {
     });
   }
 
-  // creating a new button for a specific level, defining all of its' utillities
+  /**
+   * creating a new button for a specific level, defining all of its' utillities
+   * @param {*} stageIndex - number of stage
+   * @param {*} levelIndex - number of level
+   */
   createNewLevelButton(stageIndex, levelIndex) {
     // add a new sprite of a locked level to the scene.
     let newButton = this.add

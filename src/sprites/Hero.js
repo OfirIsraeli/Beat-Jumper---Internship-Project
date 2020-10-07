@@ -29,7 +29,9 @@ export default class Hero {
     this.hitPoints = DEFAULT_HIT_POINTS;
   }
 
-  // creates phaser animation for hero standing
+  /**
+   * creates phaser animation for hero standing
+   */
   createStandingAnimation() {
     var standingAnimationConfig = {
       key: "standingAnimation",
@@ -44,7 +46,9 @@ export default class Hero {
     this.scene.anims.create(standingAnimationConfig);
   }
 
-  // creates phaser animation for hero walking
+  /**
+   * creates phaser animation for hero walking
+   */
   createWalkAnimation() {
     var walkAnimationConfig = {
       key: "walkAnimation",
@@ -59,7 +63,9 @@ export default class Hero {
     this.scene.anims.create(walkAnimationConfig);
   }
 
-  // creates phaser animation for hero jumping
+  /**
+   *  creates phaser animation for hero jumping
+   */
   createJumpAnimation() {
     var jumpAnimationConfig = {
       key: "jumpAnimation",
@@ -74,7 +80,9 @@ export default class Hero {
     this.scene.anims.create(jumpAnimationConfig);
   }
 
-  // creates phaser animation for hero in mid-air
+  /**
+   * creates phaser animation for hero in mid-air
+   */
   createMidAirAnimation() {
     var midAirAnimationConfig = {
       key: "midAirAnimation",
@@ -89,7 +97,9 @@ export default class Hero {
     this.scene.anims.create(midAirAnimationConfig);
   }
 
-  // creates phaser animation for hero landing
+  /**
+   * creates phaser animation for hero landing
+   */
   createLandingAnimation() {
     var landingAnimationConfig = {
       key: "landingAnimation",
@@ -104,7 +114,9 @@ export default class Hero {
     this.scene.anims.create(landingAnimationConfig);
   }
 
-  // creates phaser animation for hero taking a hit
+  /**
+   * creates phaser animation for hero taking a hit
+   */
   createHurtAnimation() {
     var hurtAnimationConfig = {
       key: "hurtAnimation",
@@ -119,7 +131,9 @@ export default class Hero {
     this.scene.anims.create(hurtAnimationConfig);
   }
 
-  // creates phaser animation for hero cheering
+  /**
+   * creates phaser animation for hero cheering
+   */
   createWinAnimation() {
     var winAnimationConfig = {
       key: "winAnimation",
@@ -134,7 +148,9 @@ export default class Hero {
     this.scene.anims.create(winAnimationConfig);
   }
 
-  // creates all needed animations for hero
+  /**
+   * creates all needed animations for hero
+   */
   createAllAnimations() {
     this.createWalkAnimation();
     this.createJumpAnimation();
@@ -145,34 +161,47 @@ export default class Hero {
     this.createWinAnimation();
   }
 
-  // boolean method to tell if hero is on ground (returns true) or not (returns false)
+  /**
+   * boolean method to tell if hero is on ground (returns true) or not (returns false)
+   */
   onGround() {
     return this.heroSprite.body.touching.down;
   }
 
-  // method to play hurt animation
+  /**
+   * method to play hurt animation
+   */
   hurt() {
     this.heroSprite.play("hurtAnimation"); // play failure animation
   }
 
-  // method to play cheering animation
+  /**
+   * method to play cheering animation
+   */
   cheer() {
     this.heroSprite.play("winAnimation"); // play winning animation
   }
 
-  // method to play standing animation
+  /**
+   * method to play standing animation
+   */
   stand() {
     this.heroSprite.anims.chain("standingAnimation"); // stand after level is finished
   }
 
-  // method to play walking animation
+  /**
+   * method to play walking animation
+   */
   walk() {
     this.heroSprite.play("walkAnimation");
     // save current time as the start time of this walk
     this.walkStartTime = Date.now();
   }
 
-  // method for a small hero jump. plays needed animations (if jump was either successful or not) and sets the needed negative gravity so jump will reach needed height
+  /**
+   * method for a small hero jump. plays needed animations (if jump was either successful or not) and sets the needed negative gravity so jump will reach needed height
+   * @param {*} successfulJump - a boolean to indicate if the jump was successful or not
+   */
   smallJump(successfulJump) {
     this.heroSprite.play("jumpAnimation");
     this.heroSprite.setVelocityY(-1200);
@@ -185,8 +214,10 @@ export default class Hero {
     }
   }
 
-  // method for a medium hero jump. plays needed animations (if jump was either successful or not) and sets the needed negative gravity so jump will reach needed height
-  mediumJump(successfulJump) {
+  /**
+   * method for a medium hero jump. plays needed animations (if jump was either successful or not) and sets the needed negative gravity so jump will reach needed height
+   * @param {*} successfulJump - a boolean to indicate if the jump was successful or not
+   */ mediumJump(successfulJump) {
     this.heroSprite.play("jumpAnimation");
     this.heroSprite.setVelocityY(-1400);
     this.heroSprite.anims.chain("midAirAnimation");
@@ -198,8 +229,10 @@ export default class Hero {
     }
   }
 
-  // method for a big hero jump. plays needed animations (if jump was either successful or not) and sets the needed negative gravity so jump will reach needed height
-  bigJump(successfulJump) {
+  /**
+   * method for a big hero jump. plays needed animations (if jump was either successful or not) and sets the needed negative gravity so jump will reach needed height
+   * @param {*} successfulJump - a boolean to indicate if the jump was successful or not
+   */ bigJump(successfulJump) {
     this.heroSprite.play("jumpAnimation");
     this.heroSprite.setVelocityY(-1600);
     this.heroSprite.anims.chain("midAirAnimation");
@@ -211,6 +244,11 @@ export default class Hero {
     }
   }
 
+  /**
+   * general function to make hero jump.
+   * @param {*} successfulJump - a boolean to indicate if the jump was successful or not
+   * @param {*} jumpSize - indicates the kind of jump we need this time
+   */
   jump(successfulJump, jumpSize) {
     if (jumpSize === JUMP_SIZE.SMALL) {
       this.smallJump(successfulJump);
