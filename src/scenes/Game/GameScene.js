@@ -68,7 +68,7 @@ const GROUND_HEIGHT = 0.747;
  * the acceptable delay (in milliseconds, before or after a note)
  * player can be in his jump. beyond that delay, it will be considered as a bad jump
  */
-const ACCEPTABLE_DELAY = 150;
+const ACCEPTABLE_DELAY = 275;
 
 // rest time in milliseconds each level will have before next one starts
 const DEFAULT_GAME_START_DELAY = 3500;
@@ -120,8 +120,12 @@ class GameScene extends Phaser.Scene {
    */
   preload() {
     // set game keys
-    this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    this.escButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    this.spaceBar = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SPACE
+    );
+    this.escButton = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.ESC
+    );
 
     // set game sounds
     this.hitSound = this.sound.add("hit");
@@ -236,8 +240,12 @@ class GameScene extends Phaser.Scene {
     this.hitPointsArray[3 - this.myHero.hitPoints].setTexture("emptyHitPoint");
     this.myHero.hitPoints--;
     // we add one more HP subtracted to the one we had before in localStore
-    let newhitPointsSubtracted = JSON.parse(localStorage.getItem("hitPointsSubtracted")) + 1;
-    localStorage.setItem("hitPointsSubtracted", JSON.stringify(newhitPointsSubtracted));
+    let newhitPointsSubtracted =
+      JSON.parse(localStorage.getItem("hitPointsSubtracted")) + 1;
+    localStorage.setItem(
+      "hitPointsSubtracted",
+      JSON.stringify(newhitPointsSubtracted)
+    );
   }
 
   /**
@@ -258,7 +266,10 @@ class GameScene extends Phaser.Scene {
       console.log("passed your highscore!"); // log it to console
       this.highScoreLowerText.text = levelPoints; // update the highscore text
       this.userHighScores[this.stageIndex][this.levelIndex] = levelPoints; // update the highscore in the highscore matrix
-      localStorage.setItem("userHighScores", JSON.stringify(this.userHighScores)); // update the highscore matrix in localStorage
+      localStorage.setItem(
+        "userHighScores",
+        JSON.stringify(this.userHighScores)
+      ); // update the highscore matrix in localStorage
     }
   }
 
@@ -409,10 +420,14 @@ class GameScene extends Phaser.Scene {
    */
   getClosestNoteToKeyPress(timePassedSinceLevelStart) {
     // calculate the distance between curNote and timePassedSinceLevelStart
-    const curNoteDistance = Math.abs(this.curNotes.curNote.division - timePassedSinceLevelStart);
+    const curNoteDistance = Math.abs(
+      this.curNotes.curNote.division - timePassedSinceLevelStart
+    );
 
     // calculate the distance between nextNote and timePassedSinceLevelStart
-    const nextNoteDistance = Math.abs(this.curNotes.nextNote.division - timePassedSinceLevelStart);
+    const nextNoteDistance = Math.abs(
+      this.curNotes.nextNote.division - timePassedSinceLevelStart
+    );
     const notesDistance = {};
     notesDistance[curNoteDistance] = this.curNotes.curNote;
     notesDistance[nextNoteDistance] = this.curNotes.nextNote;
@@ -426,7 +441,9 @@ class GameScene extends Phaser.Scene {
    */
   registerJump(closestNote) {
     // find the index in the timing list in which the note (element) is our given closestNote
-    let curNoteIndex = this.timingList.findIndex((element) => element === closestNote);
+    let curNoteIndex = this.timingList.findIndex(
+      (element) => element === closestNote
+    );
     // mark that note as visited
     this.timingList[curNoteIndex].visited = true;
   }
@@ -458,10 +475,14 @@ class GameScene extends Phaser.Scene {
     const delay = timePassedSinceLevelStart % this.divisionDuration;
 
     // calculates the pre-delay of the jump from the note timing (if the player is rushing)
-    const preDelay = this.divisionDuration - (timePassedSinceLevelStart % this.divisionDuration);
+    const preDelay =
+      this.divisionDuration -
+      (timePassedSinceLevelStart % this.divisionDuration);
 
     // get the note element that is closest to the jump
-    const closestNote = this.getClosestNoteToKeyPress(timePassedSinceLevelStart);
+    const closestNote = this.getClosestNoteToKeyPress(
+      timePassedSinceLevelStart
+    );
 
     let successfulJump = true; // jump is okay until proven else...
     // if we're on count-in, any jump is valid, so we jump and return
@@ -476,10 +497,16 @@ class GameScene extends Phaser.Scene {
     if (delay === 0 && closestNote.noteType === NOTES.PLAYED_NOTE) {
       this.registerScore(delay);
       console.log("just in time!");
-    } else if (delay < ACCEPTABLE_DELAY && closestNote.noteType === NOTES.PLAYED_NOTE) {
+    } else if (
+      delay < ACCEPTABLE_DELAY &&
+      closestNote.noteType === NOTES.PLAYED_NOTE
+    ) {
       this.registerScore(delay);
       console.log("jump time is ", delay, "milliseconds late");
-    } else if (preDelay < ACCEPTABLE_DELAY && closestNote.noteType === NOTES.PLAYED_NOTE) {
+    } else if (
+      preDelay < ACCEPTABLE_DELAY &&
+      closestNote.noteType === NOTES.PLAYED_NOTE
+    ) {
       this.registerScore(preDelay);
       console.log("jump time is ", preDelay, "milliseconds early");
     }
@@ -552,7 +579,10 @@ class GameScene extends Phaser.Scene {
     }
 
     // if the game is not on motion and we did not finish all of the musicJsons
-    if (this.stageState !== STAGE_STATES.ON_MOTION && this.levelIndex < this.sheetJson.length) {
+    if (
+      this.stageState !== STAGE_STATES.ON_MOTION &&
+      this.levelIndex < this.sheetJson.length
+    ) {
       // if player has failed 3 times, tell him that and don't start a new level (by doing return)
       if (this.stageState === STAGE_STATES.LOST) {
         this.infoText.text = "You Lost";
