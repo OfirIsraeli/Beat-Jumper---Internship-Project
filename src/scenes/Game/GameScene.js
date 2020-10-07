@@ -377,6 +377,7 @@ class GameScene extends Phaser.Scene {
       else {
         console.log("won level!");
         this.levelState = LEVEL_STATES.WON; // player has won the level
+        this.levelPart = LEVEL_PARTS.PART1;
         this.invisibleLevel = false;
       }
       this.calculateLevelPoints(); // calculate points for that level, add to total points
