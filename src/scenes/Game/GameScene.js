@@ -41,8 +41,10 @@ const LEVEL_STATES = {
   ON_MOTION: -1,
   // level lost
   LOST: 0,
+  //
+  PASSED_PART1: 1,
   // level win
-  WON: 1,
+  WON: 2,
 };
 
 /**
@@ -52,6 +54,11 @@ const NOTES = {
   REST_NOTE: "noPlace", // noPlace is the string value that occurs in the given ScoreJsons as an identifier for a rest note
   PLAYED_NOTE: "playedNote",
   COUNT_NOTE: "countDown",
+};
+
+const LEVEL_PARTS = {
+  PART1: 1,
+  PART2: 2,
 };
 
 // default ground height adjustment
@@ -65,9 +72,6 @@ const ACCEPTABLE_DELAY = 150;
 
 // rest time in milliseconds each level will have before next one starts
 const DEFAULT_GAME_START_DELAY = 3500;
-
-// from this level onwards, blocks are invisible
-const INVISIBLE_BOULDERS_LVL_THRESHOLD = 4;
 
 // different messages for user
 const EARLY_JUMP_MSG = "You jumped too early!";
@@ -99,6 +103,8 @@ class GameScene extends Phaser.Scene {
     // first we receive the given stage and level user wishes to play. GameScene is defined to run an entire stage at a time.
     this.stageIndex = data.stage;
     this.levelIndex = data.level;
+    this.levelPart = LEVEL_PARTS.PART1;
+    this.invisibleLevel = false;
     // all of the stages' musicJsons(Json data structure of BandPad that represent sheet music).
     this.sheetJson = data.stageJson;
     // user's current highscore.
@@ -152,6 +158,9 @@ class GameScene extends Phaser.Scene {
       this.add.sprite(1140, 60, "fullHitPoint"),
       this.add.sprite(1220, 60, "fullHitPoint"),
     ];
+
+    // REMOVED TEMPORARY IN BETA VERSION
+    /*
     // if we're in the last unlocked stage by user
     if (this.stageIndex === this.lastLevelUnlocked.stage) {
       // subtract the needed amount of HP from hero, so he will have the same HP as he did in his last attempt of this stage
@@ -159,7 +168,7 @@ class GameScene extends Phaser.Scene {
         this.hitPointsArray[3 - this.myHero.hitPoints].setTexture("emptyHitPoint"); // change texture to subtracted HP
         this.myHero.hitPoints--; // subtract HP from hero
       }
-    }
+    }*/
   }
 
   /**
@@ -253,6 +262,13 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  wonGameCheck() {
+    if (this.stageIndex === 5 && this.levelIndex === 5) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * function to check and execute stuff related to the current stage
    */
@@ -273,8 +289,13 @@ class GameScene extends Phaser.Scene {
       return;
     }
 
-    // if player won this level, update indexes accordingli
-    if (this.levelState === LEVEL_STATES.WON) {
+    // if player passed the first part of this level, just update stage state to be on hold until we redo the level without boulders
+    if (this.levelState === LEVEL_STATES.PASSED_PART1) {
+      this.stageState = STAGE_STATES.ON_HOLD;
+    }
+
+    // if player won this level, update indexes accordingly
+    else if (this.levelState === LEVEL_STATES.WON) {
       // if this is not the last level of this stage
       if (this.levelIndex < 5) {
         this.levelIndex++; // advance to next level in this stage
@@ -284,8 +305,10 @@ class GameScene extends Phaser.Scene {
         }
         // if we finished a level without ending a stage, we are on hold until we start the next level
         this.stageState = STAGE_STATES.ON_HOLD;
+      } else if (this.wonGameCheck()) {
+        this.stageState = STAGE_STATES.WON;
+        localStorage.removeItem("hitPointsSubtracted"); // reset hitPointsSubtracted. new chance per new stage...
       }
-
       // if this is the last level of this stage, advance to new stage
       else {
         this.levelIndex = 0;
@@ -333,7 +356,6 @@ class GameScene extends Phaser.Scene {
    * @param intervalNumber - the number of interval we're in
    * @param totalIntervals - total amount of intervals that will run
    */
-
   levelStatusCheck(intervalNumber, totalIntervals) {
     // if player has lost the level for any reason
     if (this.levelState === LEVEL_STATES.LOST) {
@@ -345,8 +367,18 @@ class GameScene extends Phaser.Scene {
     }
     // if player passed all intervals correctly
     else if (intervalNumber === totalIntervals) {
-      console.log("won level!");
-      this.levelState = LEVEL_STATES.WON; // player has won the level
+      // if finished first part, redo the level without boudlers
+      if (this.levelPart === LEVEL_PARTS.PART1) {
+        this.levelState = LEVEL_STATES.PASSED_PART1; // player has won the level
+        this.levelPart = LEVEL_PARTS.PART2;
+        this.invisibleLevel = true;
+      }
+      // else, passed the whole level
+      else {
+        console.log("won level!");
+        this.levelState = LEVEL_STATES.WON; // player has won the level
+        this.invisibleLevel = false;
+      }
       this.calculateLevelPoints(); // calculate points for that level, add to total points
       this.myHero.cheer(); // play winning animation
     }
@@ -362,7 +394,7 @@ class GameScene extends Phaser.Scene {
     // if level lost, we inform the player details regarding failure in the jumpTimingCheck function
     if (this.levelState !== LEVEL_STATES.LOST) {
       this.infoMessage = "Level " + (this.levelIndex + 1);
-      if (this.levelIndex >= INVISIBLE_BOULDERS_LVL_THRESHOLD) {
+      if (this.levelState === LEVEL_STATES.PASSED_PART1) {
         this.infoMessage += NO_BOULDERS_MSG;
       }
     }
@@ -438,6 +470,7 @@ class GameScene extends Phaser.Scene {
     }
     // register the jump in our timing list
     this.registerJump(closestNote);
+    //console.log(closestNote, this.timingList);
     //if jump is good, in the next if statement we log to the console details regarding the jump, and register the score in our score array.
     if (delay === 0 && closestNote.noteType === NOTES.PLAYED_NOTE) {
       this.registerScore(delay);
@@ -543,12 +576,7 @@ class GameScene extends Phaser.Scene {
       // also, from level  (INVISIBLE_BOULDERS_LVL_THRESHOLD) onwards, we ask playLevel to make blocks invisible
       this.time.addEvent({
         delay: DEFAULT_GAME_START_DELAY,
-        callback: () =>
-          playLevel(
-            this,
-            this.sheetJson[this.levelIndex],
-            INVISIBLE_BOULDERS_LVL_THRESHOLD <= this.levelIndex
-          ),
+        callback: () => playLevel(this, this.sheetJson[this.levelIndex]),
       });
     }
   }

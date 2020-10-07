@@ -73,7 +73,7 @@ const LATE_JUMP_MSG = "You jumped too late!";
  * @param {*} levelJson - the musicJson we base this level on
  * @param {*} invisibleLevel - a flag that indicates if blocks should be invisible this time or not
  */
-export function playLevel(that, levelJson, invisibleLevel) {
+export function playLevel(that, levelJson) {
   // show the score DIV element.
   let scoreDIVElement = document.getElementById("score-id");
   scoreDIVElement.style.display = "block";
@@ -100,7 +100,7 @@ export function playLevel(that, levelJson, invisibleLevel) {
   }
 
   // create music score for the level
-  createScore(levelJson, that.tempo, function (event, value) {});
+  createScore(levelJson, that.tempo, that.invisibleLevel, function (event, value) {});
 
   // array of boulder sprites. will be filled with sprites during the intervals
   that.bouldersArray = [];
@@ -179,7 +179,7 @@ export function playLevel(that, levelJson, invisibleLevel) {
         (value < that.scoreMap.length - INTERVAL_PREDECESSOR[that.divisions] &&
           intervalType === INTERVAL_TYPES.NOTES_INTERVAL) // if we're more than 4 intervals before the end of notes
       ) {
-        if (that.scoreMap[noteIndex][1] !== NOTES.REST_NOTE && !invisibleLevel) {
+        if (that.scoreMap[noteIndex][1] !== NOTES.REST_NOTE && !that.invisibleLevel) {
           // if current note is not a rest note, and also if invisibleLevel is true we do not spawn any boulders
           that.addBoulder(noteIndex); // add a boulder to the game
         }

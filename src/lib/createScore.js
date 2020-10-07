@@ -1,14 +1,14 @@
 import * as liveScore from "bandpad-vexflow";
 import Phaser from "phaser";
 import GameScene from "../scenes/Game/GameScene";
-export default function createScore(scoreJson, levelTempo, eventFunction) {
+export default function createScore(scoreJson, levelTempo, disableNoteRect, eventFunction) {
   let options = {
     interludeQuarters: 0,
     fitScore: false,
     screenSideMargins: 52,
 
     disableMeasureRect: true,
-    disableNoteRect: true,
+    disableNoteRect: disableNoteRect,
 
     // audio playback parameters
     pickupQuarters: 0,
@@ -23,7 +23,12 @@ export default function createScore(scoreJson, levelTempo, eventFunction) {
     // debugging
     debugDisplay: false,
   };
-  const scoreNode = document.getElementById("score-id");
+  let scoreNode = document.getElementById("score-id");
   scoreNode.innerHTML = "";
   liveScore.createScore(scoreJson, "score-id", options, eventFunction);
+  if (disableNoteRect) {
+    scoreNode.style.top = "120px";
+  } else {
+    scoreNode.style.top = "50px";
+  }
 }

@@ -1,7 +1,6 @@
 import { FONT_STYLE } from "./GameScene";
 
 // from this level onwards, blocks are invisible
-const INVISIBLE_BOULDERS_LVL_THRESHOLD = 4;
 const NO_BOULDERS_MSG = "\nNo boulders";
 
 /**
@@ -25,9 +24,6 @@ export function initText(that) {
     })
     .setOrigin(0.5, 0.5);
   that.infoMessage = "Level " + (that.levelIndex + 1);
-  if (that.levelIndex >= INVISIBLE_BOULDERS_LVL_THRESHOLD) {
-    that.infoMessage += NO_BOULDERS_MSG;
-  }
 
   // point text
   that.pointsUpperText = that.add
