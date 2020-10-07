@@ -8,6 +8,7 @@ export default function createScore(scoreJson, levelTempo, eventFunction) {
     screenSideMargins: 52,
 
     disableMeasureRect: true,
+    disableNoteRect: true,
 
     // audio playback parameters
     pickupQuarters: 0,

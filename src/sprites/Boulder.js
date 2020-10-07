@@ -98,6 +98,6 @@ export default class Boulder {
    * function that calculates the needed boulder velocity to match the given tempo
    */
   getVelocityForTempo() {
-    return -8 * this.scene.tempo - 40;
+    return -8 * this.scene.tempo - 37;
   }
 }
