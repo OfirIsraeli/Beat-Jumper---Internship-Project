@@ -136,6 +136,17 @@ class LevelMenuScene extends Phaser.Scene {
 
     //define each stage as an array of levels
 
+    // todo: load levels in a loop
+    /*
+    for (let stageIndex = 1; stageIndex <= NUMBER_OF_STAGES; stageIndex++) {
+      this.stages[stageIndex] = []; // define new sub-array to hold this stage's levels
+      // add 6 levels to this stage
+      for (let levelIndex = 1; levelIndex <= NUMBER_OF_LEVELS; levelIndex++) {
+        this.stages[stageIndex][levelIndex] = // WHAT DO?
+      }
+    }
+    */
+
     const stageOne = [level1_1, level1_2, level1_3, level1_4, level1_5, level1_6];
     const stageTwo = [level2_1, level2_2, level2_3, level2_4, level2_5, level2_6];
     const stageThree = [level3_1, level3_2, level3_3, level3_4, level3_5, level3_6];

@@ -64,7 +64,6 @@ const INTERVAL_PREDECESSOR = {
   4: 8,
 };
 
-const SIXTEENTH_DIVISIONS = 4;
 const LATE_JUMP_MSG = "You jumped too late!";
 
 /**
@@ -93,11 +92,6 @@ export function playLevel(that, levelJson) {
 
   // set tempo for this level
   that.tempo = 80;
-
-  // if level is based on 16th notes, play in hald tempo (it's a game for children after all...)
-  if (that.divisions === SIXTEENTH_DIVISIONS) {
-    that.tempo = that.tempo / 2;
-  }
 
   // create music score for the level
   createScore(levelJson, that.tempo, that.levelState, that.invisibleLevel, function (

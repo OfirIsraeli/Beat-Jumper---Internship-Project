@@ -407,14 +407,14 @@ class GameScene extends Phaser.Scene {
 
   /**
    * function that gets the note that is closest to the user's jump.
-   * @param {*} timePassedSinceLevelStart - jump time of the user relative to the level's start time
+   * @param {*} jumpTime - jump time of the user relative to the level's start time
    */
-  getClosestNoteToKeyPress(timePassedSinceLevelStart) {
-    // calculate the distance between curNote and timePassedSinceLevelStart
-    const curNoteDistance = Math.abs(this.curNotes.curNote.division - timePassedSinceLevelStart);
+  getClosestNoteToKeyPress(jumpTime) {
+    // calculate the distance between curNote and jumpTime
+    const curNoteDistance = Math.abs(this.curNotes.curNote.timing - jumpTime);
 
-    // calculate the distance between nextNote and timePassedSinceLevelStart
-    const nextNoteDistance = Math.abs(this.curNotes.nextNote.division - timePassedSinceLevelStart);
+    // calculate the distance between nextNote and jumpTime
+    const nextNoteDistance = Math.abs(this.curNotes.nextNote.timing - jumpTime);
     const notesDistance = {};
     notesDistance[curNoteDistance] = this.curNotes.curNote;
     notesDistance[nextNoteDistance] = this.curNotes.nextNote;
@@ -450,20 +450,14 @@ class GameScene extends Phaser.Scene {
    * general function to check, register and execute user's jump.
    */
   jumpTimingCheck() {
-    // current jump time
-    const jumpTime = Date.now();
-
     // time passed since the start of the level until the jump
-    const timePassedSinceLevelStart = jumpTime - this.myHero.walkStartTime;
-
-    // calculates the delay of the jump from the note timing (if the player is dragging)
-    const delay = timePassedSinceLevelStart % this.divisionDuration;
-
-    // calculates the pre-delay of the jump from the note timing (if the player is rushing)
-    const preDelay = this.divisionDuration - (timePassedSinceLevelStart % this.divisionDuration);
+    const jumpTime = Date.now() - this.myHero.walkStartTime;
 
     // get the note element that is closest to the jump
-    const closestNote = this.getClosestNoteToKeyPress(timePassedSinceLevelStart);
+    const closestNote = this.getClosestNoteToKeyPress(jumpTime);
+
+    // calculates the delay of the jump from the note timing
+    const jumpDelay = Math.abs(closestNote.timing - jumpTime);
 
     let successfulJump = true; // jump is okay until proven else...
     // if we're on count-in, any jump is valid, so we jump and return
@@ -473,18 +467,19 @@ class GameScene extends Phaser.Scene {
     }
     // register the jump in our timing list
     this.registerJump(closestNote);
-    //console.log(closestNote, this.timingList);
+
     //if jump is good, in the next if statement we log to the console details regarding the jump, and register the score in our score array.
-    if (delay === 0 && closestNote.noteType === NOTES.PLAYED_NOTE) {
-      this.registerScore(delay);
-      console.log("just in time!");
-    } else if (delay < ACCEPTABLE_DELAY && closestNote.noteType === NOTES.PLAYED_NOTE) {
-      this.registerScore(delay);
-      console.log("jump time is ", delay, "milliseconds late");
-    } else if (preDelay < ACCEPTABLE_DELAY && closestNote.noteType === NOTES.PLAYED_NOTE) {
-      this.registerScore(preDelay);
-      console.log("jump time is ", preDelay, "milliseconds early");
+    if (jumpDelay < ACCEPTABLE_DELAY && closestNote.noteType === NOTES.PLAYED_NOTE) {
+      this.registerScore(jumpDelay);
+      if (closestNote.timing > jumpTime) {
+        console.log("jump time is ", jumpDelay, "milliseconds early");
+      } else if (closestNote.timing < jumpTime) {
+        console.log("jump time is ", jumpDelay, "milliseconds late");
+      } else {
+        console.log("just in time!");
+      }
     }
+
     // if jump was not good, we inform to the user the details regarding the jump, and update level status to lost
     else {
       successfulJump = false;
@@ -492,7 +487,7 @@ class GameScene extends Phaser.Scene {
         this.infoMessage = WRONG_JUMP_MSG;
       }
       // else, if the the jump failed because of delay, tell that to user
-      else if (Math.min(delay, preDelay) === delay) {
+      else if (closestNote.timing < jumpTime) {
         this.infoMessage = LATE_JUMP_MSG;
       }
       // else, it failed because user jumped too early. tell that to user
