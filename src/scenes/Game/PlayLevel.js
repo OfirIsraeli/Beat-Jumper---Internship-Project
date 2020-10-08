@@ -100,7 +100,10 @@ export function playLevel(that, levelJson) {
   }
 
   // create music score for the level
-  createScore(levelJson, that.tempo, that.invisibleLevel, function (event, value) {});
+  createScore(levelJson, that.tempo, that.levelState, that.invisibleLevel, function (
+    event,
+    value
+  ) {});
 
   // array of boulder sprites. will be filled with sprites during the intervals
   that.bouldersArray = [];
