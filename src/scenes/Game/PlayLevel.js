@@ -73,10 +73,6 @@ const LATE_JUMP_MSG = "You jumped too late!";
  * @param {*} invisibleLevel - a flag that indicates if blocks should be invisible this time or not
  */
 export function playLevel(that, levelJson) {
-  // show the score DIV element.
-  let scoreDIVElement = document.getElementById("score-id");
-  scoreDIVElement.style.display = "block";
-
   // check if level we're about to play is the last level unlocked by user.
   that.levelIsLastUnlocked = that.checkIfLastLevelUnlocked();
 
@@ -189,7 +185,9 @@ export function playLevel(that, levelJson) {
         intervalType = INTERVAL_TYPES.NOTES_INTERVAL; // switch to note interval type
         that.countInText.text = ""; // after we're done with count-in, show no text from countInText
       }
-      that.levelStatusCheck(intervalNumber, totalIntervals); // check if there is a need to end the level.
+    }
+    if (event === BUS_EVENTS.UPDATE || event === BUS_EVENTS.MAIN_LOOP_END) {
+      that.levelStatusCheck(event, intervalNumber, totalIntervals);
     }
   });
 

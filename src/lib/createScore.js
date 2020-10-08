@@ -27,6 +27,7 @@ export default function createScore(
 
     disableMeasureRect: true,
     disableNoteRect: disableNoteRect,
+    disableTracksSound: true,
 
     // audio playback parameters
     pickupQuarters: 0,

@@ -2,9 +2,12 @@
 <html>
   <head>
     <title>The Beat Jumper</title>
-    <meta property="og:title" content="The Beat Jumper">
-    <meta property="og:url" content="https://bandpad.co/beat-jumper">
-    <meta property="og:description" content="Online rythmn practice game for beginners instrumental music students">
+    <meta property="og:title" content="The Beat Jumper" />
+    <meta property="og:url" content="https://bandpad.co/beat-jumper" />
+    <meta
+      property="og:description"
+      content="Online rythmn practice game for beginners instrumental music students"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;200;300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
@@ -26,6 +29,12 @@
       overflow: hidden !important;
       height: 760px;
       z-index: 100;
+      pointer-events: none;
+    }
+    html,
+    body {
+      margin: 0;
+      padding: 0;
     }
     #bandpad-promo {
       text-align: center;
@@ -37,12 +46,13 @@
   </style>
   <body>
     <!-- score -->
-    <div id="bandpad-promo">
+    <!--div id="bandpad-promo">
       <p>
-        This game is part of the <a href="https://bandpad.co"><b>BandPad</b></a> services for music education
-        <a href="https://bandpad.co/en#newsletter"><b>Join us</b></a> for more games and apps
+        This game is part of the <a href="https://bandpad.co"><b>BandPad</b></a> services for music
+        education <a href="https://bandpad.co/en#newsletter"><b>Join us</b></a> for more games and
+        apps
       </p>
-    </div>
+    </div-->
 
     <div id="score-id"></div>
   </body>

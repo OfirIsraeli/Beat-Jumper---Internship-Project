@@ -176,6 +176,9 @@ class GameScene extends Phaser.Scene {
    * setting properties regarding this scene's run (so properties regarding stage and not properties regarding just a level)
    */
   create() {
+    // show the score DIV element.
+    let scoreDIVElement = document.getElementById("score-id");
+    scoreDIVElement.style.display = "block";
     // set stage and level states. at this points, nothing has started yet so default values of NOT_STARTED
     this.stageState = STAGE_STATES.NOT_STARTED;
     this.levelState = LEVEL_STATES.NOT_STARTED;
@@ -184,7 +187,15 @@ class GameScene extends Phaser.Scene {
 
     // an array  that will keep track of the points in the CURRENT level.
     // size will be the amount of times user is required to jump.
+    //      this.myHero.onGround() && this.levelState === LEVEL_STATES.ON_MOTION
     this.levelPointsArray = [];
+    this.input.on("pointerdown", () => {
+      console.log("clicked");
+      if (this.myHero.onGround() && this.levelState === LEVEL_STATES.ON_MOTION) {
+        this.hitSound.play();
+        this.jumpTimingCheck();
+      }
+    });
   }
 
   /**
@@ -357,7 +368,7 @@ class GameScene extends Phaser.Scene {
    * @param intervalNumber - the number of interval we're in
    * @param totalIntervals - total amount of intervals that will run
    */
-  levelStatusCheck(intervalNumber, totalIntervals) {
+  levelStatusCheck(event, intervalNumber, totalIntervals) {
     // if player has lost the level for any reason
     if (this.levelState === LEVEL_STATES.LOST) {
       this.removeBoulders(); // remove all boulders from game
@@ -367,8 +378,9 @@ class GameScene extends Phaser.Scene {
       this.subtractHitPoints(); // subtract hitpoints after level failure
     }
     // if player passed all intervals correctly
-    else if (intervalNumber === totalIntervals) {
-      console.log(intervalNumber);
+    else if (event === BUS_EVENTS.MAIN_LOOP_END) {
+      console.log("ended!!!");
+
       // if finished first part, redo the level without boudlers
       if (this.levelPart === LEVEL_PARTS.PART1) {
         this.levelState = LEVEL_STATES.PASSED_PART1; // player passed the first part of this level
@@ -520,9 +532,9 @@ class GameScene extends Phaser.Scene {
     if (Phaser.Input.Keyboard.JustDown(this.escButton)) {
       // if level was rolling, stop the intervals
       if (this.levelState === LEVEL_STATES.ON_MOTION) {
+        this.removeBoulders();
         ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
       }
-      this.removeBoulders();
       this.countInText.text = ""; // making sure there is no text overload if we're in count-in
       this.infoText.text = "Exiting"; // and informing the player of his\her choice
       this.goBackToMenu(1000); // and aborting mission...
