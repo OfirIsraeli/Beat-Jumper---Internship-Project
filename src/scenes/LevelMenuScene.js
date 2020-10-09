@@ -56,9 +56,7 @@ class LevelMenuScene extends Phaser.Scene {
     let scoreDIVElement = document.getElementById("score-id");
     scoreDIVElement.style.display = "none";
     // set background
-    this.background = this.add
-      .tileSprite(0, 0, this.width, this.height, "menuBackgroundImage")
-      .setOrigin(0, 0);
+    this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
 
     // title text - select a level
     let style = {
@@ -74,8 +72,8 @@ class LevelMenuScene extends Phaser.Scene {
       .setInteractive({ cursor: "pointer", useHandCursor: true }); // so we can press it
     // pressing the sprite causing the next arrow function to execute:
 
+    // when a button is pressed, go back to main menu
     backToMenuButton.on("pointerdown", () => {
-      // when a button is pressed, go back to main menu
       this.scene.start("TitleScene");
     });
     // if cursor is over the button, change the tint to green
@@ -89,17 +87,8 @@ class LevelMenuScene extends Phaser.Scene {
     });
 
     // add a new text for this button
-    style = {
-      fontFamily: "Chewy",
-      fill: "#ffffff",
-      wordWrap: true,
-      wordWrapWidth: backToMenuButton.width,
-      align: "center",
-      fontSize: "30px",
-    };
-    let buttonText = this.add
-      .text(backToMenuButton.x, backToMenuButton.y, "Main Menu", style)
-      .setOrigin(0.5, 0.5); // centerize text to image
+    style.fontSize = "30px";
+    this.add.text(backToMenuButton.x, backToMenuButton.y, "Main Menu", style).setOrigin(0.5, 0.5); // centerize text to image
   }
 
   create() {
@@ -220,9 +209,6 @@ class LevelMenuScene extends Phaser.Scene {
       .text(newStageImage.x, newStageImage.y, text, {
         fontFamily: "Chewy",
         fill: "#ffffff",
-        wordWrap: true,
-        wordWrapWidth: newStageImage.width,
-        align: "center",
         fontSize: "30px",
       })
       .setOrigin(0.5, 0.5); // centerize text to image
@@ -298,9 +284,7 @@ class LevelMenuScene extends Phaser.Scene {
       align: "center",
       fontSize: "30px",
     };
-    let buttonText = this.add
-      .text(newButton.x, newButton.y, levelIndex + 1, style)
-      .setOrigin(0.5, 0.5); // centerize text to image
+    this.add.text(newButton.x, newButton.y, levelIndex + 1, style).setOrigin(0.5, 0.5); // centerize text to image
 
     // add this button and its' locked state (true by default) to the level buttons array
     this.levelButtons[stageIndex][levelIndex] = { button: newButton, locked: true };

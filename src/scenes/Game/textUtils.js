@@ -1,8 +1,5 @@
 import { FONT_STYLE } from "./GameScene";
 
-// from this level onwards, blocks are invisible
-const NO_BOULDERS_MSG = "\nNo boulders";
-
 /**
  * function that sets the many texts needed for GameScene
  * @param {*} that - a Phaser scene. in our case, always GameScene

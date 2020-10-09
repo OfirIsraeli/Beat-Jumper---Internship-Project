@@ -8,22 +8,15 @@ class HighScoreMenuScene extends Phaser.Scene {
     });
   }
   preload() {
-    // remove the score DIV element that can be left out from game scene
-    let scoreDIVElement = document.getElementById("score-id");
-    scoreDIVElement.style.display = "none";
     // set background
-    this.background = this.add
-      .tileSprite(0, 0, this.width, this.height, "menuBackgroundImage")
-      .setOrigin(0, 0);
+    this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
 
     let style = {
       fontFamily: "Chewy",
       fill: "#ffffff",
       fontSize: "90px",
     };
-    let TitleText = this.add
-      .text(this.sys.game.config.width / 2, 120, "Highscores", style)
-      .setOrigin(0.5, 0.5);
+    this.add.text(this.sys.game.config.width / 2, 120, "Highscores", style).setOrigin(0.5, 0.5);
 
     // button so player can go back to main menu
     let backToMenuButton = this.add
@@ -31,8 +24,8 @@ class HighScoreMenuScene extends Phaser.Scene {
       .setInteractive({ cursor: "pointer", useHandCursor: true }); // so we can press it
     // pressing the sprite causing the next arrow function to execute:
 
+    // when a button is pressed, go back to main menu
     backToMenuButton.on("pointerdown", () => {
-      // when a button is pressed, go back to main menu
       this.scene.start("TitleScene");
     });
     // if cursor is over the button, change the tint to green
@@ -46,22 +39,13 @@ class HighScoreMenuScene extends Phaser.Scene {
     });
 
     // add a new text for this button
-    style = {
-      fontFamily: "Chewy",
-      fill: "#ffffff",
-      wordWrap: true,
-      wordWrapWidth: backToMenuButton.width,
-      align: "center",
-      fontSize: "30px",
-    };
-    let buttonText = this.add
-      .text(backToMenuButton.x, backToMenuButton.y, "Main Menu", style)
-      .setOrigin(0.5, 0.5); // centerize text to image
+    style.fontSize = "30px";
+    this.add.text(backToMenuButton.x, backToMenuButton.y, "Main Menu", style).setOrigin(0.5, 0.5); // centerize text to image
   }
 
   create() {
-    for (let i = 1; i <= 6; i++) {
-      this.createNewMenuButton("Stage " + i, "StageHighScoreScene", i - 1);
+    for (let stageNumber = 1; stageNumber <= 6; stageNumber++) {
+      this.createNewMenuButton("Stage " + stageNumber, "StageHighScoreScene", stageNumber - 1);
     }
   }
 
@@ -78,8 +62,8 @@ class HighScoreMenuScene extends Phaser.Scene {
       .setInteractive({ cursor: "pointer", useHandCursor: true }); // so we can press it
     // pressing the sprite causing the next arrow function to execute:
 
+    // when a unlocked level is pressed, start GameScene with current stage and level
     newButton.on("pointerdown", () => {
-      // when a unlocked level is pressed, start GameScene with current stage and level
       this.scene.start(sceneName, { stage: buttonNumber });
     });
     // if cursor is over the button, change the tint accordingly.
@@ -96,9 +80,6 @@ class HighScoreMenuScene extends Phaser.Scene {
     let style = {
       fontFamily: "Chewy",
       fill: "#ffffff",
-      wordWrap: true,
-      wordWrapWidth: newButton.width,
-      align: "center",
       fontSize: "30px",
     };
     this.add.text(newButton.x, newButton.y, buttonText, style).setOrigin(0.5, 0.5); // centerize text to image

@@ -1,4 +1,6 @@
-// scene to display game credits
+/**
+ * scene to display game credits
+ */
 class CreditsScene extends Phaser.Scene {
   constructor(test) {
     super({
@@ -6,13 +8,8 @@ class CreditsScene extends Phaser.Scene {
     });
   }
   preload() {
-    // remove the score DIV element that can be left out from game scene
-    let scoreDIVElement = document.getElementById("score-id");
-    scoreDIVElement.style.display = "none";
     // set background
-    this.background = this.add
-      .tileSprite(0, 0, this.width, this.height, "menuBackgroundImage")
-      .setOrigin(0, 0);
+    this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
 
     // set style for texts in scene
     let style = {
@@ -30,10 +27,11 @@ class CreditsScene extends Phaser.Scene {
       .setInteractive({ cursor: "pointer", useHandCursor: true }); // so we can press it
     // pressing the sprite causing the next arrow function to execute:
 
+    // when a button is pressed, go back to main menu
     backToMenuButton.on("pointerdown", () => {
-      // when a button is pressed, go back to main menu
       this.scene.start("TitleScene");
     });
+
     // if cursor is over the button, change the tint to green
     backToMenuButton.on("pointerover", () => {
       backToMenuButton.setTint(0x26ff00);
@@ -48,9 +46,6 @@ class CreditsScene extends Phaser.Scene {
     style = {
       fontFamily: "Chewy",
       fill: "#ffffff",
-      wordWrap: true,
-      wordWrapWidth: backToMenuButton.width,
-      align: "center",
       fontSize: "30px",
     };
     this.add.text(backToMenuButton.x, backToMenuButton.y, "Main Menu", style).setOrigin(0.5, 0.5); // centerize text to image

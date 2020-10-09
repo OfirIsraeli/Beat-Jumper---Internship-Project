@@ -73,6 +73,8 @@ const ACCEPTABLE_DELAY = 275;
 // rest time in milliseconds each level will have before next one starts
 const DEFAULT_GAME_START_DELAY = 3500;
 
+const DEFAULT_TILE_SPEED = 6;
+
 // different messages for user
 const EARLY_JUMP_MSG = "You jumped too early!";
 const LATE_JUMP_MSG = "You jumped too late!";
@@ -189,10 +191,11 @@ class GameScene extends Phaser.Scene {
     // size will be the amount of times user is required to jump.
     //      this.myHero.onGround() && this.levelState === LEVEL_STATES.ON_MOTION
     this.levelPointsArray = [];
+
+    // if player has touched the screen while hero was touching the ground and level is played, jump and start jump calculations
     this.input.on("pointerdown", () => {
       console.log("clicked");
       if (this.myHero.onGround() && this.levelState === LEVEL_STATES.ON_MOTION) {
-        this.hitSound.play();
         this.jumpTimingCheck();
       }
     });
@@ -474,6 +477,7 @@ class GameScene extends Phaser.Scene {
     let successfulJump = true; // jump is okay until proven else...
     // if we're on count-in, any jump is valid, so we jump and return
     if (closestNote.noteType === NOTES.COUNT_NOTE) {
+      this.hitSound.play(); // play a sound for that jump
       this.myHero.smallJump(successfulJump);
       return;
     }
@@ -509,6 +513,7 @@ class GameScene extends Phaser.Scene {
       this.levelState = LEVEL_STATES.LOST;
     }
     // in any case, jump
+    this.hitSound.play(); // play a sound for that jump
     // needed animation and jump height are calculated in the hero class according to successfulJump and noteSize)
     this.myHero.jump(successfulJump, closestNote.noteSize);
   }
@@ -542,7 +547,7 @@ class GameScene extends Phaser.Scene {
 
     // if level is on motion, move the background image and rotate all boulders
     if (this.levelState === LEVEL_STATES.ON_MOTION) {
-      this.background.tilePositionX += 6;
+      this.background.tilePositionX += DEFAULT_TILE_SPEED;
       this.bouldersArray.forEach((boulder) => {
         boulder.roll();
       });
@@ -554,8 +559,6 @@ class GameScene extends Phaser.Scene {
       this.myHero.onGround() &&
       this.levelState === LEVEL_STATES.ON_MOTION
     ) {
-      // play a sound for that jump
-      this.hitSound.play();
       // check if jump is valid according to game rules, and act according to the user's input
       this.jumpTimingCheck();
     }

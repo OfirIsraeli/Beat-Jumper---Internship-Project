@@ -1,3 +1,6 @@
+/**
+ * scene for loading assets into the game
+ */
 class BootScene extends Phaser.Scene {
   constructor(test) {
     super({
@@ -23,7 +26,7 @@ class BootScene extends Phaser.Scene {
     this.load.image("unlockedStageImage", "assets/images/unlocked stage.png");
     this.load.image("lockedStageImage", "assets/images/locked stage.png");
 
-    // loading sprites
+    // loading spritesheets for animations
     this.load.spritesheet("walkHero", "assets/images/walkHero.png", {
       frameWidth: 140,
       frameHeight: 200,

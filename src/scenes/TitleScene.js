@@ -1,4 +1,6 @@
-// scene for main menu
+/**
+ * scene for main menu
+ */
 class TitleScene extends Phaser.Scene {
   constructor(test) {
     super({
@@ -6,13 +8,8 @@ class TitleScene extends Phaser.Scene {
     });
   }
   preload() {
-    // remove the score DIV element that can be left out from game scene
-    let scoreDIVElement = document.getElementById("score-id");
-    scoreDIVElement.style.display = "none";
     // set background
-    this.background = this.add
-      .tileSprite(0, 0, this.width, this.height, "menuBackgroundImage")
-      .setOrigin(0, 0);
+    this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
 
     let style = {
       fontFamily: "Chewy",
@@ -63,9 +60,6 @@ class TitleScene extends Phaser.Scene {
     let style = {
       fontFamily: "Chewy",
       fill: "#ffffff",
-      wordWrap: true,
-      wordWrapWidth: newButton.width,
-      align: "center",
       fontSize: "30px",
     };
     this.add.text(newButton.x, newButton.y, buttonText, style).setOrigin(0.5, 0.5); // centerize text to image

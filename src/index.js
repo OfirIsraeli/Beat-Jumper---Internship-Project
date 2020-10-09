@@ -17,6 +17,9 @@ import * as WaaSampler from "waa-sampler";
   https://labs.phaser.io
 */
 
+/**
+ * general Phaser game config
+ */
 const config = {
   type: Phaser.AUTO,
   width: 1280,
@@ -42,7 +45,7 @@ const config = {
     GameScene,
   ],
 };
-
+// intiiallize BandPad sound sampler
 WaaSampler.initWaaSampler(
   ["metronome"],
   "https://bandpad.co/livescoreV2/statics/create-bandpad-soundfont/soundfont",
