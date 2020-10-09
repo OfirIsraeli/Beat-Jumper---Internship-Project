@@ -122,7 +122,6 @@ export function playLevel(that, levelJson) {
   // data structures processing - each one explained in its' function description
   that.scoreMap = createLevelScoreMap(levelJson, that.amountOfBars);
   that.timingList = createTimingList(that.divisionDuration, that.scoreMap, countInIntervals);
-
   // start level
   that.levelState = LEVEL_STATES.ON_MOTION;
   that.myHero.walk(); // there goes my hero...
@@ -187,10 +186,12 @@ export function playLevel(that, levelJson) {
         intervalType = INTERVAL_TYPES.NOTES_INTERVAL; // switch to note interval type
         that.countInText.text = ""; // after we're done with count-in, show no text from countInText
       }
-    }
-    if (event === BUS_EVENTS.UPDATE || event === BUS_EVENTS.MAIN_LOOP_END) {
       that.levelStatusCheck(event, intervalNumber, totalIntervals);
     }
+    /*
+    if (event === BUS_EVENTS.UPDATE || event === BUS_EVENTS.MAIN_LOOP_END) {
+      that.levelStatusCheck(event, intervalNumber, totalIntervals);
+    }*/
   });
 
   // start vexflow, plays the score along with executing the intervals

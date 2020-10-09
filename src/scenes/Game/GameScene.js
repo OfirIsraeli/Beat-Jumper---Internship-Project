@@ -381,7 +381,7 @@ class GameScene extends Phaser.Scene {
       this.subtractHitPoints(); // subtract hitpoints after level failure
     }
     // if player passed all intervals correctly
-    else if (event === BUS_EVENTS.MAIN_LOOP_END) {
+    else if (intervalNumber === totalIntervals) {
       console.log("ended!!!");
 
       // if finished first part, redo the level without boudlers
@@ -466,30 +466,30 @@ class GameScene extends Phaser.Scene {
    */
   jumpTimingCheck() {
     // time passed since the start of the level until the jump
-    const jumpTime = Date.now() - this.myHero.walkStartTime;
+    this.jumpTime = Date.now() - this.myHero.walkStartTime;
 
     // get the note element that is closest to the jump
-    const closestNote = this.getClosestNoteToKeyPress(jumpTime);
+    this.closestNote = this.getClosestNoteToKeyPress(this.jumpTime);
 
     // calculates the delay of the jump from the note timing
-    const jumpDelay = Math.abs(closestNote.timing - jumpTime);
+    const jumpDelay = Math.abs(this.closestNote.timing - this.jumpTime);
 
     let successfulJump = true; // jump is okay until proven else...
     // if we're on count-in, any jump is valid, so we jump and return
-    if (closestNote.noteType === NOTES.COUNT_NOTE) {
+    if (this.closestNote.noteType === NOTES.COUNT_NOTE) {
       this.hitSound.play(); // play a sound for that jump
       this.myHero.smallJump(successfulJump);
       return;
     }
     // register the jump in our timing list
-    this.registerJump(closestNote);
+    this.registerJump(this.closestNote);
 
     //if jump is good, in the next if statement we log to the console details regarding the jump, and register the score in our score array.
-    if (jumpDelay < ACCEPTABLE_DELAY && closestNote.noteType === NOTES.PLAYED_NOTE) {
+    if (jumpDelay < ACCEPTABLE_DELAY && this.closestNote.noteType === NOTES.PLAYED_NOTE) {
       this.registerScore(jumpDelay);
-      if (closestNote.timing > jumpTime) {
+      if (this.closestNote.timing > this.jumpTime) {
         console.log("jump time is ", jumpDelay, "milliseconds early");
-      } else if (closestNote.timing < jumpTime) {
+      } else if (this.closestNote.timing < this.jumpTime) {
         console.log("jump time is ", jumpDelay, "milliseconds late");
       } else {
         console.log("just in time!");
@@ -499,11 +499,11 @@ class GameScene extends Phaser.Scene {
     // if jump was not good, we inform to the user the details regarding the jump, and update level status to lost
     else {
       successfulJump = false;
-      if (closestNote.noteType === NOTES.REST_NOTE) {
+      if (this.closestNote.noteType === NOTES.REST_NOTE) {
         this.infoMessage = WRONG_JUMP_MSG;
       }
       // else, if the the jump failed because of delay, tell that to user
-      else if (closestNote.timing < jumpTime) {
+      else if (this.closestNote.timing < this.jumpTime) {
         this.infoMessage = LATE_JUMP_MSG;
       }
       // else, it failed because user jumped too early. tell that to user
@@ -515,7 +515,14 @@ class GameScene extends Phaser.Scene {
     // in any case, jump
     this.hitSound.play(); // play a sound for that jump
     // needed animation and jump height are calculated in the hero class according to successfulJump and noteSize)
-    this.myHero.jump(successfulJump, closestNote.noteSize);
+    this.myHero.jump(successfulJump, this.closestNote.noteSize);
+  }
+
+  jumpDurationCheck() {
+    const jumpDuration = Date.now() - this.myHero.walkStartTime - this.jumpTime;
+    const neededDuration = this.closestNote.noteSize * this.divisionDuration;
+    console.log("jump length: ", jumpDuration);
+    console.log("should be  ", neededDuration);
   }
 
   /**
@@ -561,6 +568,9 @@ class GameScene extends Phaser.Scene {
     ) {
       // check if jump is valid according to game rules, and act according to the user's input
       this.jumpTimingCheck();
+    }
+    if (Phaser.Input.Keyboard.JustUp(this.spaceBar)) {
+      this.jumpDurationCheck();
     }
 
     // if the game is not on motion and we did not finish all of the musicJsons

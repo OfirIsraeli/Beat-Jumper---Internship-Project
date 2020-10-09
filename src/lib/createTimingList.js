@@ -1,5 +1,3 @@
-const COUNTIN_BEATS = 16;
-
 const NOTES = {
   REST_NOTE: "noPlace",
   PLAYED_NOTE: "playedNote",
