@@ -49,7 +49,7 @@ const config = {
 WaaSampler.initWaaSampler(
   ["metronome"],
   "https://bandpad.co/livescoreV2/statics/create-bandpad-soundfont/soundfont",
-  "COWBELL",
+  "OFF",
   90
 )
   .then(function () {

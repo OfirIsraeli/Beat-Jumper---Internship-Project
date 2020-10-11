@@ -51,6 +51,14 @@ class BootScene extends Phaser.Scene {
     // loading sounds
     this.load.audio("hit", "assets/sounds/hitLowerVolume.mp3");
     this.load.audio("failure", "assets/sounds/fail.mp3");
+    this.load.audio("measureBeat", "assets/sounds/click beat.mp3");
+    this.load.audio("quarterBeat", "assets/sounds/clickBeatLower.mp3");
+
+    this.load.audio("levelWin", "assets/sounds/level win.wav");
+    this.load.audio("stageWin", "assets/sounds/stage win.wav");
+    this.load.audio("levelFail", "assets/sounds/level fail.wav");
+    this.load.audio("stageFail", "assets/sounds/stage fail.wav");
+    this.load.audio("buttonSelect", "assets/sounds/button select.wav");
 
     // Register a load progress event to show a load bar
     this.load.on("progress", (value) => {

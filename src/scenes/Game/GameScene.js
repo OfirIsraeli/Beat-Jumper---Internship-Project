@@ -129,6 +129,13 @@ class GameScene extends Phaser.Scene {
     // set game sounds
     this.hitSound = this.sound.add("hit");
     this.failSound = this.sound.add("failure");
+    this.measureBeat = this.sound.add("measureBeat");
+    this.quarterBeat = this.sound.add("quarterBeat");
+
+    this.levelWinSound = this.sound.add("levelWin");
+    this.stageWinSound = this.sound.add("stageWin");
+    this.levelLostSound = this.sound.add("levelFail");
+    this.stageLostSound = this.sound.add("stageFail");
 
     // set game background
     this.background = this.add
@@ -300,6 +307,7 @@ class GameScene extends Phaser.Scene {
           JSON.stringify({ stage: this.stageIndex, level: 0 })
         );
       }
+      this.stageLostSound.play(); // play stage lost sound
       localStorage.removeItem("hitPointsSubtracted"); // reset hitPointsSubtracted. new chance...
       return;
     }
@@ -320,9 +328,11 @@ class GameScene extends Phaser.Scene {
         }
         // if we finished a level without ending a stage, we are on hold until we start the next level
         this.stageState = STAGE_STATES.ON_HOLD;
+        this.levelWinSound.play(); // play win level sound
       } else if (this.wonGameCheck()) {
         this.stageState = STAGE_STATES.WON;
-        localStorage.removeItem("hitPointsSubtracted"); // reset hitPointsSubtracted. new chance per new stage...
+        localStorage.removeItem("hitPointsSubtracted"); // reset hitPointsSubtracted.
+        this.stageWinSound.play(); // play stage win sound
       }
       // if this is the last level of this stage, advance to new stage
       else {
@@ -335,6 +345,7 @@ class GameScene extends Phaser.Scene {
           this.lastLevelUnlocked.stage++;
           this.lastLevelUnlocked.level = 0; // first level in the new stage...
         }
+        this.stageWinSound.play(); // play stage win sound
       }
 
       // change localStorage data to the new next level, after we updated the indexes accordingly
@@ -349,6 +360,7 @@ class GameScene extends Phaser.Scene {
     // if just lost a level but not the whole stage, just redo the level. put stageStage on hold until we restart
     else if (this.levelState === LEVEL_STATES.LOST) {
       this.stageState = STAGE_STATES.ON_HOLD;
+      this.levelLostSound.play(); // play level lose sound
     }
   }
 
@@ -518,11 +530,22 @@ class GameScene extends Phaser.Scene {
     this.myHero.jump(successfulJump, this.closestNote.noteSize);
   }
 
+  /**
+   * this function checks how long a jump took, and if it is long enough according to the current note being played
+   */
   jumpDurationCheck() {
+    // jump duration is the difference between the time user has pressed down the jump button (this.myHero.walkStartTime - this.jumpTime)
+    // and pulled up from button press (Date.now)
     const jumpDuration = Date.now() - this.myHero.walkStartTime - this.jumpTime;
+    // needed jump duration is the smallest division in miiliseconds (this.divisionDuration) times this notes' size
     const neededDuration = this.closestNote.noteSize * this.divisionDuration;
     console.log("jump length: ", jumpDuration);
     console.log("should be  ", neededDuration);
+    if (jumpDuration < neededDuration / 2) {
+      console.log("you jumped for too short a time");
+    } else if (jumpDuration + ACCEPTABLE_DELAY > neededDuration) {
+      console.log("you jumped for too long a time");
+    }
   }
 
   /**
@@ -549,7 +572,7 @@ class GameScene extends Phaser.Scene {
       }
       this.countInText.text = ""; // making sure there is no text overload if we're in count-in
       this.infoText.text = "Exiting"; // and informing the player of his\her choice
-      this.goBackToMenu(1000); // and aborting mission...
+      this.goBackToMenu(600); // and aborting mission...
     }
 
     // if level is on motion, move the background image and rotate all boulders

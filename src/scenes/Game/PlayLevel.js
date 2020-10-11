@@ -129,6 +129,9 @@ export function playLevel(that, levelJson) {
   // the arrow function that happens each interval
   ScoreManager.setEventFunction((event, value) => {
     if (event === BUS_EVENTS.UPDATE) {
+      // execute a cowbell beat if needed
+      playBeat(that, value, that.divisions);
+
       if (intervalNumber < totalIntervals) {
         // the 3 notes items closest to the current interval. Needed for calculations for user's jump.
         that.curNotes = {
@@ -198,4 +201,21 @@ export function playLevel(that, levelJson) {
   ScoreManager.scoreGetEvent(BUS_EVENTS.PLAY, {
     smoothNotePointer: true,
   });
+}
+
+/**
+ *
+ * @param {*} that - a Phaser scene. In our case, it will always be GameScene
+ * @param {*} value - the value index that we get from the scoreManager intervals.
+ * @param {*} divisions - this level's divisions
+ */
+function playBeat(that, value, divisions) {
+  // if we're in the first beat of a measure, play loud cowbell sound
+  if (value % (divisions * 4) === 0) {
+    that.measureBeat.play();
+  }
+  // if we're in any other quarter note, play normal cowbell sound
+  else if (value % divisions === 0) {
+    that.quarterBeat.play();
+  }
 }
