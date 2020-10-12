@@ -76,6 +76,7 @@ const DEFAULT_GAME_START_DELAY = 3500;
 const DEFAULT_TILE_SPEED = 6;
 
 // different messages for user
+const LONG_JUMP_MSG = "You jumped too little!";
 const EARLY_JUMP_MSG = "You jumped too early!";
 const LATE_JUMP_MSG = "You jumped too late!";
 const WRONG_JUMP_MSG = "You jumped at the wrong time!";
@@ -125,6 +126,13 @@ class GameScene extends Phaser.Scene {
     // set game keys
     this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.escButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    this.pointer = this.input.activePointer;
+
+    // the two keys that can be pressed for jump in a game
+    this.keysPressed = {
+      SPACEBAR: this.spaceBar,
+      POINTER: this.pointer,
+    };
 
     // set game sounds
     this.hitSound = this.sound.add("hit");
@@ -196,14 +204,18 @@ class GameScene extends Phaser.Scene {
 
     // an array  that will keep track of the points in the CURRENT level.
     // size will be the amount of times user is required to jump.
-    //      this.myHero.onGround() && this.levelState === LEVEL_STATES.ON_MOTION
     this.levelPointsArray = [];
 
     // if player has touched the screen while hero was touching the ground and level is played, jump and start jump calculations
     this.input.on("pointerdown", () => {
-      console.log("clicked");
       if (this.myHero.onGround() && this.levelState === LEVEL_STATES.ON_MOTION) {
-        this.jumpTimingCheck();
+        this.jumpTimingCheck(this.keysPressed.POINTER);
+      }
+    });
+    //  if player has stopped touching screen and level is played, check the duration of the jump
+    this.input.on("pointerup", () => {
+      if (this.levelState === LEVEL_STATES.ON_MOTION) {
+        this.jumpDurationCheck();
       }
     });
   }
@@ -394,8 +406,6 @@ class GameScene extends Phaser.Scene {
     }
     // if player passed all intervals correctly
     else if (intervalNumber === totalIntervals) {
-      console.log("ended!!!");
-
       // if finished first part, redo the level without boudlers
       if (this.levelPart === LEVEL_PARTS.PART1) {
         this.levelState = LEVEL_STATES.PASSED_PART1; // player passed the first part of this level
@@ -470,13 +480,14 @@ class GameScene extends Phaser.Scene {
     // normalized to max points of 100
     let jumpScore = 100 - (JumpDelay / ACCEPTABLE_DELAY) * 100;
     this.levelPointsArray.push(jumpScore);
-    console.log("jump score is: ", jumpScore);
+    //console.log("jump score is: ", jumpScore);
   }
 
   /**
    * general function to check, register and execute user's jump.
+   * @param {*} keyPressed - the key used to trigger the jump. either space bar or pointer
    */
-  jumpTimingCheck() {
+  jumpTimingCheck(keyPressed) {
     // time passed since the start of the level until the jump
     this.jumpTime = Date.now() - this.myHero.walkStartTime;
 
@@ -490,7 +501,7 @@ class GameScene extends Phaser.Scene {
     // if we're on count-in, any jump is valid, so we jump and return
     if (this.closestNote.noteType === NOTES.COUNT_NOTE) {
       this.hitSound.play(); // play a sound for that jump
-      this.myHero.smallJump(successfulJump);
+      this.myHero.jump(keyPressed, successfulJump);
       return;
     }
     // register the jump in our timing list
@@ -527,24 +538,25 @@ class GameScene extends Phaser.Scene {
     // in any case, jump
     this.hitSound.play(); // play a sound for that jump
     // needed animation and jump height are calculated in the hero class according to successfulJump and noteSize)
-    this.myHero.jump(successfulJump, this.closestNote.noteSize);
+    this.myHero.jump(keyPressed, successfulJump);
   }
 
   /**
    * this function checks how long a jump took, and if it is long enough according to the current note being played
    */
   jumpDurationCheck() {
+    // todo: change closestNote to the REAL note - the one the user has jumped on. search by checking the latest registered note
+
     // jump duration is the difference between the time user has pressed down the jump button (this.myHero.walkStartTime - this.jumpTime)
     // and pulled up from button press (Date.now)
     const jumpDuration = Date.now() - this.myHero.walkStartTime - this.jumpTime;
     // needed jump duration is the smallest division in miiliseconds (this.divisionDuration) times this notes' size
     const neededDuration = this.closestNote.noteSize * this.divisionDuration;
-    console.log("jump length: ", jumpDuration);
-    console.log("should be  ", neededDuration);
-    if (jumpDuration < neededDuration / 2) {
+    // if user has jump for less than a third of that note's duration, he fails the level
+    if (jumpDuration < neededDuration / 3) {
       console.log("you jumped for too short a time");
-    } else if (jumpDuration + ACCEPTABLE_DELAY > neededDuration) {
-      console.log("you jumped for too long a time");
+      this.infoMessage = LONG_JUMP_MSG;
+      this.levelState = LEVEL_STATES.LOST;
     }
   }
 
@@ -590,7 +602,7 @@ class GameScene extends Phaser.Scene {
       this.levelState === LEVEL_STATES.ON_MOTION
     ) {
       // check if jump is valid according to game rules, and act according to the user's input
-      this.jumpTimingCheck();
+      this.jumpTimingCheck(this.keysPressed.SPACEBAR);
     }
     if (Phaser.Input.Keyboard.JustUp(this.spaceBar)) {
       this.jumpDurationCheck();

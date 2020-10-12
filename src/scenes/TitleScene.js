@@ -1,3 +1,4 @@
+const DEFAULT_GAME_TEMPO = 70;
 /**
  * scene for main menu
  */
@@ -21,12 +22,20 @@ class TitleScene extends Phaser.Scene {
       .setOrigin(0.5, 0.5);
   }
   create() {
+    // fetch tempo for game. if no tempo is set yet, set default of 70
+    let gameTempo = JSON.parse(localStorage.getItem("GameTempo"));
+    if (gameTempo === null) {
+      gameTempo = DEFAULT_GAME_TEMPO;
+      localStorage.setItem("GameTempo", JSON.stringify(gameTempo));
+    }
+
+    // create menu buttons:
     this.createNewMenuButton("Play", "LevelMenuScene", 0);
     // todo: create scenes for each of these:
     this.createNewMenuButton("Tutorial", "TutorialScene", 1);
     this.createNewMenuButton("Highscores", "HighScoreMenuScene", 2);
     this.createNewMenuButton("Credits", "CreditsScene", 3);
-    //this.createNewMenuButton("Options", "LevelMenuScene", 3); for later use
+    this.createNewMenuButton("Options", "OptionsScene", 3);
   }
 
   /**

@@ -204,7 +204,7 @@ export default class Hero {
    */
   smallJump(successfulJump) {
     this.heroSprite.play("jumpAnimation");
-    this.heroSprite.setVelocityY(-1200);
+    //this.heroSprite.setVelocityY(-1200);
     this.heroSprite.anims.chain("midAirAnimation");
     // if the jump is a successful one, finish the jump with landing and keep walking
     // if jump was not successful, game level will take care of the rest, so no need to finish the jump
@@ -215,52 +215,34 @@ export default class Hero {
   }
 
   /**
-   * method for a medium hero jump. plays needed animations (if jump was either successful or not) and sets the needed negative gravity so jump will reach needed height
+   *  method for a medium hero jump. plays needed animations (if jump was either successful or not) and sets the needed negative gravity so jump will reach needed height
+   * @param {*} pressedButton - either space bar or pointer (mouse right click or touch on touch screen)
    * @param {*} successfulJump - a boolean to indicate if the jump was successful or not
-   */ mediumJump(successfulJump) {
-    this.heroSprite.play("jumpAnimation");
-    this.heroSprite.setVelocityY(-1400);
-    this.heroSprite.anims.chain("midAirAnimation");
-    // if the jump is a successful one, finish the jump with landing and keep walking
-    // if jump was not successful, game level will take care of the rest, so no need to finish the jump
-    if (successfulJump) {
-      this.heroSprite.anims.chain("landingAnimation");
-      this.heroSprite.anims.chain("walkAnimation");
-    }
-  }
-
-  /**
-   * method for a big hero jump. plays needed animations (if jump was either successful or not) and sets the needed negative gravity so jump will reach needed height
-   * @param {*} successfulJump - a boolean to indicate if the jump was successful or not
-   */ bigJump(successfulJump) {
-    this.heroSprite.play("jumpAnimation");
-    this.heroSprite.setVelocityY(-1600);
-    this.heroSprite.anims.chain("midAirAnimation");
-    // if the jump is a successful one, finish the jump with landing and keep walking
-    // if jump was not successful, game level will take care of the rest, so no need to finish the jump
-    if (successfulJump) {
-      this.heroSprite.anims.chain("landingAnimation");
-      this.heroSprite.anims.chain("walkAnimation");
-    }
-  }
-
-  /**
-   * general function to make hero jump.
-   * @param {*} successfulJump - a boolean to indicate if the jump was successful or not
-   * @param {*} jumpSize - indicates the kind of jump we need this time
    */
-  jump(successfulJump, jumpSize) {
-    if (jumpSize === JUMP_SIZE.SMALL) {
-      this.smallJump(successfulJump);
-    }
-    if (jumpSize === JUMP_SIZE.MEDIUM) {
-      this.smallJump(successfulJump);
-    }
-    if (jumpSize === JUMP_SIZE.BIG) {
-      this.mediumJump(successfulJump);
-    }
-    if (jumpSize === JUMP_SIZE.LARGE) {
-      this.bigJump(successfulJump);
+  jump(pressedButton, successfulJump) {
+    let jumpHeight = -900;
+    let interval = setInterval(() => {
+      if (!pressedButton.isDown) {
+        if (jumpHeight < -910) {
+          this.heroSprite.setVelocityY(500);
+        }
+        this.heroSprite.setGravityY(DEFAULT_GRAVITY);
+        clearInterval(interval);
+      } else if (jumpHeight < -915) {
+        this.heroSprite.setVelocityY(0);
+        this.heroSprite.setGravityY(0);
+      } else {
+        this.heroSprite.setVelocityY(jumpHeight);
+        jumpHeight -= 0.5;
+      }
+    }, 5);
+    this.heroSprite.play("jumpAnimation");
+    this.heroSprite.anims.chain("midAirAnimation");
+    // if the jump is a successful one, finish the jump with landing and keep walking
+    // if jump was not successful, game level will take care of the rest, so no need to finish the jump
+    if (successfulJump) {
+      this.heroSprite.anims.chain("landingAnimation");
+      this.heroSprite.anims.chain("walkAnimation");
     }
   }
 }

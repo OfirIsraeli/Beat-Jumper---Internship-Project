@@ -7,8 +7,8 @@ import HighScoreMenuScene from "./scenes/Highscores/HighScoreMenuScene";
 import StageHighScoreScene from "./scenes/Highscores/StageHighScoreScene";
 import TutorialScene from "./scenes/TutorialScene";
 import CreditsScene from "./scenes/CreditsScene";
+import OptionsScene from "./scenes/OptionsScene";
 import * as WaaSampler from "waa-sampler";
-
 /*
   https://github.com/nkholski/phaser3-es6-webpack
   https://photonstorm.github.io/phaser3-docs/Phaser.Physics.Arcade.Body.html
@@ -41,6 +41,7 @@ const config = {
     CreditsScene,
     HighScoreMenuScene,
     StageHighScoreScene,
+    OptionsScene,
     LevelMenuScene,
     GameScene,
   ],
@@ -59,3 +60,16 @@ WaaSampler.initWaaSampler(
   .catch(function (e) {
     console.error(e);
   });
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/service-worker.js")
+      .then((registration) => {
+        console.log("SW registered: ", registration);
+      })
+      .catch((registrationError) => {
+        console.log("SW registration failed: ", registrationError);
+      });
+  });
+}

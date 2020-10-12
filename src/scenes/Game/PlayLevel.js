@@ -89,7 +89,11 @@ export function playLevel(that, levelJson) {
   that.divisions = levelJson.divisions;
 
   // set tempo for this level
-  that.tempo = 80;
+  //that.tempo = 80;
+  that.tempo = JSON.parse(localStorage.getItem("GameTempo"));
+  if (that.tempo === null) {
+    that.tempo = 70;
+  }
 
   // create music score for the level
   createScore(levelJson, that.tempo, that.levelState, that.invisibleLevel, function (
