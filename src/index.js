@@ -9,6 +9,16 @@ import TutorialScene from "./scenes/TutorialScene";
 import CreditsScene from "./scenes/CreditsScene";
 import OptionsScene from "./scenes/OptionsScene";
 import * as WaaSampler from "waa-sampler";
+// fetch axios
+const axios = require("axios");
+// default game language
+const DEFAULT_LANGUAGE = "en";
+// default deployed address, without the language setting at the end
+const DEFAULT_GAME_URL = "https://bandpad.co/beat-jumper/";
+// default server we use in localhost is 8080
+const DEFAULT_LOCALHOST_SERVER = "http://localhost:8080/";
+//
+const DEFAULT_LANGUAGE_VOCAB_URL = "https://bandpad.co/livescore/score/getGameLanguage/";
 /*
   https://github.com/nkholski/phaser3-es6-webpack
   https://photonstorm.github.io/phaser3-docs/Phaser.Physics.Arcade.Body.html
@@ -55,7 +65,6 @@ WaaSampler.initWaaSampler(
 )
   .then(function () {
     console.log("init sampler successfully");
-    new Phaser.Game(config);
   })
   .catch(function (e) {
     console.error(e);
@@ -73,3 +82,29 @@ if ("serviceWorker" in navigator) {
       });
   });
 }
+
+// get game location
+let thisLocation = window.location.href;
+// if we're in localhost (so testing stuff), use the real site address as the location, with default language
+if (thisLocation === DEFAULT_LOCALHOST_SERVER) {
+  thisLocation = DEFAULT_GAME_URL + DEFAULT_LANGUAGE;
+}
+// language in our case will be in this specific location. fetch it.
+let selectedLanguage = thisLocation.slice(31, 33);
+// if it does not exist, use default language
+if (selectedLanguage === "") {
+  selectedLanguage = DEFAULT_LANGUAGE;
+}
+// command to get the vocabulary:
+// JSON.parse(localStorage.getItem("LanguageVocabulary"))
+axios
+  .get(DEFAULT_LANGUAGE_VOCAB_URL + selectedLanguage)
+  .then((response) => {
+    // handle success
+    localStorage.setItem("LanguageVocabulary", JSON.stringify(response.data));
+    new Phaser.Game(config);
+  })
+  .catch((error) => {
+    // handle error
+    console.log(error);
+  });
