@@ -22,11 +22,11 @@ import * as WaaSampler from "waa-sampler";
  */
 const config = {
   type: Phaser.AUTO,
-  width: 1280,
-  height: 760,
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: 1280,
+    height: 760,
   },
   physics: {
     default: "arcade",

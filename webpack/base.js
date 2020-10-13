@@ -46,22 +46,28 @@ module.exports = {
     }),
     new WebpackPwaManifest({
       name: "The Beat Jumper",
-      short_name: "TBJ",
+      short_name: "Beat Jumper",
+      orientation: "landscape",
       description: "Beat Jumper as a Progressive Web App",
-      background_color: "#ffffff",
+      background_color: "#063ee6",
+      start_url: "/beat-jumper",
+      display: "standalone",
+      theme_color: "#2c3e50",
+      lang: "en",
+
       crossorigin: "use-credentials", //can be null, use-credentials or anonymous
       icons: [
         {
-          src: path.resolve("assets/images/Icons/big icon.png"),
+          src: path.resolve("assets/images/Icons/icon.png"),
           sizes: [96, 128, 192, 256, 384, 512], // multiple sizes
         },
         {
-          src: path.resolve("assets/images/Icons/big icon.png"),
-          size: "1024x1024", // you can also use the specifications pattern
+          src: path.resolve("assets/images/Icons/icon.png"),
+          size: "512x512", // you can also use the specifications pattern
         },
         {
-          src: path.resolve("assets/images/Icons/big icon.png"),
-          size: "1024x1024",
+          src: path.resolve("assets/images/Icons/icon.png"),
+          size: "512x512",
           purpose: "maskable",
         },
       ],
