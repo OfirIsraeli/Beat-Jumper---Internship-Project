@@ -8,6 +8,8 @@ class HighScoreMenuScene extends Phaser.Scene {
     });
   }
   preload() {
+    // set button select sound
+    this.buttonSelectSound = this.sound.add("buttonSelect");
     // set background
     this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
 
@@ -26,6 +28,7 @@ class HighScoreMenuScene extends Phaser.Scene {
 
     // when a button is pressed, go back to main menu
     backToMenuButton.on("pointerdown", () => {
+      this.buttonSelectSound.play();
       this.scene.start("TitleScene");
     });
     // if cursor is over the button, change the tint to green
@@ -64,6 +67,7 @@ class HighScoreMenuScene extends Phaser.Scene {
 
     // when a unlocked level is pressed, start GameScene with current stage and level
     newButton.on("pointerdown", () => {
+      this.buttonSelectSound.play();
       this.scene.start(sceneName, { stage: buttonNumber });
     });
     // if cursor is over the button, change the tint accordingly.

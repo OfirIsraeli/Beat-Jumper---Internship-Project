@@ -10,6 +10,8 @@ class OptionsScene extends Phaser.Scene {
     });
   }
   preload() {
+    // set button select sound
+    this.buttonSelectSound = this.sound.add("buttonSelect");
     // set background
     this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
 
@@ -31,6 +33,7 @@ class OptionsScene extends Phaser.Scene {
     // pressing the sprite causing the next arrow function to execute:
     backToMenuButton.on("pointerdown", () => {
       // when button is pressed, go back to main menu
+      this.buttonSelectSound.play();
       this.scene.start("TitleScene");
     });
     // set tints for hovering the button
@@ -64,6 +67,7 @@ class OptionsScene extends Phaser.Scene {
     // pressing the sprite causing the next arrow function to execute:
     // when a button is pressed, make tempo faster by 5 BPM. Save it in our text and in localStorage
     fasterTempoButton.on("pointerdown", () => {
+      this.buttonSelectSound.play();
       if (gameTempo < 80) {
         gameTempo += 5;
         tempoText.text = "Tempo: " + gameTempo;
@@ -83,6 +87,7 @@ class OptionsScene extends Phaser.Scene {
     // pressing the sprite causing the next arrow function to execute:
     // when a button is pressed, make tempo slower by 5 BPM. Save it in our text and in localStorage
     slowerTempoButton.on("pointerdown", () => {
+      this.buttonSelectSound.play();
       if (gameTempo > 60) {
         gameTempo -= 5;
         tempoText.text = "Tempo: " + gameTempo;
@@ -105,6 +110,7 @@ class OptionsScene extends Phaser.Scene {
     // pressing the sprite causing the next arrow function to execute:
     resetDataButton.on("pointerdown", () => {
       // set up the "Are you sure" buttons
+      this.buttonSelectSound.play();
       this.setYesNoButtons(resetDataButton, ResetDataText);
     });
     // set tints for hovering the button
@@ -144,6 +150,8 @@ class OptionsScene extends Phaser.Scene {
     // pressing the sprite causing the next arrow function to execute:
     yesButton.on("pointerdown", () => {
       // restart storage with the default game tempo
+      this.buttonSelectSound.play();
+
       localStorage.clear();
       localStorage.setItem("GameTempo", JSON.stringify(DEFAULT_GAME_TEMPO));
       // and restart the scene
@@ -162,6 +170,7 @@ class OptionsScene extends Phaser.Scene {
     // pressing the sprite causing the next arrow function to execute:
     noButton.on("pointerdown", () => {
       // if pressed no, restart the scene.
+      this.buttonSelectSound.play();
       this.scene.restart();
     });
 

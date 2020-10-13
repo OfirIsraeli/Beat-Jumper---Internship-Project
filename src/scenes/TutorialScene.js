@@ -8,6 +8,8 @@ class TutorialScene extends Phaser.Scene {
     });
   }
   preload() {
+    // set button select sound
+    this.buttonSelectSound = this.sound.add("buttonSelect");
     // set background
     this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
 
@@ -28,6 +30,7 @@ class TutorialScene extends Phaser.Scene {
 
     // when a button is pressed, go back to main menu
     backToMenuButton.on("pointerdown", () => {
+      this.buttonSelectSound.play();
       this.scene.start("TitleScene");
     });
     // if cursor is over the button, change the tint to green
@@ -58,7 +61,8 @@ class TutorialScene extends Phaser.Scene {
     // two options for tutorial text:
     // first, short and simple:
     const basicTutorialText =
-      "Press space to jump when a note should be played (according to the sheet music)\nBy jumping in time, you will successfully jump over the boulders that are coming your way";
+      "Press space (or touch the screen if on a phone) to jump\nwhen a note should be played (according to the sheet music).\n" +
+      "You should jump for as long as each note is.\nBy jumping in time, you will successfully jump over\nthe boulders that are coming your way";
     // second, long and detailed:
     const detailedTutorialText =
       "In each level, the user will be playing the main character. When a level is started, the character will run, while boulders of different\n" +
@@ -72,7 +76,7 @@ class TutorialScene extends Phaser.Scene {
       "to (jump in a rest note for example), he will fail the level, and will have to try again. If player has lost a level 3 times during one stage,\n" +
       "he will have to redo the whole stage, until he can complete that stage with failing less than 3 times.";
 
-    this.add.text(640, 300, basicTutorialText, style).setOrigin(0.5, 0.5);
+    this.add.text(640, 340, basicTutorialText, style).setOrigin(0.5, 0.5);
   }
 
   update(time, delta) {}

@@ -24,34 +24,34 @@ export function initText(that) {
 
   // point text
   that.pointsUpperText = that.add
-    .text(20, 80, "Points:", {
+    .text(40, 110, "Points:", {
       ...FONT_STYLE,
-      fontSize: "32px",
+      fontSize: "35px",
     })
     .setOrigin(0, 0.5);
 
   // points number
   that.totalPoints = 0;
   that.pointsLowerText = that.add
-    .text(110, 80, that.totalPoints, {
+    .text(130, 110, that.totalPoints, {
       ...FONT_STYLE,
-      fontSize: "32px",
+      fontSize: "35px",
     })
     .setOrigin(0, 0.5);
 
   // high score text
   that.highScoreUpperText = that.add
-    .text(20, 25, "High Score:", {
+    .text(40, 55, "High Score:", {
       ...FONT_STYLE,
-      fontSize: "32px",
+      fontSize: "35px",
     })
     .setOrigin(0, 0.5);
 
   // high score number
   that.highScoreLowerText = that.add
-    .text(170, 25, that.userHighScores[that.stageIndex][that.levelIndex], {
+    .text(190, 55, that.userHighScores[that.stageIndex][that.levelIndex], {
       ...FONT_STYLE,
-      fontSize: "32px",
+      fontSize: "35px",
     })
     .setOrigin(0, 0.5);
 

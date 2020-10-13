@@ -170,6 +170,22 @@ class GameScene extends Phaser.Scene {
     // init text
     initText(this);
 
+    this.stopButton = this.add
+      .sprite(1140, 680, "stopImage")
+      .setInteractive({ cursor: "pointer", useHandCursor: true });
+    this.stopButton.on("pointerdown", () => {
+      // when a unlocked level is pressed, start GameScene with current stage and level
+      console.log("okay here?");
+      // if level was rolling, stop the intervals
+      if (this.levelState === LEVEL_STATES.ON_MOTION) {
+        this.removeBoulders();
+        ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
+      }
+      this.countInText.text = ""; // making sure there is no text overload if we're in count-in
+      this.infoText.text = "Exiting"; // and informing the player of his\her choice
+      this.goBackToMenu(300); // and aborting mission...
+    });
+
     // define hit points sprites. by default we have 3 hitpoints per stage (so 3 chances)
     this.hitPointsArray = [
       this.add.sprite(1060, 60, "fullHitPoint"),
@@ -193,9 +209,6 @@ class GameScene extends Phaser.Scene {
    * setting properties regarding this scene's run (so properties regarding stage and not properties regarding just a level)
    */
   create() {
-    // show the score DIV element.
-    let scoreDIVElement = document.getElementById("score-id");
-    scoreDIVElement.style.display = "block";
     // set stage and level states. at this points, nothing has started yet so default values of NOT_STARTED
     this.stageState = STAGE_STATES.NOT_STARTED;
     this.levelState = LEVEL_STATES.NOT_STARTED;
@@ -584,7 +597,7 @@ class GameScene extends Phaser.Scene {
       }
       this.countInText.text = ""; // making sure there is no text overload if we're in count-in
       this.infoText.text = "Exiting"; // and informing the player of his\her choice
-      this.goBackToMenu(600); // and aborting mission...
+      this.goBackToMenu(300); // and aborting mission...
     }
 
     // if level is on motion, move the background image and rotate all boulders

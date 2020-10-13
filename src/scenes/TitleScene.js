@@ -9,6 +9,8 @@ class TitleScene extends Phaser.Scene {
     });
   }
   preload() {
+    // set button select sound
+    this.buttonSelectSound = this.sound.add("buttonSelect");
     // set background
     this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
 
@@ -18,7 +20,7 @@ class TitleScene extends Phaser.Scene {
       fontSize: "90px",
     };
     let TitleText = this.add
-      .text(this.sys.game.config.width / 2, 120, "Beat Jumper", style)
+      .text(this.sys.game.config.width / 2, 100, "Beat Jumper", style)
       .setOrigin(0.5, 0.5);
   }
   create() {
@@ -33,9 +35,9 @@ class TitleScene extends Phaser.Scene {
     this.createNewMenuButton("Play", "LevelMenuScene", 0);
     // todo: create scenes for each of these:
     this.createNewMenuButton("Tutorial", "TutorialScene", 1);
-    this.createNewMenuButton("Highscores", "HighScoreMenuScene", 2);
-    this.createNewMenuButton("Credits", "CreditsScene", 3);
-    this.createNewMenuButton("Options", "OptionsScene", 3);
+    this.createNewMenuButton("Options", "OptionsScene", 2);
+    this.createNewMenuButton("Highscores", "HighScoreMenuScene", 3);
+    this.createNewMenuButton("Credits", "CreditsScene", 4);
   }
 
   /**
@@ -47,12 +49,13 @@ class TitleScene extends Phaser.Scene {
   createNewMenuButton(buttonText, sceneName, buttonNumber) {
     // add a new sprite of a locked level to the scene.
     let newButton = this.add
-      .sprite(this.sys.game.config.width / 2, 250 + buttonNumber * 130, "unlockedStageImage")
+      .sprite(this.sys.game.config.width / 2, 220 + buttonNumber * 120, "unlockedStageImage")
       .setInteractive({ cursor: "pointer", useHandCursor: true }); // so we can press it
     // pressing the sprite causing the next arrow function to execute:
 
     newButton.on("pointerdown", () => {
       // when a unlocked level is pressed, start GameScene with current stage and level
+      this.buttonSelectSound.play();
       this.scene.start(sceneName);
     });
     // if cursor is over the button, change the tint accordingly. red if level is locked, green otherwise

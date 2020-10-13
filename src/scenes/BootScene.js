@@ -25,6 +25,7 @@ class BootScene extends Phaser.Scene {
     this.load.image("lockedLevelImage", "assets/images/locked level.png");
     this.load.image("unlockedStageImage", "assets/images/unlocked stage.png");
     this.load.image("lockedStageImage", "assets/images/locked stage.png");
+    this.load.image("stopImage", "assets/images/stop.png");
 
     // loading spritesheets for animations
     this.load.spritesheet("walkHero", "assets/images/walkHero.png", {

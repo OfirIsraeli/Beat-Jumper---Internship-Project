@@ -73,6 +73,11 @@ const LATE_JUMP_MSG = "You jumped too late!";
  * @param {*} invisibleLevel - a flag that indicates if blocks should be invisible this time or not
  */
 export function playLevel(that, levelJson) {
+  // show the score DIV element.
+  let scoreDIVElement = document.getElementById("score-id");
+  scoreDIVElement.setAttribute("style", "height:500px");
+  scoreDIVElement.style.display = "block";
+
   // check if level we're about to play is the last level unlocked by user.
   that.levelIsLastUnlocked = that.checkIfLastLevelUnlocked();
 
@@ -96,7 +101,7 @@ export function playLevel(that, levelJson) {
   }
 
   // create music score for the level
-  createScore(levelJson, that.tempo, that.levelState, that.invisibleLevel, function (
+  createScore(that, levelJson, that.tempo, that.levelState, that.invisibleLevel, function (
     event,
     value
   ) {});

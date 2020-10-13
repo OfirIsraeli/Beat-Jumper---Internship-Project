@@ -13,6 +13,8 @@ class StageHighScoreScene extends Phaser.Scene {
   }
 
   preload() {
+    // set button select sound
+    this.buttonSelectSound = this.sound.add("buttonSelect");
     // set background
     this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
 
@@ -82,6 +84,7 @@ class StageHighScoreScene extends Phaser.Scene {
 
     // when a button is pressed, go back to main menu
     backToMenuButton.on("pointerdown", () => {
+      this.buttonSelectSound.play();
       this.scene.start(scene);
     });
     // if cursor is over the button, change the tint to green

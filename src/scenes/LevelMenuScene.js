@@ -52,6 +52,8 @@ class LevelMenuScene extends Phaser.Scene {
     });
   }
   preload() {
+    // set button select sound
+    this.buttonSelectSound = this.sound.add("buttonSelect");
     // remove the score DIV element that can be left out from game scene
     let scoreDIVElement = document.getElementById("score-id");
     scoreDIVElement.style.display = "none";
@@ -74,6 +76,7 @@ class LevelMenuScene extends Phaser.Scene {
 
     // when a button is pressed, go back to main menu
     backToMenuButton.on("pointerdown", () => {
+      this.buttonSelectSound.play();
       this.scene.start("TitleScene");
     });
     // if cursor is over the button, change the tint to green
@@ -244,6 +247,7 @@ class LevelMenuScene extends Phaser.Scene {
     // pressing the sprite causing the next arrow function to execute:
 
     newButton.on("pointerdown", () => {
+      this.buttonSelectSound.play();
       // when a unlocked level is pressed, start GameScene with current stage and level
       if (!this.levelButtons[stageIndex][levelIndex].locked) {
         this.scene.start("GameScene", {
