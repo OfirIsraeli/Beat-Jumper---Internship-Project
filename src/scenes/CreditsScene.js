@@ -59,15 +59,16 @@ class CreditsScene extends Phaser.Scene {
       fontFamily: "Chewy",
       fill: "#ffffff",
       fontSize: "30px",
-      align: "center",
     };
 
     const creditsText =
       "Beat-Jumper is an online rhythm based game,\n based on Phaser 3 Game Framework open-source.\n It was developed by Ofir Israeli,\n " +
-      "as an intern in BandPad.co company,\nusing several of BandPad's utillities, and particularly\nBandPad Vexflow and " +
-      "BandPad ScoreManager,\n in an enviroment of JavaScript ES6 along with Node.js and Webpack.\nOfir's Email: ofirisr40@gmail.com";
+      "as an intern in BandPad.co company.\nIt was developed using several of BandPad's \nutillities, and particularly BandPad Vexflow and " +
+      "\nBandPad ScoreManager, in an enviroment of \nJavaScript ES6 along with Node.js and Webpack.\nOfir's Email: ofirisr40@gmail.com";
 
-    this.add.text(680, 400, creditsText, style).setOrigin(0.5, 0.5);
+    this.add
+      .text(this.sys.game.config.width / 2, this.sys.game.config.height / 2, creditsText, style)
+      .setOrigin(0.5, 0.5);
   }
 
   update(time, delta) {}

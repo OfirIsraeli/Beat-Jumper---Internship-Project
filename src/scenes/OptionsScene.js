@@ -23,11 +23,11 @@ class OptionsScene extends Phaser.Scene {
     };
 
     // set title text
-    this.add.text(this.sys.game.config.width / 2, 120, "Options", style).setOrigin(0.5, 0.5);
+    this.add.text(this.sys.game.config.width / 2, 80, "Options", style).setOrigin(0.5, 0.5);
 
     // set button so player can go back to main menu
     let backToMenuButton = this.add
-      .sprite(100, 60, "unlockedStageImage")
+      .sprite(100, 80, "unlockedStageImage")
       .setInteractive({ cursor: "pointer", useHandCursor: true });
 
     // pressing the sprite causing the next arrow function to execute:
@@ -50,6 +50,7 @@ class OptionsScene extends Phaser.Scene {
       fontFamily: "Chewy",
       fill: "#ffffff",
       fontSize: "45px",
+      align: "center",
     };
 
     /**
@@ -57,11 +58,11 @@ class OptionsScene extends Phaser.Scene {
      */
     // fetch tempo from localStorage
     let gameTempo = JSON.parse(localStorage.getItem("GameTempo"));
-    let tempoText = this.add.text(640, 300, "Tempo: " + gameTempo, style).setOrigin(0.5, 0.5);
+    let tempoText = this.add.text(640, 200, "Tempo: " + gameTempo, style).setOrigin(0.5, 0.5);
     style.fontSize = "30px";
     // set faster tempo button
     let fasterTempoButton = this.add
-      .sprite(720, 400, "unlockedStageImage")
+      .sprite(720, 300, "unlockedStageImage")
       .setInteractive({ cursor: "pointer", useHandCursor: true })
       .setOrigin(0.5, 0.5);
     // pressing the sprite causing the next arrow function to execute:
@@ -72,6 +73,8 @@ class OptionsScene extends Phaser.Scene {
         gameTempo += 5;
         tempoText.text = "Tempo: " + gameTempo;
         localStorage.setItem("GameTempo", JSON.stringify(gameTempo));
+      } else {
+        this.applyShakingTween(fasterTempoButton);
       }
     });
     // set tints for hovering the button
@@ -81,7 +84,7 @@ class OptionsScene extends Phaser.Scene {
 
     // set slower tempo button
     let slowerTempoButton = this.add
-      .sprite(560, 400, "unlockedStageImage")
+      .sprite(560, 300, "unlockedStageImage")
       .setInteractive({ cursor: "pointer", useHandCursor: true })
       .setOrigin(0.5, 0.5);
     // pressing the sprite causing the next arrow function to execute:
@@ -92,6 +95,8 @@ class OptionsScene extends Phaser.Scene {
         gameTempo -= 5;
         tempoText.text = "Tempo: " + gameTempo;
         localStorage.setItem("GameTempo", JSON.stringify(gameTempo));
+      } else {
+        this.applyShakingTween(slowerTempoButton);
       }
     });
     // set tints for hovering the button
@@ -124,7 +129,7 @@ class OptionsScene extends Phaser.Scene {
     // set upper text for reset option
     style.fontSize = "45px";
     this.upperResetText = this.add
-      .text(resetDataButton.x, resetDataButton.y - 70, "Restart the Game", style)
+      .text(resetDataButton.x, resetDataButton.y - 70, "Reset the game", style)
       .setOrigin(0.5, 0.5);
   }
 
@@ -136,8 +141,9 @@ class OptionsScene extends Phaser.Scene {
       fontSize: "30px",
     };
     // change the upper text to ask user if he is sure he wants to reset game
-    this.upperResetText.text = "Are you sure?";
-
+    this.upperResetText.y -= 30;
+    this.upperResetText.text =
+      "Are you sure?\nPressing yes will delete your progress and highscores";
     // destory the previous button
     resetDataButton.destroy();
     ResetDataText = "";
@@ -193,6 +199,22 @@ class OptionsScene extends Phaser.Scene {
     // remove tint after cursor leaves this button
     button.on("pointerout", () => {
       button.clearTint();
+    });
+  }
+
+  /**
+   * when a locked level is pressed, we shake the button sprite
+   * @param {*} button - a Phaser sprite we want to apply the tween on
+   */
+  applyShakingTween(button) {
+    this.tweens.add({
+      targets: button,
+      x: button.x + (-Math.random() * 2 + 1) * 5,
+      y: button.y,
+      ease: "Power1",
+      duration: 50,
+      yoyo: true,
+      loop: 5,
     });
   }
 

@@ -227,6 +227,12 @@ export default class Hero {
           this.heroSprite.setVelocityY(500);
         }
         this.heroSprite.setGravityY(DEFAULT_GRAVITY);
+        // if the jump is a successful one, finish the jump with landing and keep walking
+        // if jump was not successful, game level will take care of the rest, so no need to finish the jump
+        if (successfulJump) {
+          this.heroSprite.play("landingAnimation");
+          this.heroSprite.anims.chain("walkAnimation");
+        }
         clearInterval(interval);
       } else if (jumpHeight < -915) {
         this.heroSprite.setVelocityY(0);
@@ -238,11 +244,5 @@ export default class Hero {
     }, 5);
     this.heroSprite.play("jumpAnimation");
     this.heroSprite.anims.chain("midAirAnimation");
-    // if the jump is a successful one, finish the jump with landing and keep walking
-    // if jump was not successful, game level will take care of the rest, so no need to finish the jump
-    if (successfulJump) {
-      this.heroSprite.anims.chain("landingAnimation");
-      this.heroSprite.anims.chain("walkAnimation");
-    }
   }
 }
