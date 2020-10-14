@@ -223,9 +223,7 @@ export default class Hero {
     let jumpHeight = -900;
     let interval = setInterval(() => {
       if (!pressedButton.isDown) {
-        if (jumpHeight < -910) {
-          this.heroSprite.setVelocityY(500);
-        }
+        this.heroSprite.setVelocityY(-100);
         this.heroSprite.setGravityY(DEFAULT_GRAVITY);
         // if the jump is a successful one, finish the jump with landing and keep walking
         // if jump was not successful, game level will take care of the rest, so no need to finish the jump

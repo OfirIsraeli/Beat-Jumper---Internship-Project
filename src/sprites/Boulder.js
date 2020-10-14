@@ -10,6 +10,13 @@ const BOULDER_HEIGHTS = {
   4: -75,
 };
 
+const BOULDER_RADIUSES = {
+  1: 24,
+  2: 34,
+  3: 44,
+  4: 57,
+};
+
 /**
  * points each note division (1 as smallest note, 4 as biggest) to the relevant
  * image string for image loading
@@ -49,6 +56,7 @@ export default class Boulder {
     );
     this.sprite.setImmovable(); // boulders are heavy...
     this.sprite.setVelocityX(this.getVelocityForTempo()); // and fast...
+    // this.sprite.body.setCircle(BOULDER_RADIUSES[this.size]);
 
     // add the dust cloud sprite for this boulder
     this.dustCloud = this.scene.physics.add.sprite(
