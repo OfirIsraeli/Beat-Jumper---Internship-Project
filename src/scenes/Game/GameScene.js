@@ -138,15 +138,15 @@ class GameScene extends Phaser.Scene {
     };
 
     // set game sounds
-    this.hitSound = this.sound.add("hit");
-    this.failSound = this.sound.add("failure");
-    this.measureBeat = this.sound.add("measureBeat");
-    this.quarterBeat = this.sound.add("quarterBeat");
+    this.hitSound = this.sound.add("hit", { volume: gameVolume });
+    this.failSound = this.sound.add("failure", { volume: gameVolume });
+    this.measureBeat = this.sound.add("measureBeat", { volume: gameVolume });
+    this.quarterBeat = this.sound.add("quarterBeat", { volume: gameVolume });
 
-    this.levelWinSound = this.sound.add("levelWin");
-    this.stageWinSound = this.sound.add("stageWin");
-    this.levelLostSound = this.sound.add("levelFail");
-    this.stageLostSound = this.sound.add("stageFail");
+    this.levelWinSound = this.sound.add("levelWin", { volume: gameVolume });
+    this.stageWinSound = this.sound.add("stageWin", { volume: gameVolume });
+    this.levelLostSound = this.sound.add("levelFail", { volume: gameVolume });
+    this.stageLostSound = this.sound.add("stageFail", { volume: gameVolume });
 
     // set game background
     this.background = this.add

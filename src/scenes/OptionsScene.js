@@ -11,7 +11,7 @@ class OptionsScene extends Phaser.Scene {
   }
   preload() {
     // set button select sound
-    this.buttonSelectSound = this.sound.add("buttonSelect");
+    this.buttonSelectSound = this.sound.add("buttonSelect", { volume: gameVolume });
     // set background
     this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
 
@@ -58,11 +58,11 @@ class OptionsScene extends Phaser.Scene {
      */
     // fetch tempo from localStorage
     let gameTempo = JSON.parse(localStorage.getItem("GameTempo"));
-    let tempoText = this.add.text(640, 200, "Tempo: " + gameTempo, style).setOrigin(0.5, 0.5);
+    let tempoText = this.add.text(440, 200, "Tempo: " + gameTempo, style).setOrigin(0.5, 0.5);
     style.fontSize = "30px";
     // set faster tempo button
     let fasterTempoButton = this.add
-      .sprite(720, 300, "unlockedStageImage")
+      .sprite(820, 200, "unlockedStageImage")
       .setInteractive({ cursor: "pointer", useHandCursor: true })
       .setOrigin(0.5, 0.5);
     // pressing the sprite causing the next arrow function to execute:
@@ -84,7 +84,7 @@ class OptionsScene extends Phaser.Scene {
 
     // set slower tempo button
     let slowerTempoButton = this.add
-      .sprite(560, 300, "unlockedStageImage")
+      .sprite(660, 200, "unlockedStageImage")
       .setInteractive({ cursor: "pointer", useHandCursor: true })
       .setOrigin(0.5, 0.5);
     // pressing the sprite causing the next arrow function to execute:
@@ -104,12 +104,68 @@ class OptionsScene extends Phaser.Scene {
     // add a new text for this button
     this.add.text(slowerTempoButton.x, slowerTempoButton.y, "Slower", style).setOrigin(0.5, 0.5);
 
+    //------------------------------------------
+    /**
+     * set volume options
+     */
+    style.fontSize = "45px";
+    // fetch Volume from localStorage
+    let volumeText = this.add
+      .text(440, 400, "Volume: " + gameVolume * 100 + "%", style)
+      .setOrigin(0.5, 0.5);
+    // set faster Volume button
+    let higherVolButton = this.add
+      .sprite(720, 400, "unlockedLevelImage")
+      .setInteractive({ cursor: "pointer", useHandCursor: true })
+      .setOrigin(0.5, 0.5);
+    // pressing the sprite causing the next arrow function to execute:
+    // when a button is pressed, make Volume faster by 10% Save it in our text and in localStorage
+    higherVolButton.on("pointerdown", () => {
+      this.buttonSelectSound.play();
+      if (gameVolume < 1.0) {
+        gameVolume = parseFloat((gameVolume + 0.1).toFixed(2));
+        volumeText.text = "Volume: " + gameVolume * 100 + "%";
+        localStorage.setItem("gameVolume", JSON.stringify(parseFloat(gameVolume)));
+      } else {
+        this.applyShakingTween(higherVolButton);
+      }
+    });
+    // set tints for hovering the button
+    this.createTintButtonHover(higherVolButton);
+    // add a new text for this button
+    this.add.text(higherVolButton.x, higherVolButton.y, "+", style).setOrigin(0.5, 0.65);
+
+    // set slower Volume button
+    let lowerVolButton = this.add
+      .sprite(640, 400, "unlockedLevelImage")
+      .setInteractive({ cursor: "pointer", useHandCursor: true })
+      .setOrigin(0.5, 0.5);
+    // pressing the sprite causing the next arrow function to execute:
+    // when a button is pressed, make Volume slower by 5 BPM. Save it in our text and in localStorage
+    lowerVolButton.on("pointerdown", () => {
+      this.buttonSelectSound.play();
+      if (gameVolume > 0) {
+        gameVolume = parseFloat((gameVolume - 0.1).toFixed(2));
+        volumeText.text = "Volume: " + gameVolume * 100 + "%";
+        localStorage.setItem("gameVolume", JSON.stringify(parseFloat(gameVolume)));
+      } else {
+        this.applyShakingTween(lowerVolButton);
+      }
+    });
+    // set tints for hovering the button
+    this.createTintButtonHover(lowerVolButton);
+    // add a new text for this button
+    this.add.text(lowerVolButton.x, lowerVolButton.y, "-", style).setOrigin(0.5, 0.65);
+    //---------------------------------------------------------------------------------------
+
     /**
      * set reset options
      */
     // set the reset button
+    style.fontSize = "30px";
+
     let resetDataButton = this.add
-      .sprite(640, 560, "unlockedStageImage")
+      .sprite(640, 640, "unlockedStageImage")
       .setInteractive({ cursor: "pointer", useHandCursor: true })
       .setOrigin(0.5, 0.5);
     // pressing the sprite causing the next arrow function to execute:
@@ -150,7 +206,7 @@ class OptionsScene extends Phaser.Scene {
 
     // set the yes button
     let yesButton = this.add
-      .sprite(640, 560, "unlockedStageImage")
+      .sprite(resetDataButton.x, resetDataButton.y, "unlockedStageImage")
       .setInteractive({ cursor: "pointer", useHandCursor: true })
       .setOrigin(1, 0.5);
     // pressing the sprite causing the next arrow function to execute:
@@ -170,7 +226,7 @@ class OptionsScene extends Phaser.Scene {
 
     // set the no button
     let noButton = this.add
-      .sprite(640, 560, "unlockedStageImage")
+      .sprite(resetDataButton.x, resetDataButton.y, "unlockedStageImage")
       .setInteractive({ cursor: "pointer", useHandCursor: true })
       .setOrigin(0, 0.5);
     // pressing the sprite causing the next arrow function to execute:

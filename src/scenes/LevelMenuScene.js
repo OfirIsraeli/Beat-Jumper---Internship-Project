@@ -53,7 +53,7 @@ class LevelMenuScene extends Phaser.Scene {
   }
   preload() {
     // set button select sound
-    this.buttonSelectSound = this.sound.add("buttonSelect");
+    this.buttonSelectSound = this.sound.add("buttonSelect", { volume: gameVolume });
     // remove the score DIV element that can be left out from game scene
     let scoreDIVElement = document.getElementById("score-id");
     scoreDIVElement.style.display = "none";

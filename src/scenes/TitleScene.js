@@ -1,4 +1,5 @@
 const DEFAULT_GAME_TEMPO = 70;
+const DEFAULT_GAME_VOLUME = 1.0;
 /**
  * scene for main menu
  */
@@ -9,8 +10,15 @@ class TitleScene extends Phaser.Scene {
     });
   }
   preload() {
+    // fetch volume for game. if no volume is set yet, set default of 100%
+    window.gameVolume = JSON.parse(localStorage.getItem("gameVolume"));
+    if (gameVolume === null) {
+      gameVolume = DEFAULT_GAME_VOLUME;
+      localStorage.setItem("gameVolume", JSON.stringify(gameVolume));
+    }
+
     // set button select sound
-    this.buttonSelectSound = this.sound.add("buttonSelect");
+    this.buttonSelectSound = this.sound.add("buttonSelect", { volume: gameVolume });
     // set background
     this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
 

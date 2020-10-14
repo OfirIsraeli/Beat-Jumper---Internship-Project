@@ -9,7 +9,7 @@ class HighScoreMenuScene extends Phaser.Scene {
   }
   preload() {
     // set button select sound
-    this.buttonSelectSound = this.sound.add("buttonSelect");
+    this.buttonSelectSound = this.sound.add("buttonSelect", { volume: gameVolume });
     // set background
     this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
 
