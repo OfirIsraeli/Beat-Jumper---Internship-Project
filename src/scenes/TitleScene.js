@@ -28,7 +28,7 @@ class TitleScene extends Phaser.Scene {
       fontSize: "90px",
     };
     let TitleText = this.add
-      .text(this.sys.game.config.width / 2, 100, "Beat Jumper", style)
+      .text(this.sys.game.config.width / 2, 100, myLanguage.beatJumper, style)
       .setOrigin(0.5, 0.5);
   }
   create() {
@@ -40,12 +40,12 @@ class TitleScene extends Phaser.Scene {
     }
 
     // create menu buttons:
-    this.createNewMenuButton("Play", "LevelMenuScene", 0);
+    this.createNewMenuButton(myLanguage.play, "LevelMenuScene", 0);
     // todo: create scenes for each of these:
-    this.createNewMenuButton("Tutorial", "TutorialScene", 1);
-    this.createNewMenuButton("Options", "OptionsScene", 2);
-    this.createNewMenuButton("Highscores", "HighScoreMenuScene", 3);
-    this.createNewMenuButton("Credits", "CreditsScene", 4);
+    this.createNewMenuButton(myLanguage.tutorial, "TutorialScene", 1);
+    this.createNewMenuButton(myLanguage.options, "OptionsScene", 2);
+    this.createNewMenuButton(myLanguage.highscores, "HighScoreMenuScene", 3);
+    this.createNewMenuButton(myLanguage.credits, "CreditsScene", 4);
   }
 
   /**

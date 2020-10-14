@@ -21,7 +21,9 @@ class TutorialScene extends Phaser.Scene {
     };
 
     // set title text
-    this.add.text(this.sys.game.config.width / 2, 120, "Tutorial", style).setOrigin(0.5, 0.5);
+    this.add
+      .text(this.sys.game.config.width / 2, 120, myLanguage.tutorial, style)
+      .setOrigin(0.5, 0.5);
 
     // set button so player can go back to main menu
     let backToMenuButton = this.add
@@ -49,7 +51,9 @@ class TutorialScene extends Phaser.Scene {
       fill: "#ffffff",
       fontSize: "30px",
     };
-    this.add.text(backToMenuButton.x, backToMenuButton.y, "Main Menu", style).setOrigin(0.5, 0.5); // centerize text to image
+    this.add
+      .text(backToMenuButton.x, backToMenuButton.y, myLanguage.mainMenu, style)
+      .setOrigin(0.5, 0.5); // centerize text to image
   }
 
   create() {
@@ -79,7 +83,7 @@ class TutorialScene extends Phaser.Scene {
       .text(
         this.sys.game.config.width / 2,
         this.sys.game.config.height / 2,
-        basicTutorialText,
+        myLanguage.beatJumperTutorialText.replaceAll("\\n", "\n"),
         style
       )
       .setOrigin(0.5, 0.5);

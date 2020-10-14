@@ -20,11 +20,11 @@ export function initText(that) {
       fontSize: "70px",
     })
     .setOrigin(0.5, 0.5);
-  that.infoMessage = "Level " + (that.levelIndex + 1);
+  that.infoMessage = myLanguage.level + " " + (that.levelIndex + 1);
 
   // point text
   that.pointsUpperText = that.add
-    .text(40, 110, "Points:", {
+    .text(40, 110, myLanguage.points + ":", {
       ...FONT_STYLE,
       fontSize: "35px",
     })
@@ -41,7 +41,7 @@ export function initText(that) {
 
   // high score text
   that.highScoreUpperText = that.add
-    .text(40, 55, "Highscore:", {
+    .text(40, 55, myLanguage.highscore + ":", {
       ...FONT_STYLE,
       fontSize: "35px",
     })
@@ -60,7 +60,13 @@ export function initText(that) {
     .text(
       20,
       that.sys.game.config.height - 50,
-      "Stage " + (that.stageIndex + 1) + ", Level " + (that.levelIndex + 1),
+      myLanguage.stage +
+        " " +
+        (that.stageIndex + 1) +
+        ", " +
+        myLanguage.level +
+        " " +
+        (that.levelIndex + 1),
       {
         fontFamily: "Chewy",
         fill: "#342707",

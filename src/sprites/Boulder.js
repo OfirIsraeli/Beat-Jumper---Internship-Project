@@ -57,7 +57,7 @@ export default class Boulder {
     this.sprite.setImmovable(); // boulders are heavy...
     this.sprite.setVelocityX(this.getVelocityForTempo()); // and fast...
     // this.sprite.body.setCircle(BOULDER_RADIUSES[this.size]);
-
+    //this.sprite.setOffset(30, 30, 0, 0);
     // add the dust cloud sprite for this boulder
     this.dustCloud = this.scene.physics.add.sprite(
       this.scene.sys.game.config.width + 30,

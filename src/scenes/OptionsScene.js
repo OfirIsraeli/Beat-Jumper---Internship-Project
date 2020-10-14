@@ -23,7 +23,9 @@ class OptionsScene extends Phaser.Scene {
     };
 
     // set title text
-    this.add.text(this.sys.game.config.width / 2, 80, "Options", style).setOrigin(0.5, 0.5);
+    this.add
+      .text(this.sys.game.config.width / 2, 80, myLanguage.options, style)
+      .setOrigin(0.5, 0.5);
 
     // set button so player can go back to main menu
     let backToMenuButton = this.add
@@ -41,7 +43,9 @@ class OptionsScene extends Phaser.Scene {
 
     // add a new text for this button
     style.fontSize = "30px";
-    this.add.text(backToMenuButton.x, backToMenuButton.y, "Main Menu", style).setOrigin(0.5, 0.5); // centerize text to image
+    this.add
+      .text(backToMenuButton.x, backToMenuButton.y, myLanguage.mainMenu, style)
+      .setOrigin(0.5, 0.5); // centerize text to image
   }
 
   create() {
@@ -58,7 +62,9 @@ class OptionsScene extends Phaser.Scene {
      */
     // fetch tempo from localStorage
     let gameTempo = JSON.parse(localStorage.getItem("GameTempo"));
-    let tempoText = this.add.text(440, 200, "Tempo: " + gameTempo, style).setOrigin(0.5, 0.5);
+    let tempoText = this.add
+      .text(440, 200, myLanguage.tempo + ": " + gameTempo, style)
+      .setOrigin(0.5, 0.5);
     style.fontSize = "30px";
     // set faster tempo button
     let fasterTempoButton = this.add
@@ -71,7 +77,7 @@ class OptionsScene extends Phaser.Scene {
       this.buttonSelectSound.play();
       if (gameTempo < 80) {
         gameTempo += 5;
-        tempoText.text = "Tempo: " + gameTempo;
+        tempoText.text = myLanguage.tempo + ": " + gameTempo;
         localStorage.setItem("GameTempo", JSON.stringify(gameTempo));
       } else {
         this.applyShakingTween(fasterTempoButton);
@@ -80,7 +86,9 @@ class OptionsScene extends Phaser.Scene {
     // set tints for hovering the button
     this.createTintButtonHover(fasterTempoButton);
     // add a new text for this button
-    this.add.text(fasterTempoButton.x, fasterTempoButton.y, "Faster", style).setOrigin(0.5, 0.5);
+    this.add
+      .text(fasterTempoButton.x, fasterTempoButton.y, myLanguage.faster, style)
+      .setOrigin(0.5, 0.5);
 
     // set slower tempo button
     let slowerTempoButton = this.add
@@ -93,7 +101,7 @@ class OptionsScene extends Phaser.Scene {
       this.buttonSelectSound.play();
       if (gameTempo > 60) {
         gameTempo -= 5;
-        tempoText.text = "Tempo: " + gameTempo;
+        tempoText.text = myLanguage.tempo + ": " + gameTempo;
         localStorage.setItem("GameTempo", JSON.stringify(gameTempo));
       } else {
         this.applyShakingTween(slowerTempoButton);
@@ -102,7 +110,9 @@ class OptionsScene extends Phaser.Scene {
     // set tints for hovering the button
     this.createTintButtonHover(slowerTempoButton);
     // add a new text for this button
-    this.add.text(slowerTempoButton.x, slowerTempoButton.y, "Slower", style).setOrigin(0.5, 0.5);
+    this.add
+      .text(slowerTempoButton.x, slowerTempoButton.y, myLanguage.slower, style)
+      .setOrigin(0.5, 0.5);
 
     //------------------------------------------
     /**
@@ -111,7 +121,7 @@ class OptionsScene extends Phaser.Scene {
     style.fontSize = "45px";
     // fetch Volume from localStorage
     let volumeText = this.add
-      .text(440, 400, "Volume: " + gameVolume * 100 + "%", style)
+      .text(440, 400, myLanguage.volume + ": " + gameVolume * 100 + "%", style)
       .setOrigin(0.5, 0.5);
     // set faster Volume button
     let higherVolButton = this.add
@@ -124,7 +134,7 @@ class OptionsScene extends Phaser.Scene {
       this.buttonSelectSound.play();
       if (gameVolume < 1.0) {
         gameVolume = parseFloat((gameVolume + 0.1).toFixed(2));
-        volumeText.text = "Volume: " + gameVolume * 100 + "%";
+        volumeText.text = myLanguage.volume + ": " + gameVolume * 100 + "%";
         localStorage.setItem("gameVolume", JSON.stringify(parseFloat(gameVolume)));
       } else {
         this.applyShakingTween(higherVolButton);
@@ -146,7 +156,7 @@ class OptionsScene extends Phaser.Scene {
       this.buttonSelectSound.play();
       if (gameVolume > 0) {
         gameVolume = parseFloat((gameVolume - 0.1).toFixed(2));
-        volumeText.text = "Volume: " + gameVolume * 100 + "%";
+        volumeText.text = myLanguage.volume + ": " + gameVolume * 100 + "%";
         localStorage.setItem("gameVolume", JSON.stringify(parseFloat(gameVolume)));
       } else {
         this.applyShakingTween(lowerVolButton);
@@ -179,13 +189,13 @@ class OptionsScene extends Phaser.Scene {
 
     // add a new text for this button
     let ResetDataText = this.add
-      .text(resetDataButton.x, resetDataButton.y, "Reset Game", style)
+      .text(resetDataButton.x, resetDataButton.y, myLanguage.resetGame, style)
       .setOrigin(0.5, 0.5);
 
     // set upper text for reset option
     style.fontSize = "45px";
     this.upperResetText = this.add
-      .text(resetDataButton.x, resetDataButton.y - 70, "Reset the game", style)
+      .text(resetDataButton.x, resetDataButton.y - 70, myLanguage.resetGame, style)
       .setOrigin(0.5, 0.5);
   }
 
@@ -198,8 +208,7 @@ class OptionsScene extends Phaser.Scene {
     };
     // change the upper text to ask user if he is sure he wants to reset game
     this.upperResetText.y -= 30;
-    this.upperResetText.text =
-      "Are you sure?\nPressing yes will delete your progress and highscores";
+    this.upperResetText.text = myLanguage.resetValidation.replace("\\n", "\n");
     // destory the previous button
     resetDataButton.destroy();
     ResetDataText = "";
@@ -222,7 +231,7 @@ class OptionsScene extends Phaser.Scene {
     // set tints for hovering the button
     this.createTintButtonHover(yesButton);
     // set text for yes button
-    this.add.text(yesButton.x - 80, yesButton.y, "Yes", style).setOrigin(0.5, 0.5); // centerize text to image
+    this.add.text(yesButton.x - 80, yesButton.y, myLanguage.yes, style).setOrigin(0.5, 0.5); // centerize text to image
 
     // set the no button
     let noButton = this.add
@@ -239,7 +248,7 @@ class OptionsScene extends Phaser.Scene {
     // set tints for hovering the button
     this.createTintButtonHover(noButton);
     // set text for no button
-    this.add.text(noButton.x + 80, noButton.y, "No", style).setOrigin(0.5, 0.5); // centerize text to image
+    this.add.text(noButton.x + 80, noButton.y, myLanguage.no, style).setOrigin(0.5, 0.5); // centerize text to image
   }
 
   /**

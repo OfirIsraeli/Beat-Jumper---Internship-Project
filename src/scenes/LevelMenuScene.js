@@ -66,7 +66,9 @@ class LevelMenuScene extends Phaser.Scene {
       fill: "#ffffff",
       fontSize: "60px",
     };
-    this.add.text(this.sys.game.config.width / 2, 60, "Select a Level", style).setOrigin(0.5, 0.5);
+    this.add
+      .text(this.sys.game.config.width / 2, 60, myLanguage.selectLevel, style)
+      .setOrigin(0.5, 0.5);
 
     // button so player can go back to main menu
     let backToMenuButton = this.add
@@ -91,7 +93,9 @@ class LevelMenuScene extends Phaser.Scene {
 
     // add a new text for this button
     style.fontSize = "30px";
-    this.add.text(backToMenuButton.x, backToMenuButton.y, "Main Menu", style).setOrigin(0.5, 0.5); // centerize text to image
+    this.add
+      .text(backToMenuButton.x, backToMenuButton.y, myLanguage.mainMenu, style)
+      .setOrigin(0.5, 0.5); // centerize text to image
   }
 
   create() {
@@ -207,7 +211,7 @@ class LevelMenuScene extends Phaser.Scene {
     let newStageImage = this.add.sprite(330, 150 + stageIndex * 90, "lockedStageImage");
 
     // add a new text with the needed stage number in the same location
-    const text = "Stage " + (stageIndex + 1);
+    const text = myLanguage.stage + " " + (stageIndex + 1);
     this.add
       .text(newStageImage.x, newStageImage.y, text, {
         fontFamily: "Chewy",

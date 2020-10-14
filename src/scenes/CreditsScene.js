@@ -21,7 +21,9 @@ class CreditsScene extends Phaser.Scene {
     };
 
     // set title text
-    this.add.text(this.sys.game.config.width / 2, 120, "Credits", style).setOrigin(0.5, 0.5);
+    this.add
+      .text(this.sys.game.config.width / 2, 120, myLanguage.credits, style)
+      .setOrigin(0.5, 0.5);
 
     // set button so player can go back to main menu
     let backToMenuButton = this.add
@@ -51,7 +53,9 @@ class CreditsScene extends Phaser.Scene {
       fill: "#ffffff",
       fontSize: "30px",
     };
-    this.add.text(backToMenuButton.x, backToMenuButton.y, "Main Menu", style).setOrigin(0.5, 0.5); // centerize text to image
+    this.add
+      .text(backToMenuButton.x, backToMenuButton.y, myLanguage.mainMenu, style)
+      .setOrigin(0.5, 0.5); // centerize text to image
   }
 
   create() {

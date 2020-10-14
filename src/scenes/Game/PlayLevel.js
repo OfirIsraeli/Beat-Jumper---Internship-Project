@@ -156,7 +156,7 @@ export function playLevel(that, levelJson) {
             that.curNotes.prevNote.visited === false
           ) {
             that.levelState = LEVEL_STATES.LOST;
-            that.infoMessage = LATE_JUMP_MSG;
+            that.infoMessage = myLanguage.lateJumpTime;
           }
         }
       }

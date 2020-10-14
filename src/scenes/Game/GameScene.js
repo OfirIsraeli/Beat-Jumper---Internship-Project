@@ -79,7 +79,7 @@ const DEFAULT_TILE_SPEED = 6;
 const HALF_NOTE_SIZE = 4;
 
 // different messages for user
-const LONG_JUMP_MSG = "Stay longer in air\nwhen a half note is played!";
+//const LONG_JUMP_MSG = window.myLanguage.shortJumpDuration; //"Stay longer in air\nwhen a half note is played!";
 const EARLY_JUMP_MSG = "You jumped too early!";
 const LATE_JUMP_MSG = "You jumped too late!";
 const WRONG_JUMP_MSG = "You jumped at the wrong time!";
@@ -184,7 +184,7 @@ class GameScene extends Phaser.Scene {
         ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
       }
       this.countInText.text = ""; // making sure there is no text overload if we're in count-in
-      this.infoText.text = "Exiting"; // and informing the player of his\her choice
+      this.infoText.text = myLanguage.exiting; // and informing the player of his\her choice
       this.goBackToMenu(300); // and aborting mission...
     });
 
@@ -266,6 +266,7 @@ class GameScene extends Phaser.Scene {
    */
   addBoulder(noteIndex) {
     let newBoulder = new Boulder({ scene: this.scene, noteIndex: noteIndex });
+    //this.physics.add.collider(this.myHero.heroSprite, newBoulder.sprite);
     this.bouldersArray.push(newBoulder);
   }
 
@@ -382,7 +383,13 @@ class GameScene extends Phaser.Scene {
       );
       // inform player on the next level
       this.levelInfoText.text =
-        "Stage " + (this.stageIndex + 1) + ", Level " + (this.levelIndex + 1);
+        myLanguage.stage +
+        " " +
+        (this.stageIndex + 1) +
+        ", " +
+        myLanguage.level +
+        " " +
+        (this.levelIndex + 1);
     }
     // if just lost a level but not the whole stage, just redo the level. put stageStage on hold until we restart
     else if (this.levelState === LEVEL_STATES.LOST) {
@@ -448,9 +455,9 @@ class GameScene extends Phaser.Scene {
     // if level was not lost, set infoMessage to display the next level user is going to face
     // if level lost, we inform the player details regarding failure in the jumpTimingCheck function
     if (this.levelState !== LEVEL_STATES.LOST) {
-      this.infoMessage = "Level " + (this.levelIndex + 1);
+      this.infoMessage = myLanguage.level + " " + (this.levelIndex + 1);
       if (this.levelState === LEVEL_STATES.PASSED_PART1) {
-        this.infoMessage += NO_BOULDERS_MSG;
+        this.infoMessage += "\n" + myLanguage.noBoulders;
       }
     }
   }
@@ -538,15 +545,15 @@ class GameScene extends Phaser.Scene {
     else {
       successfulJump = false;
       if (this.closestNote.noteType === NOTES.REST_NOTE) {
-        this.infoMessage = WRONG_JUMP_MSG;
+        this.infoMessage = myLanguage.wrongJumpTime;
       }
       // else, if the the jump failed because of delay, tell that to user
       else if (this.closestNote.timing < this.jumpTime) {
-        this.infoMessage = LATE_JUMP_MSG;
+        this.infoMessage = myLanguage.lateJumpTime;
       }
       // else, it failed because user jumped too early. tell that to user
       else {
-        this.infoMessage = EARLY_JUMP_MSG;
+        this.infoMessage = myLanguage.earlyJumpTime;
       }
       this.levelState = LEVEL_STATES.LOST;
     }
@@ -570,7 +577,7 @@ class GameScene extends Phaser.Scene {
     // if user has jump for less than a third of that note's duration, he fails the level
     if (jumpDuration < neededDuration / 3 && this.closestNote.noteSize === HALF_NOTE_SIZE) {
       console.log("you jumped for too short a time");
-      this.infoMessage = LONG_JUMP_MSG;
+      this.infoMessage = myLanguage.shortJumpDuration.replace("\\n", "\n");
       this.levelState = LEVEL_STATES.LOST;
     }
   }
@@ -598,7 +605,7 @@ class GameScene extends Phaser.Scene {
         ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
       }
       this.countInText.text = ""; // making sure there is no text overload if we're in count-in
-      this.infoText.text = "Exiting"; // and informing the player of his\her choice
+      this.infoText.text = myLanguage.exiting; // and informing the player of his\her choice
       this.goBackToMenu(300); // and aborting mission...
     }
 
@@ -627,13 +634,13 @@ class GameScene extends Phaser.Scene {
     if (this.stageState !== STAGE_STATES.ON_MOTION && this.levelIndex < this.sheetJson.length) {
       // if player has failed 3 times, tell him that and don't start a new level (by doing return)
       if (this.stageState === STAGE_STATES.LOST) {
-        this.infoText.text = "You Lost";
+        this.infoText.text = myLanguage.youLost;
         this.goBackToMenu();
         return;
       }
       // if player has won, tell him that and don't start a new level (by doing return)
       if (this.stageState === STAGE_STATES.WON) {
-        this.infoText.text = "You Won!";
+        this.infoText.text = myLanguage.youWon;
         ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // remove the sheet from screen
         this.goBackToMenu();
         return;
