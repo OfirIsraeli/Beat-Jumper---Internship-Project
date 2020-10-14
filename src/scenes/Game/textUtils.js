@@ -41,7 +41,7 @@ export function initText(that) {
 
   // high score text
   that.highScoreUpperText = that.add
-    .text(40, 55, "High Score:", {
+    .text(40, 55, "Highscore:", {
       ...FONT_STYLE,
       fontSize: "35px",
     })

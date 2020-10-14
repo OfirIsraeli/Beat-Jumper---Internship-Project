@@ -32,9 +32,9 @@ class StageHighScoreScene extends Phaser.Scene {
 
     // add the first line, the head of the table
     style.fontSize = "40px";
-    const firstLine = "\t\t\t\t\t\tStage " + (this.stageIndex + 1) + "\nLevel\t\t\t\t\t\t\tScore";
-    this.add.text(640, 250, firstLine, style).setOrigin(0.5, 0.5);
-
+    this.add.text(635, 230, "Stage " + (this.stageIndex + 1), style).setOrigin(0.5, 0.5);
+    this.add.text(550, 280, "Level", style).setOrigin(0.5, 0.5);
+    this.add.text(720, 280, "Score", style).setOrigin(0.5, 0.5);
     // add the left text of the highscore table, so just level names
     for (let levelNumber = 1; levelNumber <= NUMBER_OF_LEVELS; levelNumber++) {
       this.add.text(500, 250 + levelNumber * 60, "Level " + levelNumber, style);

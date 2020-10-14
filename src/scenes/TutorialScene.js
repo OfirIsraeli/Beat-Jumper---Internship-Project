@@ -61,8 +61,7 @@ class TutorialScene extends Phaser.Scene {
     // two options for tutorial text:
     // first, short and simple:
     const basicTutorialText =
-      "Press space (or touch the screen if on a phone) to jump\nwhen a note should be played (according to the sheet music).\n" +
-      "You should jump for as long as each note is.\nBy jumping in time, you will successfully jump over\nthe boulders that are coming your way";
+      "Press space or touch the screen to jump when a note\nis played according to the sheet music.\nA half note jump should be longer than any other jump.\nBy jumping in time, you will successfully jump over\nthe boulders that are coming your way.";
     // second, long and detailed:
     const detailedTutorialText =
       "In each level, the user will be playing the main character. When a level is started, the character will run, while boulders of different\n" +
@@ -76,7 +75,14 @@ class TutorialScene extends Phaser.Scene {
       "to (jump in a rest note for example), he will fail the level, and will have to try again. If player has lost a level 3 times during one stage,\n" +
       "he will have to redo the whole stage, until he can complete that stage with failing less than 3 times.";
 
-    this.add.text(640, 340, basicTutorialText, style).setOrigin(0.5, 0.5);
+    this.add
+      .text(
+        this.sys.game.config.width / 2,
+        this.sys.game.config.height / 2,
+        basicTutorialText,
+        style
+      )
+      .setOrigin(0.5, 0.5);
   }
 
   update(time, delta) {}

@@ -75,8 +75,11 @@ const DEFAULT_GAME_START_DELAY = 3500;
 
 const DEFAULT_TILE_SPEED = 6;
 
+// with the smallest division of an eighth note, the biggest note size of 4 is a half note
+const HALF_NOTE_SIZE = 4;
+
 // different messages for user
-const LONG_JUMP_MSG = "You jumped too little!";
+const LONG_JUMP_MSG = "Stay longer in air\nwhen a half note is played!";
 const EARLY_JUMP_MSG = "You jumped too early!";
 const LATE_JUMP_MSG = "You jumped too late!";
 const WRONG_JUMP_MSG = "You jumped at the wrong time!";
@@ -175,7 +178,6 @@ class GameScene extends Phaser.Scene {
       .setInteractive({ cursor: "pointer", useHandCursor: true });
     this.stopButton.on("pointerdown", () => {
       // when a unlocked level is pressed, start GameScene with current stage and level
-      console.log("okay here?");
       // if level was rolling, stop the intervals
       if (this.levelState === LEVEL_STATES.ON_MOTION) {
         this.removeBoulders();
@@ -566,7 +568,7 @@ class GameScene extends Phaser.Scene {
     // needed jump duration is the smallest division in miiliseconds (this.divisionDuration) times this notes' size
     const neededDuration = this.closestNote.noteSize * this.divisionDuration;
     // if user has jump for less than a third of that note's duration, he fails the level
-    if (jumpDuration < neededDuration / 3) {
+    if (jumpDuration < neededDuration / 3 && this.closestNote.noteSize === HALF_NOTE_SIZE) {
       console.log("you jumped for too short a time");
       this.infoMessage = LONG_JUMP_MSG;
       this.levelState = LEVEL_STATES.LOST;
