@@ -53,6 +53,7 @@ module.exports = {
       start_url: "/beat-jumper",
       display: "standalone",
       theme_color: "#2c3e50",
+      scope: "/beat-jumper",
       lang: "en",
 
       crossorigin: "use-credentials", //can be null, use-credentials or anonymous

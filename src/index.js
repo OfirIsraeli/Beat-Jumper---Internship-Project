@@ -18,7 +18,8 @@ const DEFAULT_GAME_URL = "https://bandpad.co/beat-jumper/";
 // default server we use in localhost is 8080
 const DEFAULT_LOCALHOST_SERVER = "http://localhost:8080/";
 //
-const DEFAULT_LANGUAGE_VOCAB_URL = "https://bandpad.co/livescore/score/getGameLanguage/";
+const DEFAULT_LANGUAGE_VOCAB_URL =
+  "https://bandpad.co/livescore/score/getGameLanguage/";
 /*
   https://github.com/nkholski/phaser3-es6-webpack
   https://photonstorm.github.io/phaser3-docs/Phaser.Physics.Arcade.Body.html
@@ -85,6 +86,7 @@ if ("serviceWorker" in navigator) {
 
 // get game location
 let thisLocation = window.location.href;
+
 // if we're in localhost (so testing stuff), use the real site address as the location, with default language
 if (thisLocation === DEFAULT_LOCALHOST_SERVER) {
   thisLocation = DEFAULT_GAME_URL + DEFAULT_LANGUAGE;
@@ -101,7 +103,7 @@ axios
   .get(DEFAULT_LANGUAGE_VOCAB_URL + selectedLanguage)
   .then((response) => {
     // handle success
-    localStorage.setItem("LanguageVocabulary", JSON.stringify(response.data));
+    window.myLanguage = response.data;
     new Phaser.Game(config);
   })
   .catch((error) => {
