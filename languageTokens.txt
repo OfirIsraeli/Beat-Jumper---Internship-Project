@@ -78,8 +78,16 @@ sceneExit: Exiting
 exiting
 
 shortJumpDuration: Hold your jump longer\nwhen a half note is played
+shortJumpDuration
 
-earlyJumpTime: You jumped too early!
-lateJumpTime: You jumped too late!
-wrongJumpTime: You jumped at the wrong time!
-noBoulders: Now without the boulders!
+earlyJumpTime: You jumped too early
+earlyJumpTime
+
+lateJumpTime: You jumped too late
+lateJumpTime
+
+wrongJumpTime: You jumped at the wrong time
+wrongJumpTime
+
+noBoulders: Now without the boulders
+noBoulders
