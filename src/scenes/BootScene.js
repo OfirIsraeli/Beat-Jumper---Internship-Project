@@ -12,6 +12,8 @@ class BootScene extends Phaser.Scene {
 
     // loading images
     this.load.image("backgroundImage", "assets/images/background.png");
+    this.load.image("backgroundDesertImage", "assets/images/MyBackground2.png");
+
     this.load.image("emptyMenuBackgroundSand", "assets/images/emptyMenuBackgroundSand.png");
     this.load.image("emptyMenuBackgroundNormal", "assets/images/emptyMenuBackgroundNormal.png");
     this.load.image("cloudLeftBig", "assets/images/cloudLeftBig.png");
