@@ -83,19 +83,17 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-// get game location
-let thisLocation = window.location.href;
+// language in our case will be provided as URL parameter. fetch it.
 
-// if we're in localhost (so testing stuff), use the real site address as the location, with default language
-if (thisLocation === DEFAULT_LOCALHOST_SERVER) {
-  thisLocation = DEFAULT_GAME_URL + DEFAULT_LANGUAGE;
-}
-// language in our case will be in this specific location. fetch it.
-let selectedLanguage = thisLocation.slice(31, 33);
+// get the URL parameters
+const urlParams = new URLSearchParams(window.location.search);
+// get our specific parameter
+let selectedLanguage = urlParams.get("language");
 // if it does not exist, use default language
-if (selectedLanguage === "") {
+if (selectedLanguage === null) {
   selectedLanguage = DEFAULT_LANGUAGE;
 }
+
 // use axios to get our language vocabulary
 axios
   .get(DEFAULT_LANGUAGE_VOCAB_URL + selectedLanguage)
