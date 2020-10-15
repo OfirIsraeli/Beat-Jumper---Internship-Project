@@ -42,17 +42,27 @@ export default function createScore(
     debugDisplay: false,
   };
   let scoreNode = document.getElementById("score-id");
+  // the real width of this specific user's resolution
+  const realGameWidth = parseFloat(document.querySelector("canvas").style.width);
+  // change the score DIV element width to the user's game width
+  document.getElementById("score-id").setAttribute("style", "width:" + realGameWidth + "px");
+
+  // the user's ratio between our default resolution to his own resolution.
+  const userResolutionRatio = parseFloat(document.querySelector("canvas").style.height) / 760;
+
   scoreNode.innerHTML = "";
   liveScore.createScore(scoreJson, "score-id", options, eventFunction);
+
   // if player has a screen such that there is a top margin, we want to define score-id DIV to spawn in our game and not in that margin
   // get that margin
   const screenToGameDifference = parseInt(document.querySelector("body > canvas").style.marginTop);
   // default up position for the div
   const DIVUpPosition = 0 + screenToGameDifference;
-  // default down position for the div
-  const DIVDownPosition = 80 + screenToGameDifference;
+  // default down position for the div. we're fixing the down position to the user's ratio between our default resolution to his own resolution.
+  const DIVDownPosition = Math.floor(userResolutionRatio * 70) + screenToGameDifference;
   // moving the DIV element in the scene. if we are in a level's first part, it is on top, else it's moved downwards
   //  if disableNoteRect is true, it means we are on a level's second part, so move DIV down.
+
   if (disableNoteRect) {
     // if player has lost the level in his last try, just position the DIV in the same place as before
     if (levelState === LEVEL_STATES.LOST) {
