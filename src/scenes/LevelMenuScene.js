@@ -41,15 +41,37 @@ import level6_4 from "../sheets/levels/level6/level6-4";
 import level6_5 from "../sheets/levels/level6/level6-5";
 import level6_6 from "../sheets/levels/level6/level6-6";
 
+import { createMenuBackground } from "../lib/createMenuBackground";
+
 const NUMBER_OF_STAGES = 6;
 const NUMBER_OF_LEVELS = 6;
 const NO_HP_SUBTRACTED = 0;
+const INIT_CLOUD_POSITIONS = [
+  { x: 250, y: 150 },
+  { x: 1190, y: 690 },
+  { x: 210, y: 290 },
+  { x: 450, y: 450 },
+  { x: 150, y: 470 },
+  { x: 350, y: 600 },
+  { x: 950, y: 40 },
+  { x: 850, y: 600 },
+  { x: 1100, y: 240 },
+  { x: 1000, y: 380 },
+  { x: 700, y: 460 },
+];
 
 class LevelMenuScene extends Phaser.Scene {
   constructor(test) {
     super({
       key: "LevelMenuScene",
     });
+  }
+  init(data) {
+    if (data.cloudLocations) {
+      this.cloudLocations = data.cloudLocations;
+    } else {
+      this.cloudLocations = INIT_CLOUD_POSITIONS;
+    }
   }
   preload() {
     // set button select sound
@@ -58,7 +80,7 @@ class LevelMenuScene extends Phaser.Scene {
     let scoreDIVElement = document.getElementById("score-id");
     scoreDIVElement.style.display = "none";
     // set background
-    this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
+    createMenuBackground(this, this.cloudLocations);
 
     // title text - select a level
     let style = {
@@ -68,7 +90,8 @@ class LevelMenuScene extends Phaser.Scene {
     };
     this.add
       .text(this.sys.game.config.width / 2, 60, myLanguage.selectLevel, style)
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
 
     // button so player can go back to main menu
     let backToMenuButton = this.add
@@ -79,7 +102,7 @@ class LevelMenuScene extends Phaser.Scene {
     // when a button is pressed, go back to main menu
     backToMenuButton.on("pointerdown", () => {
       this.buttonSelectSound.play();
-      this.scene.start("TitleScene");
+      this.scene.start("TitleScene", { cloudLocations: this.getCloudLocations() });
     });
     // if cursor is over the button, change the tint to green
     backToMenuButton.on("pointerover", () => {
@@ -95,7 +118,8 @@ class LevelMenuScene extends Phaser.Scene {
     style.fontSize = "30px";
     this.add
       .text(backToMenuButton.x, backToMenuButton.y, myLanguage.mainMenu, style)
-      .setOrigin(0.5, 0.5); // centerize text to image
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2); // centerize text to image
   }
 
   create() {
@@ -218,7 +242,8 @@ class LevelMenuScene extends Phaser.Scene {
         fill: "#ffffff",
         fontSize: "30px",
       })
-      .setOrigin(0.5, 0.5); // centerize text to image
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2); // centerize text to image
     this.stageImages[stageIndex] = newStageImage; // add the image object to our array
   }
 
@@ -292,7 +317,10 @@ class LevelMenuScene extends Phaser.Scene {
       align: "center",
       fontSize: "30px",
     };
-    this.add.text(newButton.x, newButton.y, levelIndex + 1, style).setOrigin(0.5, 0.5); // centerize text to image
+    this.add
+      .text(newButton.x, newButton.y, levelIndex + 1, style)
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2); // centerize text to image
 
     // add this button and its' locked state (true by default) to the level buttons array
     this.levelButtons[stageIndex][levelIndex] = { button: newButton, locked: true };

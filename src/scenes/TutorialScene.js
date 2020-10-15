@@ -1,3 +1,5 @@
+import { createMenuBackground } from "../lib/createMenuBackground";
+
 /**
  * scene for a brief explanation of how to play the game
  */
@@ -7,12 +9,15 @@ class TutorialScene extends Phaser.Scene {
       key: "TutorialScene",
     });
   }
+  init(data) {
+    this.cloudLocations = data.cloudLocations;
+  }
+
   preload() {
     // set button select sound
     this.buttonSelectSound = this.sound.add("buttonSelect", { volume: gameVolume });
     // set background
-    this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
-
+    createMenuBackground(this, this.cloudLocations);
     // set style for texts in scene
     let style = {
       fontFamily: "Chewy",
@@ -23,7 +28,8 @@ class TutorialScene extends Phaser.Scene {
     // set title text
     this.add
       .text(this.sys.game.config.width / 2, 120, myLanguage.tutorial, style)
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
 
     // set button so player can go back to main menu
     let backToMenuButton = this.add
@@ -33,7 +39,7 @@ class TutorialScene extends Phaser.Scene {
     // when a button is pressed, go back to main menu
     backToMenuButton.on("pointerdown", () => {
       this.buttonSelectSound.play();
-      this.scene.start("TitleScene");
+      this.scene.start("TitleScene", { cloudLocations: this.getCloudLocations() });
     });
     // if cursor is over the button, change the tint to green
     backToMenuButton.on("pointerover", () => {
@@ -53,7 +59,8 @@ class TutorialScene extends Phaser.Scene {
     };
     this.add
       .text(backToMenuButton.x, backToMenuButton.y, myLanguage.mainMenu, style)
-      .setOrigin(0.5, 0.5); // centerize text to image
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 1); // centerize text to image
   }
 
   create() {
@@ -86,7 +93,8 @@ class TutorialScene extends Phaser.Scene {
         myLanguage.beatJumperTutorialText.replaceAll("\\n", "\n"),
         style
       )
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 1);
   }
 
   update(time, delta) {}

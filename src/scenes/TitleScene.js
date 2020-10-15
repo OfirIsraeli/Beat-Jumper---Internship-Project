@@ -1,5 +1,20 @@
 const DEFAULT_GAME_TEMPO = 70;
 const DEFAULT_GAME_VOLUME = 1.0;
+const INIT_CLOUD_POSITIONS = [
+  { x: 250, y: 150 },
+  { x: 1190, y: 690 },
+  { x: 210, y: 290 },
+  { x: 450, y: 450 },
+  { x: 150, y: 470 },
+  { x: 350, y: 600 },
+  { x: 950, y: 40 },
+  { x: 850, y: 600 },
+  { x: 1100, y: 240 },
+  { x: 1000, y: 380 },
+  { x: 700, y: 460 },
+];
+
+import { createMenuBackground } from "../lib/createMenuBackground";
 /**
  * scene for main menu
  */
@@ -8,6 +23,13 @@ class TitleScene extends Phaser.Scene {
     super({
       key: "TitleScene",
     });
+  }
+  init(data) {
+    if (data.cloudLocations) {
+      this.cloudLocations = data.cloudLocations;
+    } else {
+      this.cloudLocations = INIT_CLOUD_POSITIONS;
+    }
   }
   preload() {
     // fetch volume for game. if no volume is set yet, set default of 100%
@@ -19,8 +41,8 @@ class TitleScene extends Phaser.Scene {
 
     // set button select sound
     this.buttonSelectSound = this.sound.add("buttonSelect", { volume: gameVolume });
-    // set background
-    this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
+
+    createMenuBackground(this, this.cloudLocations);
 
     let style = {
       fontFamily: "Chewy",
@@ -29,7 +51,8 @@ class TitleScene extends Phaser.Scene {
     };
     let TitleText = this.add
       .text(this.sys.game.config.width / 2, 100, myLanguage.beatJumper, style)
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setShadow(3, 3, "rgba(0,0,0,1)", 2);
   }
   create() {
     // fetch tempo for game. if no tempo is set yet, set default of 70
@@ -64,7 +87,7 @@ class TitleScene extends Phaser.Scene {
     newButton.on("pointerdown", () => {
       // when a unlocked level is pressed, start GameScene with current stage and level
       this.buttonSelectSound.play();
-      this.scene.start(sceneName);
+      this.scene.start(sceneName, { cloudLocations: this.getCloudLocations() });
     });
     // if cursor is over the button, change the tint accordingly. red if level is locked, green otherwise
     newButton.on("pointerover", () => {
@@ -82,7 +105,10 @@ class TitleScene extends Phaser.Scene {
       fill: "#ffffff",
       fontSize: "30px",
     };
-    this.add.text(newButton.x, newButton.y, buttonText, style).setOrigin(0.5, 0.5); // centerize text to image
+    this.add
+      .text(newButton.x, newButton.y, buttonText, style)
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 1); // centerize text to image
   }
 
   update(time, delta) {}

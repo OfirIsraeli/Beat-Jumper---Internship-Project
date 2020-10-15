@@ -1,3 +1,5 @@
+import { createMenuBackground } from "../lib/createMenuBackground";
+
 const DEFAULT_GAME_TEMPO = 70;
 
 /**
@@ -9,11 +11,14 @@ class OptionsScene extends Phaser.Scene {
       key: "OptionsScene",
     });
   }
+  init(data) {
+    this.cloudLocations = data.cloudLocations;
+  }
   preload() {
     // set button select sound
     this.buttonSelectSound = this.sound.add("buttonSelect", { volume: gameVolume });
     // set background
-    this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
+    createMenuBackground(this, this.cloudLocations);
 
     // set style for texts in scene
     let style = {
@@ -25,7 +30,8 @@ class OptionsScene extends Phaser.Scene {
     // set title text
     this.add
       .text(this.sys.game.config.width / 2, 80, myLanguage.options, style)
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
 
     // set button so player can go back to main menu
     let backToMenuButton = this.add
@@ -36,7 +42,7 @@ class OptionsScene extends Phaser.Scene {
     backToMenuButton.on("pointerdown", () => {
       // when button is pressed, go back to main menu
       this.buttonSelectSound.play();
-      this.scene.start("TitleScene");
+      this.scene.start("TitleScene", { cloudLocations: this.getCloudLocations() });
     });
     // set tints for hovering the button
     this.createTintButtonHover(backToMenuButton);
@@ -45,7 +51,8 @@ class OptionsScene extends Phaser.Scene {
     style.fontSize = "30px";
     this.add
       .text(backToMenuButton.x, backToMenuButton.y, myLanguage.mainMenu, style)
-      .setOrigin(0.5, 0.5); // centerize text to image
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2); // centerize text to image
   }
 
   create() {
@@ -64,7 +71,8 @@ class OptionsScene extends Phaser.Scene {
     let gameTempo = JSON.parse(localStorage.getItem("GameTempo"));
     let tempoText = this.add
       .text(440, 200, myLanguage.tempo + ": " + gameTempo, style)
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
     style.fontSize = "30px";
     // set faster tempo button
     let fasterTempoButton = this.add
@@ -88,7 +96,8 @@ class OptionsScene extends Phaser.Scene {
     // add a new text for this button
     this.add
       .text(fasterTempoButton.x, fasterTempoButton.y, myLanguage.faster, style)
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
 
     // set slower tempo button
     let slowerTempoButton = this.add
@@ -112,7 +121,8 @@ class OptionsScene extends Phaser.Scene {
     // add a new text for this button
     this.add
       .text(slowerTempoButton.x, slowerTempoButton.y, myLanguage.slower, style)
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
 
     //------------------------------------------
     /**
@@ -122,7 +132,8 @@ class OptionsScene extends Phaser.Scene {
     // fetch Volume from localStorage
     let volumeText = this.add
       .text(440, 400, myLanguage.volume + ": " + gameVolume * 100 + "%", style)
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
     // set faster Volume button
     let higherVolButton = this.add
       .sprite(720, 400, "unlockedLevelImage")
@@ -143,7 +154,10 @@ class OptionsScene extends Phaser.Scene {
     // set tints for hovering the button
     this.createTintButtonHover(higherVolButton);
     // add a new text for this button
-    this.add.text(higherVolButton.x, higherVolButton.y, "+", style).setOrigin(0.5, 0.65);
+    this.add
+      .text(higherVolButton.x, higherVolButton.y, "+", style)
+      .setOrigin(0.5, 0.65)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
 
     // set slower Volume button
     let lowerVolButton = this.add
@@ -165,7 +179,10 @@ class OptionsScene extends Phaser.Scene {
     // set tints for hovering the button
     this.createTintButtonHover(lowerVolButton);
     // add a new text for this button
-    this.add.text(lowerVolButton.x, lowerVolButton.y, "-", style).setOrigin(0.5, 0.65);
+    this.add
+      .text(lowerVolButton.x, lowerVolButton.y, "-", style)
+      .setOrigin(0.5, 0.65)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
     //---------------------------------------------------------------------------------------
 
     /**
@@ -190,13 +207,15 @@ class OptionsScene extends Phaser.Scene {
     // add a new text for this button
     let ResetDataText = this.add
       .text(resetDataButton.x, resetDataButton.y, myLanguage.resetGame, style)
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
 
     // set upper text for reset option
     style.fontSize = "45px";
     this.upperResetText = this.add
       .text(resetDataButton.x, resetDataButton.y - 70, myLanguage.resetGame, style)
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
   }
 
   setYesNoButtons(resetDataButton, ResetDataText) {
@@ -226,12 +245,15 @@ class OptionsScene extends Phaser.Scene {
       localStorage.clear();
       localStorage.setItem("GameTempo", JSON.stringify(DEFAULT_GAME_TEMPO));
       // and restart the scene
-      this.scene.restart();
+      this.scene.restart({ cloudLocations: this.getCloudLocations() });
     });
     // set tints for hovering the button
     this.createTintButtonHover(yesButton);
     // set text for yes button
-    this.add.text(yesButton.x - 80, yesButton.y, myLanguage.yes, style).setOrigin(0.5, 0.5); // centerize text to image
+    this.add
+      .text(yesButton.x - 80, yesButton.y, myLanguage.yes, style)
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2); // centerize text to image
 
     // set the no button
     let noButton = this.add
@@ -242,13 +264,16 @@ class OptionsScene extends Phaser.Scene {
     noButton.on("pointerdown", () => {
       // if pressed no, restart the scene.
       this.buttonSelectSound.play();
-      this.scene.restart();
+      this.scene.restart({ cloudLocations: this.getCloudLocations() });
     });
 
     // set tints for hovering the button
     this.createTintButtonHover(noButton);
     // set text for no button
-    this.add.text(noButton.x + 80, noButton.y, myLanguage.no, style).setOrigin(0.5, 0.5); // centerize text to image
+    this.add
+      .text(noButton.x + 80, noButton.y, myLanguage.no, style)
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2); // centerize text to image
   }
 
   /**

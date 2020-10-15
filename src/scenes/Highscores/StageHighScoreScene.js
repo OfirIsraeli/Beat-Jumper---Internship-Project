@@ -1,3 +1,5 @@
+import { createMenuBackground } from "../../lib/createMenuBackground";
+
 const NUMBER_OF_LEVELS = 6;
 /**
  * scene that presents the highscore of a given stage
@@ -10,13 +12,14 @@ class StageHighScoreScene extends Phaser.Scene {
   }
   init(data) {
     this.stageIndex = data.stage;
+    this.cloudLocations = data.cloudLocations;
   }
 
   preload() {
     // set button select sound
     this.buttonSelectSound = this.sound.add("buttonSelect", { volume: gameVolume });
     // set background
-    this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
+    createMenuBackground(this, this.cloudLocations);
 
     // text style
     let style = {
@@ -25,19 +28,27 @@ class StageHighScoreScene extends Phaser.Scene {
       fontSize: "90px",
     };
     // set the title text
-    this.add.text(this.sys.game.config.width / 2, 120, "Highscores", style).setOrigin(0.5, 0.5);
+    this.add
+      .text(this.sys.game.config.width / 2, 120, "Highscores", style)
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
     // set the back buttons - one for main menu and one for highscore menu
     this.createBackButtons("Main Menu", "TitleScene", style, 0);
     this.createBackButtons("Back", "HighScoreMenuScene", style, 1);
 
     // add the first line, the head of the table
     style.fontSize = "40px";
-    this.add.text(635, 230, "Stage " + (this.stageIndex + 1), style).setOrigin(0.5, 0.5);
-    this.add.text(550, 280, "Level", style).setOrigin(0.5, 0.5);
-    this.add.text(720, 280, "Score", style).setOrigin(0.5, 0.5);
+    this.add
+      .text(635, 230, "Stage " + (this.stageIndex + 1), style)
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
+    this.add.text(550, 280, "Level", style).setOrigin(0.5, 0.5).setShadow(0, 0, "rgba(0,0,0,1)", 2);
+    this.add.text(720, 280, "Score", style).setOrigin(0.5, 0.5).setShadow(0, 0, "rgba(0,0,0,1)", 2);
     // add the left text of the highscore table, so just level names
     for (let levelNumber = 1; levelNumber <= NUMBER_OF_LEVELS; levelNumber++) {
-      this.add.text(500, 250 + levelNumber * 60, "Level " + levelNumber, style);
+      this.add
+        .text(500, 250 + levelNumber * 60, "Level " + levelNumber, style)
+        .setShadow(0, 0, "rgba(0,0,0,1)", 2);
     }
   }
 
@@ -55,7 +66,10 @@ class StageHighScoreScene extends Phaser.Scene {
     if (userHighScores === null) {
       console.log("no highscores yet!");
       for (let levelIndex = 0; levelIndex < NUMBER_OF_LEVELS; levelIndex++) {
-        this.add.text(720, 330 + levelIndex * 60, 0, style).setOrigin(0.5, 0.5);
+        this.add
+          .text(720, 330 + levelIndex * 60, 0, style)
+          .setOrigin(0.5, 0.5)
+          .setShadow(0, 0, "rgba(0,0,0,1)", 2);
       }
     }
     // if user has highscores, add highscores of each level as a text
@@ -63,7 +77,8 @@ class StageHighScoreScene extends Phaser.Scene {
       for (let levelIndex = 0; levelIndex < NUMBER_OF_LEVELS; levelIndex++) {
         this.add
           .text(720, 330 + levelIndex * 60, userHighScores[this.stageIndex][levelIndex], style)
-          .setOrigin(0.5, 0.5);
+          .setOrigin(0.5, 0.5)
+          .setShadow(0, 0, "rgba(0,0,0,1)", 2);
       }
     }
   }
@@ -85,7 +100,7 @@ class StageHighScoreScene extends Phaser.Scene {
     // when a button is pressed, go back to main menu
     backToMenuButton.on("pointerdown", () => {
       this.buttonSelectSound.play();
-      this.scene.start(scene);
+      this.scene.start(scene, { cloudLocations: this.getCloudLocations() });
     });
     // if cursor is over the button, change the tint to green
     backToMenuButton.on("pointerover", () => {
@@ -100,7 +115,10 @@ class StageHighScoreScene extends Phaser.Scene {
     // add a new text for this button
     style.fontSize = "30px";
 
-    this.add.text(backToMenuButton.x, backToMenuButton.y, text, style).setOrigin(0.5, 0.5); // centerize text to image
+    this.add
+      .text(backToMenuButton.x, backToMenuButton.y, text, style)
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2); // centerize text to image
   }
 
   update(time, delta) {}

@@ -1,3 +1,5 @@
+import { createMenuBackground } from "../../lib/createMenuBackground";
+
 /**
  * a scene for the highscore menu. directs into each stages' different highscores
  */
@@ -7,18 +9,24 @@ class HighScoreMenuScene extends Phaser.Scene {
       key: "HighScoreMenuScene",
     });
   }
+  init(data) {
+    this.cloudLocations = data.cloudLocations;
+  }
   preload() {
     // set button select sound
     this.buttonSelectSound = this.sound.add("buttonSelect", { volume: gameVolume });
     // set background
-    this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
+    createMenuBackground(this, this.cloudLocations);
 
     let style = {
       fontFamily: "Chewy",
       fill: "#ffffff",
       fontSize: "90px",
     };
-    this.add.text(this.sys.game.config.width / 2, 120, "Highscores", style).setOrigin(0.5, 0.5);
+    this.add
+      .text(this.sys.game.config.width / 2, 120, "Highscores", style)
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
 
     // button so player can go back to main menu
     let backToMenuButton = this.add
@@ -29,7 +37,7 @@ class HighScoreMenuScene extends Phaser.Scene {
     // when a button is pressed, go back to main menu
     backToMenuButton.on("pointerdown", () => {
       this.buttonSelectSound.play();
-      this.scene.start("TitleScene");
+      this.scene.start("TitleScene", { cloudLocations: this.getCloudLocations() });
     });
     // if cursor is over the button, change the tint to green
     backToMenuButton.on("pointerover", () => {
@@ -43,7 +51,10 @@ class HighScoreMenuScene extends Phaser.Scene {
 
     // add a new text for this button
     style.fontSize = "30px";
-    this.add.text(backToMenuButton.x, backToMenuButton.y, "Main Menu", style).setOrigin(0.5, 0.5); // centerize text to image
+    this.add
+      .text(backToMenuButton.x, backToMenuButton.y, "Main Menu", style)
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2); // centerize text to image
   }
 
   create() {
@@ -68,7 +79,10 @@ class HighScoreMenuScene extends Phaser.Scene {
     // when a unlocked level is pressed, start GameScene with current stage and level
     newButton.on("pointerdown", () => {
       this.buttonSelectSound.play();
-      this.scene.start(sceneName, { stage: buttonNumber });
+      this.scene.start(sceneName, {
+        stage: buttonNumber,
+        cloudLocations: this.getCloudLocations(),
+      });
     });
     // if cursor is over the button, change the tint accordingly.
     newButton.on("pointerover", () => {
@@ -86,7 +100,10 @@ class HighScoreMenuScene extends Phaser.Scene {
       fill: "#ffffff",
       fontSize: "30px",
     };
-    this.add.text(newButton.x, newButton.y, buttonText, style).setOrigin(0.5, 0.5); // centerize text to image
+    this.add
+      .text(newButton.x, newButton.y, buttonText, style)
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2); // centerize text to image
   }
 
   update(time, delta) {}

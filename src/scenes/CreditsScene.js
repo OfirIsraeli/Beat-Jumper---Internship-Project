@@ -1,3 +1,5 @@
+import { createMenuBackground } from "../lib/createMenuBackground";
+
 /**
  * scene to display game credits
  */
@@ -7,11 +9,14 @@ class CreditsScene extends Phaser.Scene {
       key: "CreditsScene",
     });
   }
+  init(data) {
+    this.cloudLocations = data.cloudLocations;
+  }
   preload() {
     // set button select sound
     this.buttonSelectSound = this.sound.add("buttonSelect", { volume: gameVolume });
     // set background
-    this.background = this.add.image(0, 0, "menuBackgroundImage").setOrigin(0, 0);
+    createMenuBackground(this, this.cloudLocations);
 
     // set style for texts in scene
     let style = {
@@ -23,7 +28,8 @@ class CreditsScene extends Phaser.Scene {
     // set title text
     this.add
       .text(this.sys.game.config.width / 2, 120, myLanguage.credits, style)
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
 
     // set button so player can go back to main menu
     let backToMenuButton = this.add
@@ -34,7 +40,7 @@ class CreditsScene extends Phaser.Scene {
     // when a button is pressed, go back to main menu
     backToMenuButton.on("pointerdown", () => {
       this.buttonSelectSound.play();
-      this.scene.start("TitleScene");
+      this.scene.start("TitleScene", { cloudLocations: this.getCloudLocations() });
     });
 
     // if cursor is over the button, change the tint to green
@@ -55,7 +61,8 @@ class CreditsScene extends Phaser.Scene {
     };
     this.add
       .text(backToMenuButton.x, backToMenuButton.y, myLanguage.mainMenu, style)
-      .setOrigin(0.5, 0.5); // centerize text to image
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2); // centerize text to image
   }
 
   create() {
@@ -72,7 +79,8 @@ class CreditsScene extends Phaser.Scene {
 
     this.add
       .text(this.sys.game.config.width / 2, this.sys.game.config.height / 2, creditsText, style)
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
   }
 
   update(time, delta) {}
