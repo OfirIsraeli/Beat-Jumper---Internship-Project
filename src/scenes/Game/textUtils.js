@@ -23,36 +23,25 @@ export function initText(that) {
   that.infoMessage = myLanguage.level + " " + (that.levelIndex + 1);
 
   // point text
-  that.pointsUpperText = that.add
-    .text(40, 110, myLanguage.points + ":", {
-      ...FONT_STYLE,
-      fontSize: "35px",
-    })
-    .setOrigin(0, 0.5);
-
-  // points number
   that.totalPoints = 0;
-  that.pointsLowerText = that.add
-    .text(130, 110, that.totalPoints, {
+  that.pointsText = that.add
+    .text(40, 110, myLanguage.points + ": " + that.totalPoints, {
       ...FONT_STYLE,
       fontSize: "35px",
     })
     .setOrigin(0, 0.5);
 
   // high score text
-  that.highScoreUpperText = that.add
-    .text(40, 55, myLanguage.highscore + ":", {
-      ...FONT_STYLE,
-      fontSize: "35px",
-    })
-    .setOrigin(0, 0.5);
-
-  // high score number
-  that.highScoreLowerText = that.add
-    .text(190, 55, that.userHighScores[that.stageIndex][that.levelIndex], {
-      ...FONT_STYLE,
-      fontSize: "35px",
-    })
+  that.highScoreText = that.add
+    .text(
+      40,
+      55,
+      myLanguage.highscore + ": " + that.userHighScores[that.stageIndex][that.levelIndex],
+      {
+        ...FONT_STYLE,
+        fontSize: "35px",
+      }
+    )
     .setOrigin(0, 0.5);
 
   // level text

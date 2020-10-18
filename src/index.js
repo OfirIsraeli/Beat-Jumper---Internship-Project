@@ -88,7 +88,7 @@ if ("serviceWorker" in navigator) {
 // get the URL parameters
 const urlParams = new URLSearchParams(window.location.search);
 // get our specific parameter
-let selectedLanguage = urlParams.get("language");
+window.selectedLanguage = urlParams.get("language");
 // if it does not exist, use default language
 if (selectedLanguage === null) {
   selectedLanguage = DEFAULT_LANGUAGE;

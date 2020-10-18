@@ -29,25 +29,31 @@ class StageHighScoreScene extends Phaser.Scene {
     };
     // set the title text
     this.add
-      .text(this.sys.game.config.width / 2, 120, "Highscores", style)
+      .text(this.sys.game.config.width / 2, 120, myLanguage.highscores, style)
       .setOrigin(0.5, 0.5)
       .setShadow(0, 0, "rgba(0,0,0,1)", 2);
     // set the back buttons - one for main menu and one for highscore menu
-    this.createBackButtons("Main Menu", "TitleScene", style, 0);
-    this.createBackButtons("Back", "HighScoreMenuScene", style, 1);
+    this.createBackButtons(myLanguage.mainMenu, "TitleScene", style, 0);
+    this.createBackButtons(myLanguage.back, "HighScoreMenuScene", style, 1);
 
     // add the first line, the head of the table
     style.fontSize = "40px";
     this.add
-      .text(635, 230, "Stage " + (this.stageIndex + 1), style)
+      .text(635, 230, myLanguage.stage + " " + (this.stageIndex + 1), style)
       .setOrigin(0.5, 0.5)
       .setShadow(0, 0, "rgba(0,0,0,1)", 2);
-    this.add.text(550, 280, "Level", style).setOrigin(0.5, 0.5).setShadow(0, 0, "rgba(0,0,0,1)", 2);
-    this.add.text(720, 280, "Score", style).setOrigin(0.5, 0.5).setShadow(0, 0, "rgba(0,0,0,1)", 2);
+    this.add
+      .text(550, 280, myLanguage.level, style)
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
+    this.add
+      .text(720, 280, myLanguage.score, style)
+      .setOrigin(0.5, 0.5)
+      .setShadow(0, 0, "rgba(0,0,0,1)", 2);
     // add the left text of the highscore table, so just level names
     for (let levelNumber = 1; levelNumber <= NUMBER_OF_LEVELS; levelNumber++) {
       this.add
-        .text(500, 250 + levelNumber * 60, "Level " + levelNumber, style)
+        .text(500, 250 + levelNumber * 60, myLanguage.level + " " + levelNumber, style)
         .setShadow(0, 0, "rgba(0,0,0,1)", 2);
     }
   }

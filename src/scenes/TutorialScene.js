@@ -69,6 +69,9 @@ class TutorialScene extends Phaser.Scene {
       fill: "#ffffff",
       fontSize: "30px",
     };
+    if (selectedLanguage === "he") {
+      style.align = "right";
+    }
     // two options for tutorial text:
     // first, short and simple:
     const basicTutorialText =
@@ -85,7 +88,6 @@ class TutorialScene extends Phaser.Scene {
       "If the user will miss a jump, not jump in time (meaning he did not execute the rhythmic pattern precisely enough) or jump when he was not supposed\n" +
       "to (jump in a rest note for example), he will fail the level, and will have to try again. If player has lost a level 3 times during one stage,\n" +
       "he will have to redo the whole stage, until he can complete that stage with failing less than 3 times.";
-
     this.add
       .text(
         this.sys.game.config.width / 2,

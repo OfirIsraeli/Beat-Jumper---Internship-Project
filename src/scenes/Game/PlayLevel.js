@@ -82,10 +82,11 @@ export function playLevel(that, levelJson) {
   that.levelIsLastUnlocked = that.checkIfLastLevelUnlocked();
 
   // inform player what the high score of this level is
-  that.highScoreLowerText.text = that.userHighScores[that.stageIndex][that.levelIndex];
+  that.highScoreText.text =
+    myLanguage.highscore + ": " + that.userHighScores[that.stageIndex][that.levelIndex];
 
   // until this level is complete so we can calculate the score (points), we set them for a default value of 0
-  that.pointsLowerText.text = 0;
+  that.pointsText.text = myLanguage.points + ": " + 0;
 
   // at a start of each level, infoText is empty so screen would be clear
   that.infoText.text = "";

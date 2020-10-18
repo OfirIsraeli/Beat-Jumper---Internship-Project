@@ -301,12 +301,12 @@ class GameScene extends Phaser.Scene {
     // calculate the average of our level points array using that function, multiply by 5 to get a points range of 0-500.
     // floor it down so it will be an integer
     const levelPoints = Math.floor(average(this.levelPointsArray) * 5);
-    this.pointsLowerText.text = levelPoints;
+    this.pointsText.text = myLanguage.points + ": " + levelPoints;
     console.log("final level score is: ", levelPoints); // log it to console
     // if user passed his previous highscore
     if (this.userHighScores[this.stageIndex][this.levelIndex] < levelPoints) {
       console.log("passed your highscore!"); // log it to console
-      this.highScoreLowerText.text = levelPoints; // update the highscore text
+      this.highScoreText.text = myLanguage.highscore + ": " + levelPoints; // update the highscore text
       this.userHighScores[this.stageIndex][this.levelIndex] = levelPoints; // update the highscore in the highscore matrix
       localStorage.setItem("userHighScores", JSON.stringify(this.userHighScores)); // update the highscore matrix in localStorage
     }

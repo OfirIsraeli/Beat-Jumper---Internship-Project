@@ -18,7 +18,7 @@ export function createMenuBackground(that, cloudLocations) {
       .setOrigin(1, 0.5),
   ];
   that.clouds.forEach((cloud) => {
-    cloud.speed = randomizeSpeed(0.05, 0.25);
+    cloud.speed = randomizeSpeed(0.05, 0.3);
   });
   that.update = (time, delta) => {
     that.clouds.forEach((cloud) => {

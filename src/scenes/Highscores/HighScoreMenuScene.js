@@ -24,7 +24,7 @@ class HighScoreMenuScene extends Phaser.Scene {
       fontSize: "90px",
     };
     this.add
-      .text(this.sys.game.config.width / 2, 120, "Highscores", style)
+      .text(this.sys.game.config.width / 2, 120, myLanguage.highscores, style)
       .setOrigin(0.5, 0.5)
       .setShadow(0, 0, "rgba(0,0,0,1)", 2);
 
@@ -52,14 +52,18 @@ class HighScoreMenuScene extends Phaser.Scene {
     // add a new text for this button
     style.fontSize = "30px";
     this.add
-      .text(backToMenuButton.x, backToMenuButton.y, "Main Menu", style)
+      .text(backToMenuButton.x, backToMenuButton.y, myLanguage.mainMenu, style)
       .setOrigin(0.5, 0.5)
       .setShadow(0, 0, "rgba(0,0,0,1)", 2); // centerize text to image
   }
 
   create() {
     for (let stageNumber = 1; stageNumber <= 6; stageNumber++) {
-      this.createNewMenuButton("Stage " + stageNumber, "StageHighScoreScene", stageNumber - 1);
+      this.createNewMenuButton(
+        myLanguage.stage + " " + stageNumber,
+        "StageHighScoreScene",
+        stageNumber - 1
+      );
     }
   }
 
