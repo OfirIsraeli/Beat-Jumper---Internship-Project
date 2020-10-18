@@ -13,7 +13,6 @@ export function initText(that) {
   });
 
   // set information text. appears on screen whenever we want to inform the user about anything
-  // todo: centralize the text
   that.infoText = that.add
     .text(640, 350, "", {
       ...FONT_STYLE,

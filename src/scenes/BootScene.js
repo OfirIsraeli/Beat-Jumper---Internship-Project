@@ -63,10 +63,8 @@ class BootScene extends Phaser.Scene {
 
     // loading sounds
     this.load.audio("hit", "assets/sounds/hit.wav");
-    this.load.audio("failure", "assets/sounds/fail.wav");
     this.load.audio("measureBeat", "assets/sounds/click beat.wav");
     this.load.audio("quarterBeat", "assets/sounds/clickBeatLower.wav");
-
     this.load.audio("levelWin", "assets/sounds/level win.wav");
     this.load.audio("stageWin", "assets/sounds/stage win.wav");
     this.load.audio("levelFail", "assets/sounds/level fail.wav");
@@ -84,6 +82,7 @@ class BootScene extends Phaser.Scene {
     this.load.on("complete", () => {
       // prepare all animations, defined in a separate file
       progress.destroy();
+      // and we are done with loading assets, start main menu
       this.scene.start("TitleScene");
     });
   }

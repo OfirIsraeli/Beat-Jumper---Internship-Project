@@ -1,5 +1,14 @@
+// ------------------ IMPORTS ---------------- //
+
+import { createMenuBackground } from "../lib/createMenuBackground";
+
+// ------------------ CONSTANTS ---------------- //
+
 const DEFAULT_GAME_TEMPO = 70;
+
 const DEFAULT_GAME_VOLUME = 1.0;
+
+// default cloud positions, before they start moving around
 const INIT_CLOUD_POSITIONS = [
   { x: 250, y: 150 },
   { x: 1190, y: 690 },
@@ -14,7 +23,6 @@ const INIT_CLOUD_POSITIONS = [
   { x: 700, y: 460 },
 ];
 
-import { createMenuBackground } from "../lib/createMenuBackground";
 /**
  * scene for main menu
  */
@@ -24,6 +32,7 @@ class TitleScene extends Phaser.Scene {
       key: "TitleScene",
     });
   }
+
   init(data) {
     if (data.cloudLocations) {
       this.cloudLocations = data.cloudLocations;
@@ -42,14 +51,17 @@ class TitleScene extends Phaser.Scene {
     // set button select sound
     this.buttonSelectSound = this.sound.add("buttonSelect", { volume: gameVolume });
 
+    // set menu background
     createMenuBackground(this, this.cloudLocations);
 
-    let style = {
+    // set needed text CSS - Phaser style
+    const style = {
       fontFamily: "Chewy",
       fill: "#ffffff",
       fontSize: "90px",
     };
-    let TitleText = this.add
+    // add title text
+    this.add
       .text(this.sys.game.config.width / 2, 100, myLanguage.beatJumper, style)
       .setOrigin(0.5, 0.5)
       .setShadow(3, 3, "rgba(0,0,0,1)", 2);
@@ -62,9 +74,8 @@ class TitleScene extends Phaser.Scene {
       localStorage.setItem("GameTempo", JSON.stringify(gameTempo));
     }
 
-    // create menu buttons:
+    // create menu buttons that directs into all of the sub-menu scenes:
     this.createNewMenuButton(myLanguage.play, "LevelMenuScene", 0);
-    // todo: create scenes for each of these:
     this.createNewMenuButton(myLanguage.tutorial, "TutorialScene", 1);
     this.createNewMenuButton(myLanguage.options, "OptionsScene", 2);
     this.createNewMenuButton(myLanguage.highscores, "HighScoreMenuScene", 3);
@@ -100,7 +111,7 @@ class TitleScene extends Phaser.Scene {
     });
 
     // add a new text with the needed level number in the same location
-    let style = {
+    const style = {
       fontFamily: "Chewy",
       fill: "#ffffff",
       fontSize: "30px",
@@ -108,7 +119,7 @@ class TitleScene extends Phaser.Scene {
     this.add
       .text(newButton.x, newButton.y, buttonText, style)
       .setOrigin(0.5, 0.5)
-      .setShadow(0, 0, "rgba(0,0,0,1)", 1); // centerize text to image
+      .setShadow(0, 0, "rgba(0,0,0,1)", 1);
   }
 
   update(time, delta) {}

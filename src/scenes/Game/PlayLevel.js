@@ -56,21 +56,20 @@ const NOTES = {
 };
 
 /*
-    we push a boulder into the game exactly 4 or 8 intervals before the correct note timing so it would reach hero in time.
-    if divisions are eighth notes (so 2) it's 4 intervals, if they are 16th, it's 8 intervals.
-  */
+  we push a boulder into the game exactly 4 or 8 intervals before the correct note timing so it would reach hero in time.
+  if divisions are eighth notes (so 2) it's 4 intervals, if they are 16th, it's 8 intervals.
+ */
 const INTERVAL_PREDECESSOR = {
   2: 4,
   4: 8,
 };
 
-const LATE_JUMP_MSG = "You jumped too late!";
+const DEFAULT_TEMPO = 70;
 
 /**
  * main function that runs a level in GameScene with a given musicJson
  * @param {*} that - a Phaser scene. In our case, it will always be GameScene
  * @param {*} levelJson - the musicJson we base this level on
- * @param {*} invisibleLevel - a flag that indicates if blocks should be invisible this time or not
  */
 export function playLevel(that, levelJson) {
   // show the score DIV element.
@@ -95,10 +94,9 @@ export function playLevel(that, levelJson) {
   that.divisions = levelJson.divisions;
 
   // set tempo for this level
-  //that.tempo = 80;
   that.tempo = JSON.parse(localStorage.getItem("GameTempo"));
   if (that.tempo === null) {
-    that.tempo = 70;
+    that.tempo = DEFAULT_TEMPO;
   }
 
   // create music score for the level
@@ -125,13 +123,14 @@ export function playLevel(that, levelJson) {
   let intervalType = INTERVAL_TYPES.COUNT_IN_INTERVAL; // define the starting interval type as a count-in interval
   let noteIndex = 0; // index that tracks the notes of our scoreMap (so excluding the count-in notes)
   let intervalNumber = 0; // tracks the number of overall interval we're in
-  let countInIndex = 1; // index that will appear on screen on the final bar of count-in each quarter note
+  that.countInIndex = 1; // index that will appear on screen on the final bar of count-in each quarter note
   const countInIntervals = 2 * that.divSize; // 2 bars, each has divSize number of intervals
   const totalIntervals = countInIntervals + that.divSize * that.amountOfBars; // total amount of intervals
 
   // data structures processing - each one explained in its' function description
   that.scoreMap = createLevelScoreMap(levelJson, that.amountOfBars);
   that.timingList = createTimingList(that.divisionDuration, that.scoreMap, countInIntervals);
+
   // start level
   that.levelState = LEVEL_STATES.ON_MOTION;
   that.myHero.walk(); // there goes my hero...
@@ -140,7 +139,7 @@ export function playLevel(that, levelJson) {
   ScoreManager.setEventFunction((event, value) => {
     if (event === BUS_EVENTS.UPDATE) {
       // execute a cowbell beat if needed
-      playBeat(that, value, that.divisions);
+      playBeat(that, value, that.divisions, countInIntervals, intervalType);
 
       if (intervalNumber < totalIntervals) {
         // the 3 notes items closest to the current interval. Needed for calculations for user's jump.
@@ -160,22 +159,6 @@ export function playLevel(that, levelJson) {
             that.infoMessage = myLanguage.lateJumpTime;
           }
         }
-      }
-
-      // if we're in an interval of a quarter note in the second bar of the count-in.
-      // happens 4 times overall regardless of divisions
-      if (
-        value >= countInIntervals / 2 && // second bar
-        intervalType === INTERVAL_TYPES.COUNT_IN_INTERVAL && // of the count-in
-        value <= countInIntervals &&
-        value % that.divisions === 0 // we're in a quarter note interval
-      ) {
-        that.countInText.text = countInIndex; // change countInText to the number of quarter note in the bar we're in
-        countInIndex++;
-      }
-      // after we're done with count-in, show no text from countInText
-      if (value === 0 && intervalType === INTERVAL_TYPES.NOTES_INTERVAL) {
-        //this.countInText.text = "";
       }
 
       //we push a boulder into the game exactly 4 or 8 intervals before the correct note timing so it would reach hero in time.
@@ -199,12 +182,8 @@ export function playLevel(that, levelJson) {
         intervalType = INTERVAL_TYPES.NOTES_INTERVAL; // switch to note interval type
         that.countInText.text = ""; // after we're done with count-in, show no text from countInText
       }
-      that.levelStatusCheck(event, intervalNumber, totalIntervals);
+      that.levelStatusCheck(intervalNumber, totalIntervals);
     }
-    /*
-    if (event === BUS_EVENTS.UPDATE || event === BUS_EVENTS.MAIN_LOOP_END) {
-      that.levelStatusCheck(event, intervalNumber, totalIntervals);
-    }*/
   });
 
   // start vexflow, plays the score along with executing the intervals
@@ -219,7 +198,7 @@ export function playLevel(that, levelJson) {
  * @param {*} value - the value index that we get from the scoreManager intervals.
  * @param {*} divisions - this level's divisions
  */
-function playBeat(that, value, divisions) {
+function playBeat(that, value, divisions, countInIntervals, intervalType) {
   // if we're in the first beat of a measure, play loud cowbell sound
   if (value % (divisions * 4) === 0) {
     that.measureBeat.play();
@@ -227,5 +206,21 @@ function playBeat(that, value, divisions) {
   // if we're in any other quarter note, play normal cowbell sound
   else if (value % divisions === 0) {
     that.quarterBeat.play();
+  }
+
+  // if we're in an interval of a quarter note in the second bar of the count-in.
+  // happens 4 times overall regardless of divisions
+  if (
+    value >= countInIntervals / 2 && // second bar
+    intervalType === INTERVAL_TYPES.COUNT_IN_INTERVAL && // of the count-in
+    value <= countInIntervals &&
+    value % divisions === 0 // we're in a quarter note interval
+  ) {
+    that.countInText.text = that.countInIndex; // change countInText to the number of quarter note in the bar we're in
+    that.countInIndex++;
+  }
+  // after we're done with count-in, show no text from countInText
+  if (value === 0 && intervalType === INTERVAL_TYPES.NOTES_INTERVAL) {
+    //this.countInText.text = "";
   }
 }

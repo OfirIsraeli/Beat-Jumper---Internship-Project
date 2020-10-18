@@ -78,12 +78,9 @@ const DEFAULT_TILE_SPEED = 6;
 // with the smallest division of an eighth note, the biggest note size of 4 is a half note
 const HALF_NOTE_SIZE = 4;
 
-// different messages for user
-//const LONG_JUMP_MSG = window.myLanguage.shortJumpDuration; //"Stay longer in air\nwhen a half note is played!";
-const EARLY_JUMP_MSG = "You jumped too early!";
-const LATE_JUMP_MSG = "You jumped too late!";
-const WRONG_JUMP_MSG = "You jumped at the wrong time!";
-const NO_BOULDERS_MSG = "\nNow without boulders!";
+// we have 6 stages and 6 levels...
+const LAST_STAGE_INDEX = 5;
+const LAST_LEVEL_INDEX = 5;
 
 // font style and color for a text in the scene
 export const FONT_STYLE = {
@@ -139,10 +136,8 @@ class GameScene extends Phaser.Scene {
 
     // set game sounds
     this.hitSound = this.sound.add("hit", { volume: gameVolume });
-    this.failSound = this.sound.add("failure", { volume: gameVolume });
     this.measureBeat = this.sound.add("measureBeat", { volume: gameVolume });
     this.quarterBeat = this.sound.add("quarterBeat", { volume: gameVolume });
-
     this.levelWinSound = this.sound.add("levelWin", { volume: gameVolume });
     this.stageWinSound = this.sound.add("stageWin", { volume: gameVolume });
     this.levelLostSound = this.sound.add("levelFail", { volume: gameVolume });
@@ -173,11 +168,11 @@ class GameScene extends Phaser.Scene {
     // init text
     initText(this);
 
+    // stop button so player can go back to level menu
     this.stopButton = this.add
       .sprite(1140, 680, "stopImage")
       .setInteractive({ cursor: "pointer", useHandCursor: true });
     this.stopButton.on("pointerdown", () => {
-      // when a unlocked level is pressed, start GameScene with current stage and level
       // if level was rolling, stop the intervals
       if (this.levelState === LEVEL_STATES.ON_MOTION) {
         this.removeBoulders();
@@ -313,7 +308,7 @@ class GameScene extends Phaser.Scene {
   }
 
   wonGameCheck() {
-    if (this.stageIndex === 5 && this.levelIndex === 5) {
+    if (this.stageIndex === LAST_STAGE_INDEX && this.levelIndex === LAST_LEVEL_INDEX) {
       return true;
     }
     return false;
@@ -348,7 +343,7 @@ class GameScene extends Phaser.Scene {
     // if player won this level, update indexes accordingly
     else if (this.levelState === LEVEL_STATES.WON) {
       // if this is not the last level of this stage
-      if (this.levelIndex < 5) {
+      if (this.levelIndex < LAST_LEVEL_INDEX) {
         this.levelIndex++; // advance to next level in this stage
         // if it's the last level unlocked, also update this.LastLevelUnlocked to be the newly unlocked level
         if (this.levelIsLastUnlocked) {
@@ -417,11 +412,10 @@ class GameScene extends Phaser.Scene {
    * @param intervalNumber - the number of interval we're in
    * @param totalIntervals - total amount of intervals that will run
    */
-  levelStatusCheck(event, intervalNumber, totalIntervals) {
+  levelStatusCheck(intervalNumber, totalIntervals) {
     // if player has lost the level for any reason
     if (this.levelState === LEVEL_STATES.LOST) {
       this.removeBoulders(); // remove all boulders from game
-      //this.failSound.play(); // play a failure sound
       this.myHero.hurt(); // play failure animation
       ScoreManager.scoreGetEvent(BUS_EVENTS.STOP); // stop the intervals
       this.subtractHitPoints(); // subtract hitpoints after level failure
@@ -567,8 +561,6 @@ class GameScene extends Phaser.Scene {
    * this function checks how long a jump took, and if it is long enough according to the current note being played
    */
   jumpDurationCheck() {
-    // todo: change closestNote to the REAL note - the one the user has jumped on. search by checking the latest registered note
-
     // jump duration is the difference between the time user has pressed down the jump button (this.myHero.walkStartTime - this.jumpTime)
     // and pulled up from button press (Date.now)
     const jumpDuration = Date.now() - this.myHero.walkStartTime - this.jumpTime;
