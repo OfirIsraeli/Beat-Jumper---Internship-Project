@@ -38,15 +38,24 @@ while boulders of different sizes will roll towards him.
 
 The general aim is to jump (by pressing space) above those boulders,
 according to the notes diplayed in the sheet music above (there is a metronome beat so user will know when each measure takes place).
+
 Each boulder will reach the character just in the time it's corresponding note in the sheet music will occur in it's measure. 
+
 Generally speaking, user will jump successfully above all of the boulders if he presses space in the exact same time he should according to the sheet music. 
+
 Notice that during a half note, player should hold the jump and stay in air longer than other notes (at least a third of the half note's duration). 
+
 In each level, the user gets points for each jump, based on how precise his jump was (relative to the note in the sheet music he meant to jump for). 
+
 After completing a level (when we finish executing the sheet music displayed), he will get a score representing his points in that level (based on all of the jumps). 
+
 If the user will miss a jump, not jump in time (meaning he did not execute the rhythmic pattern precisely enough) 
 or jump when he was not supposed to (jump in a rest note for example), he will fail the level, and will have to try again. 
+
 If player has lost a level 3 times during one stage, he will have to redo the whole stage, until he can complete that stage with failing less than 3 times. 
+
 Notice that after each level completed, you will have to re-do the same level but without the approaching boulders. 
+
 By that, player will have to truly demonstrate his musical abillities and not just jump above the boulders without considering the sheet music.
 
 -------------------------------------
