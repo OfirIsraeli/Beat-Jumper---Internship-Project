@@ -1,11 +1,12 @@
-# Beat-Jumper---Internship-Project
+# Beat-Jumper - Internship-Project
 Beat Jumper - my main project as an intern in BandPad. 
 A JavaScript ES6 project using node.js along with webpack, and the open-source Phaser 3 game framework.
 uploaded as a PWA. Designed for children in their first\second year learning music (playable only if you can read basic sheet music). 
 You can play the game in https://bandpad.co/beat-jumper/?language=en.
 You can choose the language you prefer. As of this moment, available language are English and Hebrew, and in the future German and Arabic.
 
----------- BACKGROUND AND ENVIROMENT----------
+# Background and Enviroment
+
 Beat-Jumper is an online rhythm based game, based on Phaser 3 Game Framework open-source.
 It was developed by Ofir Israeli, as an intern in BandPad.
 It was developed using several of BandPad's utillities, and particularly BandPad Vexflow and BandPad ScoreManager, 
@@ -16,7 +17,8 @@ so people without any musical background will have a REALLY hard time passing le
 IMPORTANT NOTICE #2 - As mentioned above, Beat Jumper depends on several of BandPad's utillities, which are not open-source, 
 so running the code in GitHub with node.js WILL NOT result in the functioning game in a localhost server.
 
----------- GAME OVERVIEW ----------
+# Game Overview
+
 The game is designed to strengthen children's abillities in rhythmic sheet music reading and executing basic rhythmic patterns in time. 
 The game has overall 36 levels, divided into 6 stages (so 6 levels per stage). 
 Each stage focuses on different kinds of rhythmic patterns, with the first one being the easiest (with only half and quarter notes), 
