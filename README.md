@@ -22,6 +22,7 @@ so people without any musical background will have a REALLY hard time passing le
 
 IMPORTANT NOTICE #2 - As mentioned above, Beat Jumper depends on several of BandPad's utillities, which are not open-source, 
 so running the code in GitHub with node.js WILL NOT result in the functioning game in a localhost server.
+Also, due to graphic copyrights, all of the graphics (from the assets folder) are not shown on this repository.
 
 # Game Overview
 
